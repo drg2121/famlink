@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 160">
+  <defs>
+    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7c4dff"/>
+      <stop offset="1" stop-color="#ff5d7a"/>
+    </linearGradient>
+  </defs>
+  <!-- two interlocked links = family bond -->
+  <g fill="none" stroke-linecap="round">
+    <circle cx="62" cy="82" r="34" stroke="#7c4dff" stroke-width="16"/>
+    <circle cx="106" cy="82" r="34" stroke="#ff5d7a" stroke-width="16" opacity=".92"/>
+    <path d="M84 55 a34 34 0 0 1 0 54" stroke="#7c4dff" stroke-width="16"/>
+  </g>
+  <!-- family dots (parents + child) -->
+  <circle cx="62" cy="82" r="8" fill="#7c4dff"/>
+  <circle cx="106" cy="82" r="8" fill="#ff5d7a"/>
+  <circle cx="84" cy="82" r="5.5" fill="#ffb020"/>
+  <!-- wordmark -->
+  <text x="164" y="98" font-family="Avenir Next, Segoe UI, sans-serif" font-size="56" font-weight="700" fill="url(#g2)">FamLink</text>
+  <text x="166" y="126" font-family="Avenir Next, Segoe UI, sans-serif" font-size="17" letter-spacing="3" fill="#8b90ab">ÎMPREUNĂ, ÎN FIECARE ZI</text>
+</svg>

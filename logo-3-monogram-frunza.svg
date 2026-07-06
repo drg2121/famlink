@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 160">
+  <defs>
+    <linearGradient id="g3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#16a37f"/>
+      <stop offset="1" stop-color="#7bd94a"/>
+    </linearGradient>
+  </defs>
+  <!-- rounded tile -->
+  <rect x="22" y="26" width="110" height="110" rx="28" fill="url(#g3)"/>
+  <!-- F monogram -->
+  <path d="M52 116 V50 h50 v14 H68 v14 h28 v14 H68 v24 z" fill="#ffffff"/>
+  <!-- leaf accent (sănătate) -->
+  <path d="M104 108 c18 2 26-10 26-24 c-16-2-28 6-26 24z" fill="#eaffde"/>
+  <path d="M106 106 c8-8 14-12 20-16" stroke="#16a37f" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <!-- wordmark -->
+  <text x="156" y="98" font-family="Avenir Next, Segoe UI, sans-serif" font-size="56" font-weight="700" fill="#1e3a34">Fam<tspan fill="#16a37f">Link</tspan></text>
+  <text x="158" y="126" font-family="Avenir Next, Segoe UI, sans-serif" font-size="17" letter-spacing="3" fill="#8b90ab">CALENDAR &#8226; SĂNĂTATE &#8226; FAMILIE</text>
+</svg>
