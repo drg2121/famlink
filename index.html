@@ -200,13 +200,31 @@ main{padding:12px;max-width:920px;margin:0 auto}
 .photoprev{position:relative;display:inline-block;margin:6px 0}
 .photoprev img{max-width:100%;max-height:230px;border-radius:12px;border:1px solid var(--line);display:block}
 .photoprev .aix{top:8px;right:8px}
+/* asistent flotant */
+#askFab{position:fixed;right:16px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:90;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--pri),var(--acc));color:#fff;border:none;box-shadow:0 6px 18px rgba(22,163,127,.42);display:flex;align-items:center;justify-content:center;cursor:pointer}
+#askFab svg.lucide{width:26px;height:26px}
+#askFab:active{transform:scale(.94)}
+@media(min-width:760px){#askFab{bottom:24px;right:24px}}
+#askPanel{position:fixed;right:16px;bottom:calc(150px + env(safe-area-inset-bottom));z-index:95;width:min(360px,calc(100vw - 32px));background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 14px 44px rgba(20,40,35,.28);display:none;flex-direction:column;overflow:hidden}
+#askPanel.show{display:flex}
+@media(min-width:760px){#askPanel{bottom:92px;right:24px}}
+.askhead{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:linear-gradient(135deg,var(--pri2),var(--pri));color:#fff;font-weight:700;font-size:15px}
+.askhead span{display:inline-flex;align-items:center;gap:7px}
+.askhead .x{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.asklog{padding:12px;max-height:44vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
+.askmsg{padding:8px 11px;border-radius:12px;font-size:13.5px;line-height:1.4;max-width:88%;overflow-wrap:anywhere;white-space:pre-wrap}
+.askmsg.bot{background:#fff;border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:4px}
+.askmsg.user{background:var(--pri);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.askrow{display:flex;gap:6px;padding:10px;border-top:1px solid var(--line);align-items:center}
+.askrow .micbtn{width:40px;height:40px}
+.askrow .btn{padding:10px 12px}
 .mealsempty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:26px 10px}
 .mealsempty svg.lucide{width:38px;height:38px;color:var(--pri);opacity:.55}
 .aibox{position:relative;background:linear-gradient(135deg,var(--soft2),var(--soft));border:1px dashed var(--pri);border-radius:14px;padding:12px 38px 12px 12px;font-size:14px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
 #aiEvOut{overflow-wrap:anywhere}
 .aix{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.85);border:1px solid var(--line);border-radius:50%;width:27px;height:27px;display:flex;align-items:center;justify-content:center;color:var(--pri2);padding:0;cursor:pointer}
 .aix svg.lucide{width:15px;height:15px}
-#voiceBtn.rec{background:#fdeef1;color:#c94258;animation:pulse 1s infinite}
+#voiceBtn.rec,.micbtn.rec{background:#fdeef1;color:#c94258;animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 /* voice overlay */
 .voback{position:fixed;inset:0;background:rgba(20,40,35,.55);z-index:120;display:none;align-items:center;justify-content:center;padding:18px}
@@ -358,6 +376,7 @@ main{padding:12px;max-width:920px;margin:0 auto}
         <button class="on" data-dt="prof" onclick="dTab('prof')"><i data-lucide="user-round"></i>Profil</button>
         <button data-dt="body" onclick="dTab('body')"><i data-lucide="ruler"></i>Corp</button>
         <button data-dt="fast" onclick="dTab('fast')"><i data-lucide="timer"></i>Fasting</button>
+        <button data-dt="sport" onclick="dTab('sport')"><i data-lucide="dumbbell"></i>Sport</button>
         <button data-dt="meal" onclick="dTab('meal')"><i data-lucide="utensils"></i>Mese</button>
         <button data-dt="ai" onclick="dTab('ai')"><i data-lucide="sparkles"></i>AI</button>
       </div>
@@ -408,10 +427,27 @@ main{padding:12px;max-width:920px;margin:0 auto}
         <div id="fHist" class="muted">—</div>
       </div>
 
+      <div id="dt-sport" style="display:none">
+        <div class="spread"><h3 style="margin:0"><i data-lucide="dumbbell"></i>Sport azi</h3><span class="pill" id="sportPill">0 min</span></div>
+        <div id="sportList"></div>
+        <div class="mealadd">
+          <div class="mealadd-h"><i data-lucide="plus-circle"></i>Adaugă activitate sportivă</div>
+          <div class="g3">
+            <div><label>Tip</label><select id="spType"><option>Alergare</option><option>Mers alert</option><option>Sală (forță)</option><option>Bicicletă</option><option>Înot</option><option>Fotbal</option><option>Tenis</option><option>Yoga</option><option>Drumeție</option><option>Altul</option></select></div>
+            <div><label>Minute</label><input id="spMin" type="number" min="1" placeholder="ex: 30"></div>
+            <div><label>Kcal (opțional)</label><input id="spCal" type="number" min="0" placeholder="auto"></div>
+          </div>
+          <button class="btn mealadd-btn" onclick="addSport()"><i data-lucide="plus"></i>Adaugă sport</button>
+        </div>
+        <h3><i data-lucide="flame"></i>Săptămâna aceasta</h3>
+        <div id="sportWeek" class="muted">—</div>
+      </div>
+
       <div id="dt-meal" style="display:none">
         <div class="spread"><h3 style="margin:0"><i data-lucide="utensils"></i>Mesele de azi</h3><span class="pill" id="calPill">0 kcal</span></div>
         <div class="pbar" style="margin:8px 0"><i id="calBar" style="width:0%"></i></div>
         <div id="mealList"></div>
+        <div class="mealrow" id="waterLine" style="margin-top:4px"></div>
         <div class="mealadd">
           <div class="mealadd-h"><i data-lucide="plus-circle"></i>Adaugă o masă</div>
           <div class="g3">
@@ -481,8 +517,14 @@ main{padding:12px;max-width:920px;margin:0 auto}
       </ol>
       <p class="muted">Notă: abonamentul Gemini Pro din aplicația Gemini e separat de API. Cheia din AI Studio are un <b>nivel gratuit generos</b> — suficient pentru uz personal, indiferent de abonament.</p>
       <label>Cheie API</label><input id="setKey" type="password" placeholder="AIza…" onchange="S.settings.geminiKey=this.value.trim();save();toast('Cheie salvată')">
-      <label>Model</label><select id="setModel" onchange="S.settings.model=this.value;save()"><option value="gemini-2.5-flash">gemini-2.5-flash (recomandat — cotă gratuită mare)</option><option value="gemini-2.0-flash">gemini-2.0-flash (rapid)</option><option value="gemini-2.5-pro">gemini-2.5-pro (precis — cotă gratuită mică)</option></select>
-      <p class="muted" style="margin-top:6px">Pentru uz gratuit alege un model <b>„flash"</b>. Modelele „pro" au foarte puține cereri gratuite și dau eroare 429 rapid.</p>
+      <label>Model</label><select id="setModel" onchange="S.settings.model=this.value;save()">
+        <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite (recomandat — ~500 cereri/zi)</option>
+        <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite (cotă mare)</option>
+        <option value="gemini-2.5-flash">gemini-2.5-flash (echilibrat)</option>
+        <option value="gemini-2.0-flash">gemini-2.0-flash (rapid)</option>
+        <option value="gemini-2.5-pro">gemini-2.5-pro (precis — cotă foarte mică)</option>
+      </select>
+      <p class="muted" style="margin-top:6px">Alege un model <b>„flash"</b>. Dacă modelul ales atinge limita zilnică (429), aplicația <b>trece automat</b> pe alt model gratuit din listă. Modelele „pro" au foarte puține cereri gratuite.</p>
       <p class="muted" style="margin-top:6px">Cheia se salvează doar local, în browserul tău.</p>
     </div>
 
@@ -543,7 +585,7 @@ main{padding:12px;max-width:920px;margin:0 auto}
         <input type="file" id="restoreF" accept=".json" style="display:none" onchange="restore(this)">
         <button class="btn warn" onclick="if(confirm('Sigur ștergi TOATE datele?')){localStorage.removeItem(KEY);location.reload()}"><i data-lucide="trash-2"></i>Reset</button>
       </div>
-      <p class="muted" style="margin-top:8px">FamLink v1.3 — datele stau local (sau criptate în cloud dacă activezi sincronizarea).</p>
+      <p class="muted" style="margin-top:8px">FamLink v1.4 — datele stau local (sau criptate în cloud dacă activezi sincronizarea).</p>
     </div>
   </section>
 </main>
@@ -601,6 +643,18 @@ main{padding:12px;max-width:920px;margin:0 auto}
   </div>
 </div>
 
+<!-- Asistent flotant -->
+<button id="askFab" onclick="toggleAsk()" aria-label="Asistent"><i data-lucide="sparkles"></i></button>
+<div id="askPanel">
+  <div class="askhead"><span><i data-lucide="sparkles"></i> Asistent</span><button class="x" onclick="toggleAsk()"><i data-lucide="x"></i></button></div>
+  <div id="askLog" class="asklog"><div class="askmsg bot">Spune-mi ce ai făcut și mă ocup eu: „am băut un pahar cu apă", „am alergat 30 min", „pornește fastingul", „am mâncat o pizza", „programează dentist joi la 15".</div></div>
+  <div class="askrow">
+    <input id="askInput" placeholder="Scrie sau apasă microfonul…" onkeydown="if(event.key==='Enter')askSend()">
+    <button id="askMic" class="micbtn" onclick="askVoice()" title="Vorbește"><i data-lucide="mic"></i></button>
+    <button class="btn" onclick="askSend()"><i data-lucide="send"></i></button>
+  </div>
+</div>
+
 <!-- Confirmare activități AI -->
 <div class="mback" id="confBack" onclick="if(event.target===this)confirmEvents(false)">
   <div class="modal" style="max-width:440px">
@@ -649,8 +703,8 @@ const MONTHS=['ianuarie','februarie','martie','aprilie','mai','iunie','iulie','a
 const DAYS=['duminică','luni','marți','miercuri','joi','vineri','sâmbătă'];
 
 let S = load();
-function defState(){return {members:[{id:'m1',name:'Eu',color:'#16a37f',email:''}],events:[],goals:[],mottos:{},diet:{profiles:{},weights:{},meals:[],fasting:{active:false,start:null,hours:16,history:[]}},settings:{geminiKey:'',model:'gemini-2.5-flash',printSize:'A4',activeUser:'',reminders:[]}};}
-function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.members)return Object.assign(defState(),d);}catch(e){}return defState();}
+function defState(){return {members:[{id:'m1',name:'Eu',color:'#16a37f',email:''}],events:[],goals:[],mottos:{},diet:{profiles:{},weights:{},meals:[],sports:[],water:{},fasting:{active:false,start:null,hours:16,history:[]}},settings:{geminiKey:'',model:'gemini-2.5-flash',printSize:'A4',activeUser:'',reminders:[]}};}
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.members){const s=Object.assign(defState(),d);s.diet=Object.assign(defState().diet,d.diet||{});s.settings=Object.assign(defState().settings,d.settings||{});return s;}}catch(e){}return defState();}
 function save(){localStorage.setItem(KEY,JSON.stringify(S));if(typeof schedulePush==='function')schedulePush();}
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const pad=n=>String(n).padStart(2,'0');
@@ -1074,14 +1128,14 @@ const dietMid=()=>document.getElementById('dietWho').value||S.settings.activeUse
 function clearAI(id){const el=document.getElementById(id);if(el)el.innerHTML='';}
 function clearAIOuts(){['aiProfOut','aiBodyOut','aiMenuOut','aiPhotoOut'].forEach(clearAI);}
 function aiShow(id,html,extra){const el=document.getElementById(id);if(!el)return;el.innerHTML='<div class="aibox"><button class="aix" title="Închide" onclick="clearAI(\''+id+'\')"><i data-lucide="x"></i></button>'+html+'</div>'+(extra||'');LI();}
-function dTab(t){dietTab=t;clearAIOuts();document.querySelectorAll('[data-dt]').forEach(b=>b.classList.toggle('on',b.dataset.dt===t));['prof','body','fast','meal','ai'].forEach(x=>document.getElementById('dt-'+x).style.display=x===t?'':'none');rDiet();}
+function dTab(t){dietTab=t;clearAIOuts();document.querySelectorAll('[data-dt]').forEach(b=>b.classList.toggle('on',b.dataset.dt===t));['prof','body','fast','sport','meal','ai'].forEach(x=>document.getElementById('dt-'+x).style.display=x===t?'':'none');rDiet();}
 function rDiet(){
   const sel=document.getElementById('dietWho');
   const cur=sel.value;
   sel.innerHTML=S.members.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('');
   if(cur&&S.members.some(m=>m.id===cur))sel.value=cur;
   else if(S.settings.activeUser&&S.members.some(m=>m.id===S.settings.activeUser))sel.value=S.settings.activeUser;
-  if(dietTab==='prof')rProf();else if(dietTab==='body')rBody();else if(dietTab==='fast')fastPaint(true);else if(dietTab==='meal')rMeals();else if(dietTab==='ai')rAI();
+  if(dietTab==='prof')rProf();else if(dietTab==='body')rBody();else if(dietTab==='fast')fastPaint(true);else if(dietTab==='sport')rSport();else if(dietTab==='meal')rMeals();else if(dietTab==='ai')rAI();
 }
 
 /* ---- profil + calcule ---- */
@@ -1255,6 +1309,45 @@ const RECS=[
   {n:'Piept de curcan cu legume la tigaie',c:400,t:'Cină'},{n:'Brânză cottage cu castraveți',c:220,t:'Cină'},
   {n:'Un măr + 10 migdale',c:160,t:'Gustare'},{n:'Morcovi cu hummus',c:150,t:'Gustare'}
 ];
+/* ---- sport ---- */
+const MET={'alergare':9.8,'mers alert':4.3,'sală (forță)':5,'sala (forta)':5,'forță':5,'forta':5,'bicicletă':7.5,'bicicleta':7.5,'înot':7,'inot':7,'fotbal':7,'tenis':7,'yoga':2.8,'drumeție':6,'drumetie':6,'altul':5};
+function metFor(name){const k=(name||'').toLowerCase().trim();if(MET[k])return MET[k];for(const m in MET){if(k.includes(m))return MET[m];}return 5;}
+function sportKcal(name,min){const w=lastW()||getProf().w||75;return Math.round(metFor(name)*w*(min/60));}
+function todaySports(){return (S.diet.sports||[]).filter(s=>s.mid===dietMid()&&s.date===todayStr());}
+function addSport(){
+  const name=document.getElementById('spType').value;
+  const min=Number(document.getElementById('spMin').value);
+  if(!min||min<1)return toast('Scrie câte minute');
+  let cal=Number(document.getElementById('spCal').value);if(!cal)cal=sportKcal(name,min);
+  logSport(name,min,cal);
+  document.getElementById('spMin').value='';document.getElementById('spCal').value='';
+}
+function logSport(name,min,cal){
+  S.diet.sports=S.diet.sports||[];
+  S.diet.sports.push({id:uid(),mid:dietMid(),date:todayStr(),name:name||'Sport',minutes:Number(min)||0,kcal:Number(cal)||sportKcal(name,min)});
+  save();if(dietTab==='sport')rSport();toast('Sport adăugat: '+name+' '+min+' min');
+}
+function delSport(id){S.diet.sports=(S.diet.sports||[]).filter(s=>s.id!==id);save();rSport();}
+function rSport(){
+  const ss=todaySports();
+  const totMin=ss.reduce((a,b)=>a+(b.minutes||0),0),totCal=ss.reduce((a,b)=>a+(b.kcal||0),0);
+  document.getElementById('sportPill').textContent=totMin+' min · '+totCal+' kcal';
+  document.getElementById('sportList').innerHTML=ss.length?ss.map(s=>`<div class="mealrow"><span><b>${esc(s.name)}</b> · ${s.minutes} min</span><span class="row" style="gap:8px"><span class="k">${s.kcal} kcal</span><button class="btn sm warn" onclick="delSport('${s.id}')">✕</button></span></div>`).join(''):'<div class="empty mealsempty"><i data-lucide="dumbbell"></i><span>Niciun sport azi. Hai, mișcă-te!</span></div>';
+  // săptămâna
+  const now=new Date(),wk=(S.diet.sports||[]).filter(s=>{if(s.mid!==dietMid())return false;const d=fromStr(s.date);return (now-d)/864e5<7;});
+  const wm=wk.reduce((a,b)=>a+(b.minutes||0),0),wc=wk.reduce((a,b)=>a+(b.kcal||0),0);
+  const goal=150;
+  document.getElementById('sportWeek').innerHTML=`<div class="statgrid"><div class="stat"><b style="color:${wm>=goal?'var(--pri)':'var(--ink)'}">${wm}</b><span>min / ${goal} (OMS)</span></div><div class="stat"><b>${wk.length}</b><span>sesiuni</span></div><div class="stat"><b>${wc}</b><span>kcal arse</span></div></div>`;
+  LI();
+}
+/* ---- apă ---- */
+function logWater(ml){
+  const mid=dietMid(),t=todayStr();
+  S.diet.water=S.diet.water||{};S.diet.water[mid]=S.diet.water[mid]||{};
+  S.diet.water[mid][t]=(S.diet.water[mid][t]||0)+(Number(ml)||250);
+  save();if(dietTab==='meal')rMeals();
+}
+function waterToday(){const mid=dietMid();return (S.diet.water&&S.diet.water[mid]&&S.diet.water[mid][todayStr()])||0;}
 function todayMeals(){return S.diet.meals.filter(m=>m.mid===dietMid()&&m.date===todayStr());}
 function rMeals(){
   const ms=todayMeals(),tot=ms.reduce((a,b)=>a+(b.cal||0),0);
@@ -1264,6 +1357,8 @@ function rMeals(){
   document.getElementById('calPill').style.cssText='background:'+(tot>tgt?'#fdeef1;color:#c94258':'var(--soft);color:var(--pri2)');
   document.getElementById('calBar').style.width=Math.min(100,tot/tgt*100)+'%';
   document.getElementById('mealList').innerHTML=ms.length?ms.map(m=>`<div class="mealrow"><span><b>${m.type}</b> · ${esc(m.name)}</span><span class="row" style="gap:8px"><span class="k">${m.cal} kcal</span><button class="btn sm warn" onclick="delMeal('${m.id}')">✕</button></span></div>`).join(''):'<div class="empty mealsempty"><i data-lucide="utensils-crossed"></i><span>Nicio masă înregistrată azi.</span></div>';
+  const wt=waterToday();
+  const wel=document.getElementById('waterLine');if(wel)wel.innerHTML=`<span style="display:inline-flex;align-items:center;gap:7px"><i data-lucide="glass-water" style="color:var(--blue);width:17px;height:17px"></i><b>Apă azi:</b> ${wt} ml <span class="muted">(${(wt/250).toFixed(1)} pahare)</span></span><span class="row" style="gap:6px"><button class="btn sm sec" onclick="logWater(250)">+250 ml</button><button class="btn sm ghost" onclick="logWater(500)">+500</button></span>`;
   document.getElementById('recList').innerHTML=RECS.filter(r=>!c||r.c<=tgt/2).slice(0,8).map(r=>`<div class="mealrow"><span>${esc(r.n)} <span class="muted">· ${r.t}</span></span><span class="row" style="gap:8px"><span class="k">${r.c}</span><button class="btn sm sec" onclick="quickMeal('${esc(r.n)}',${r.c},'${r.t}')">＋</button></span></div>`).join('');
   LI();
 }
@@ -1282,23 +1377,38 @@ function delMeal(id){S.diet.meals=S.diet.meals.filter(m=>m.id!==id);save();rMeal
 function rAI(){
   document.getElementById('aiKeyWarn').innerHTML=S.settings.geminiKey?'':'Pune mai întâi cheia Gemini în <b>Setări → Gemini AI</b>.';
 }
+/* lanț de rezervă: dacă modelul ales atinge limita (429) sau nu e disponibil, încearcă automat următorul gratuit */
+const GEM_FALLBACK=['gemini-3.1-flash-lite','gemini-2.5-flash-lite','gemini-2.0-flash','gemini-2.5-flash','gemini-3-flash'];
 async function gemini(parts){
   const key=S.settings.geminiKey;
   if(!key){toast('Adaugă cheia Gemini în Setări');throw new Error('no key');}
-  const model=S.settings.model||'gemini-2.0-flash';
-  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,{
-    method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({contents:[{parts}],generationConfig:{temperature:0.4}})
-  });
-  if(!r.ok){
+  const primary=S.settings.model||'gemini-2.5-flash';
+  const chain=[primary,...GEM_FALLBACK.filter(m=>m!==primary)];
+  let quotaHit=false,lastMsg='';
+  for(let idx=0;idx<chain.length;idx++){
+    const model=chain[idx];
+    let r;
+    try{
+      r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{parts}],generationConfig:{temperature:0.4}})
+      });
+    }catch(net){lastMsg='rețea';continue;}
+    if(r.ok){
+      if(idx>0)toast('Am folosit modelul de rezervă: '+model);
+      const d=await r.json();
+      return d.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('')||'';
+    }
     const e=await r.text();
-    if(r.status===429)throw new Error('Limita gratuită Gemini atinsă pentru modelul „'+model+'". Dacă e „...pro", schimbă pe „gemini-2.5-flash" în Setări (cotă mult mai mare). Altfel ai epuizat cota pe azi — se resetează la miezul nopții ora Pacific (~10:00 România).');
+    // erori fatale — nu are rost să încercăm alt model
     if(r.status===400&&/API[_ ]?key|API key not valid/i.test(e))throw new Error('Cheia API nu este validă. Verific-o în Setări → Gemini AI.');
-    if(r.status===403)throw new Error('Acces refuzat (403). Cheia nu are permisiuni sau modelul nu e disponibil pentru contul tău.');
-    throw new Error('API '+r.status+': '+e.slice(0,160));
+    if(r.status===401||r.status===403)throw new Error('Acces refuzat ('+r.status+'). Cheia nu are permisiuni pentru API.');
+    // 429 (cotă) / 404 (model inexistent) / 400 (model incompatibil) / 5xx → încearcă următorul
+    if(r.status===429)quotaHit=true;
+    lastMsg='API '+r.status;
   }
-  const d=await r.json();
-  return d.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('')||'';
+  if(quotaHit)throw new Error('Toate modelele gratuite au atins limita pe azi. Cotele se resetează la miezul nopții ora Pacific (~10:00 România). Poți activa billing în Google AI Studio pentru fără limite.');
+  throw new Error('Nu am putut contacta niciun model ('+lastMsg+'). Verifică cheia și conexiunea.');
 }
 function fileToB64(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(f);});}
 
@@ -1590,6 +1700,50 @@ function rSyncUI(){
   if(tI&&SYNC.token&&!tI.value)tI.value=SYNC.token;
   if(pI&&SYNC.pass&&!pI.value)pI.value=SYNC.pass;
   st.innerHTML=(SYNC.token&&SYNC.gistId)?('<b style="color:var(--pri2)">Conectat ✓</b>'+(SYNC.last?(' · ultima sincronizare: '+new Date(SYNC.last).toLocaleString('ro-RO')):'')):'Neconectat — datele stau doar pe acest dispozitiv.';
+}
+
+/* ============ ASISTENT FLOTANT ============ */
+function toggleAsk(){const p=document.getElementById('askPanel');const open=p.classList.toggle('show');if(open){LI();setTimeout(()=>document.getElementById('askInput').focus(),60);}}
+function appendAsk(who,txt){const log=document.getElementById('askLog');const d=document.createElement('div');d.className='askmsg '+who;d.textContent=txt;log.appendChild(d);log.scrollTop=log.scrollHeight;return d;}
+function logWeightKg(kg){const mid=dietMid();S.diet.weights[mid]=S.diet.weights[mid]||[];const ws=S.diet.weights[mid],t=todayStr();const ex=ws.find(x=>x.d===t);if(ex)ex.w=kg;else ws.push({d:t,w:kg});ws.sort((a,b)=>a.d<b.d?-1:1);save();if(VIEW==='health')rDiet();}
+function execAction(a){
+  switch(a.action){
+    case 'fasting_start': if(!S.diet.fasting.active)fastToggle(); break;
+    case 'fasting_stop': if(S.diet.fasting.active)fastToggle(); break;
+    case 'water': logWater(Number(a.ml)||250); break;
+    case 'drink': quickMeal(a.name||'Băutură',Number(a.cal)||0,a.type||'Gustare'); break;
+    case 'meal': quickMeal(a.name||'Masă',Number(a.cal)||0,a.type||'Gustare'); break;
+    case 'sport': logSport(a.name||'Sport',Number(a.minutes)||0,Number(a.cal)||0); break;
+    case 'weight': if(Number(a.kg))logWeightKg(Number(a.kg)); break;
+    case 'event': {const t=a.text||'';if(t){const el=document.getElementById('aiEvText');if(el)el.value=t;aiQuickEvent(false);}break;}
+    default: break;
+  }
+}
+async function askSend(){
+  const inp=document.getElementById('askInput');const text=(inp.value||'').trim();
+  if(!text)return;
+  if(!S.settings.geminiKey){appendAsk('user',text);appendAsk('bot','Adaugă întâi cheia Gemini în Setări → Gemini AI.');inp.value='';return;}
+  appendAsk('user',text);inp.value='';
+  const wait=appendAsk('bot','…');
+  try{
+    const prompt=`Ești asistentul aplicației FamLink (sănătate + calendar). Azi: ${todayStr()}. Interpretează comanda și răspunde DOAR cu JSON valid, fără markdown: {"action":"fasting_start|fasting_stop|water|drink|meal|sport|weight|event|reply","ml":număr,"name":"","cal":număr,"type":"Mic dejun|Prânz|Cină|Gustare","minutes":număr,"kg":număr,"text":"","reply":"confirmare scurtă și prietenoasă în română despre ce ai făcut"}.
+Reguli: "am băut apă/un pahar"→water (un pahar=250 ml, o sticlă=500 ml, o cană=300); "cafea/ceai/suc/bere"→drink cu cal estimat (cafea simplă 2, cu lapte 60, suc 110, bere 150) și name; mâncare descrisă→meal cu cal estimat realist și type potrivit după oră/denumire; "am alergat/mers/sală/înot/mers cu bicicleta X minute"→sport cu name (ex "Alergare") și minutes; "am/cântărit X kg"→weight; "programează/adaugă/pune în calendar ..."→event cu text=comanda originală; dacă nu e o comandă clară→reply cu un răspuns util. Pune MEREU un "reply" scurt. Comanda: "${text}"`;
+    const raw=await gemini([{text:prompt}]);
+    const a=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    execAction(a);
+    wait.textContent=a.reply||'Gata ✓';
+  }catch(e){wait.textContent='Nu am reușit: '+e.message;}
+}
+function askVoice(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR)return toast('Dictarea nu e suportată aici. Deschide în Chrome.');
+  const r=new SR();r.lang='ro-RO';r.interimResults=false;r.maxAlternatives=1;
+  const b=document.getElementById('askMic');if(b)b.classList.add('rec');
+  toast('Ascult…');
+  r.onresult=e=>{const t=e.results[0][0].transcript;const inp=document.getElementById('askInput');if(inp)inp.value=t;askSend();};
+  r.onerror=e=>toast('Nu am auzit: '+(e.error||''));
+  r.onend=()=>{const x=document.getElementById('askMic');if(x)x.classList.remove('rec');};
+  try{r.start();}catch(e){}
 }
 
 /* ============ INIT ============ */
