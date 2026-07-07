@@ -10,6 +10,8 @@
 <title>FamLink — Calendarul Familiei</title>
 <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 132 132"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="%2316a37f"/><stop offset="1" stop-color="%237bd94a"/></linearGradient></defs><rect x="8" y="8" width="116" height="116" rx="30" fill="url(%23g)"/><path d="M40 104 V36 h52 v15 H57 v14 h30 v15 H57 v24 z" fill="%23ffffff"/><path d="M92 96 c18 2 26-10 26-24 c-16-2-28 6-26 24z" fill="%23eaffde"/></svg>'>
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root{
   --bg:#f1f7f3; --card:#ffffff; --ink:#1e3a34; --muted:#7d938c; --line:#dfeae4;
@@ -18,7 +20,7 @@
   --rad:16px; --sh:0 2px 10px rgba(30,58,52,.08);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:96px}
+body{font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:96px;min-height:100vh;min-height:100dvh}
 button{font-family:inherit;cursor:pointer}
 input,select,textarea{font-family:inherit;font-size:15px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);width:100%}
 input:focus,select:focus,textarea:focus{outline:2px solid var(--pri);border-color:transparent}
@@ -331,7 +333,7 @@ main{padding:12px;max-width:920px;margin:0 auto}
       <div class="mgrid" id="mGrid"></div>
       <div class="row act" style="margin-top:12px">
         <button class="btn" onclick="openEvent()"><i data-lucide="plus"></i>Activitate</button>
-        <button class="btn sec" onclick="printMonth()"><i data-lucide="printer"></i>Printează</button>
+        <button class="btn sec" onclick="savePDF()"><i data-lucide="file-down"></i>Salvează PDF</button>
         <button class="btn ghost" onclick="exportICS('month')"><i data-lucide="calendar-plus"></i>ICS lună</button>
       </div>
       <p class="muted" style="margin-top:12px;text-align:center;font-size:12.5px"><i data-lucide="sparkles" style="width:14px;height:14px;color:var(--pri);vertical-align:-2px"></i> Adaugă activități scriind sau vorbind — apasă butonul verde din colțul din dreapta jos.</p>
@@ -606,7 +608,7 @@ main{padding:12px;max-width:920px;margin:0 auto}
         <input type="file" id="restoreF" accept=".json" style="display:none" onchange="restore(this)">
         <button class="btn warn" onclick="if(confirm('Sigur ștergi TOATE datele?')){localStorage.removeItem(KEY);location.reload()}"><i data-lucide="trash-2"></i>Reset</button>
       </div>
-      <p class="muted" style="margin-top:8px">FamLink v1.4 — datele stau local (sau criptate în cloud dacă activezi sincronizarea).</p>
+      <p class="muted" style="margin-top:8px">FamLink v1.5 — datele stau local (sau criptate în cloud dacă activezi sincronizarea).</p>
       </div>
     </details>
   </section>
@@ -640,6 +642,15 @@ main{padding:12px;max-width:920px;margin:0 auto}
       <button class="btn ghost" onclick="icsOne()" id="eIcsBtn" title="Adaugă în calendarul iPhone"><i data-lucide="calendar-plus"></i></button>
       <button class="btn warn" id="eDel" onclick="delEvent()" style="display:none"><i data-lucide="trash-2"></i></button>
     </div>
+  </div>
+</div>
+
+<!-- Zi modal -->
+<div class="mback" id="dayBack" onclick="if(event.target===this)closeDayModal()">
+  <div class="modal" style="max-width:460px">
+    <div class="mhead"><h2 style="margin:0;font-size:16px" id="dayModalTitle"></h2><button class="x" onclick="closeDayModal()"><i data-lucide="x"></i></button></div>
+    <div id="dayModalList"></div>
+    <button class="btn" style="width:100%;margin-top:12px" onclick="closeDayModal();openEvent(null,VD.d)"><i data-lucide="plus"></i>Adaugă activitate în această zi</button>
   </div>
 </div>
 
@@ -795,6 +806,8 @@ const eventsOn=ds=>S.events.filter(e=>occursOn(e,ds)).sort((x,y)=>(x.time||'99')
 /* filtru pe membru: 'all' = tot; id = activitățile membrului + cele comune (fără persoane) */
 let calFilter='all';
 function evVisible(e){if(calFilter==='all')return true;const ms=e.members||[];return ms.length===0||ms.includes(calFilter);}
+/* culoare pe ecran: 1 participant = culoarea lui (individual), altfel verde (familie/comun) */
+function evColor(e){const ms=(e.members||[]).filter(id=>memById(id));return ms.length===1?(memById(ms[0]).color||'#16a37f'):'#16a37f';}
 function setCalFilter(f){calFilter=f;render();}
 function filterBar(){
   if(S.members.length<2)return '';
@@ -837,9 +850,9 @@ function rMonth(){
     const ds=dstr(d),out=d.getMonth()!==VM.m,wknd=d.getDay()===0||d.getDay()===6;
     const evs=eventsOn(ds).filter(evVisible);
     let chips='';
-    evs.slice(0,3).forEach(e=>{const c=(CATS[e.cat]||CATS.altele).c;chips+=`<div class="evchip" style="background:${c}">${e.time?e.time+' ':''}${esc(e.title)}</div>`;});
+    evs.slice(0,3).forEach(e=>{const c=evColor(e);chips+=`<div class="evchip" style="background:${c}">${e.time?e.time+' ':''}${esc(e.title)}</div>`;});
     if(evs.length>3)chips+=`<div class="moreev">+${evs.length-3} altele</div>`;
-    h+=`<div class="dcell${out?' out':''}${ds===tds?' today':''}${wknd?' wknd':''}" onclick="VD.d='${ds}';go('day')"><div class="dnum">${d.getDate()}</div>${chips}</div>`;
+    h+=`<div class="dcell${out?' out':''}${ds===tds?' today':''}${wknd?' wknd':''}" onclick="openDayModal('${ds}')"><div class="dnum">${d.getDate()}</div>${chips}</div>`;
   }
   document.getElementById('mGrid').innerHTML=h;
   // goals of month card
@@ -884,7 +897,7 @@ function rDay(){
     const rec=e.recur&&e.recur.f!=='none'?'<i data-lucide="repeat" class="ci" style="color:var(--muted)"></i>':'';
     return `<div class="evrow${e.doneOn&&e.doneOn.includes(VD.d)?' done':''}" onclick="openEvent('${e.id}')">
       <input type="checkbox" ${e.doneOn&&e.doneOn.includes(VD.d)?'checked':''} onclick="event.stopPropagation();tglDone('${e.id}')" style="width:19px;height:19px;accent-color:var(--pri);margin-top:2px">
-      <div class="cat" style="background:${c.c}"></div>
+      <div class="cat" style="background:${evColor(e)}"></div>
       <div class="time">${e.time||'—'}</div>
       <div class="grow"><div class="t"><i data-lucide="${c.i}" class="ci" style="color:${c.c}"></i>${esc(e.title)}${rec}</div><div class="sub">${c.n}${e.dur?' · '+e.dur+' min':''}${e.notes?' · '+esc(e.notes):''} ${who}</div></div>
       <button class="evx" title="Șterge" onclick="event.stopPropagation();quickDelEvent('${e.id}')"><i data-lucide="x"></i></button>
@@ -1008,15 +1021,31 @@ function applyPage(){document.getElementById('pageStyle').textContent='@page{siz
 /* culoare pe participanți: comun (2+ / familie) = verde app, individual = culoarea membrului */
 const PCOMMON='#4e8d78';
 function pWhoColor(e){const ms=(e.members||[]).filter(id=>memById(id));return ms.length===1?memById(ms[0]).color:PCOMMON;}
-function printMonth(){
-  applyPage();
+/* ---------- Modal zi (click pe o zi din calendar) ---------- */
+function openDayModal(ds){
+  VD.d=ds;const d=fromStr(ds);
+  const dn=DAYS[d.getDay()];
+  document.getElementById('dayModalTitle').textContent=dn.charAt(0).toUpperCase()+dn.slice(1)+', '+d.getDate()+' '+MONTHS[d.getMonth()]+' '+d.getFullYear();
+  const evs=eventsOn(ds).filter(evVisible);
+  document.getElementById('dayModalList').innerHTML=evs.length?evs.map(e=>{
+    const c=(CATS[e.cat]||CATS.altele);
+    const who=(e.members||[]).map(id=>{const m=memById(id);return m?`<span class="mdot" style="background:${m.color}" title="${esc(m.name)}"></span>`:'';}).join('');
+    return `<div class="evrow" onclick="closeDayModal();openEvent('${e.id}')"><div class="cat" style="background:${evColor(e)}"></div><div class="time">${e.time||'—'}</div><div class="grow"><div class="t"><i data-lucide="${c.i}" class="ci" style="color:${c.c}"></i>${esc(e.title)}</div><div class="sub">${c.n}${e.dur?' · '+e.dur+' min':''} ${who}</div></div></div>`;
+  }).join(''):'<div class="empty">Nimic planificat în această zi.</div>';
+  document.getElementById('dayBack').classList.add('show');LI();
+}
+function closeDayModal(){document.getElementById('dayBack').classList.remove('show');}
+
+/* ---------- Export PDF (landscape, pagină plină, fără antet de browser) ---------- */
+function buildPdfHTML(){
   const first=new Date(VM.y,VM.m,1),start=new Date(first);start.setDate(1-((first.getDay()+6)%7));
   const motto=S.mottos[ymKey()],tds=todayStr();
-  // count weeks in month
   let weeks=0;for(let w=0;w<6;w++){const d=new Date(start);d.setDate(start.getDate()+w*7);if(w>=4&&d.getMonth()!==VM.m)break;weeks++;}
-  // fill entire page: usable height (landscape) minus band/head/goals/footer, split across weeks
-  const usable=(S.settings.printSize==='A3'?279:192)-30-10-14;
-  const rowH=Math.floor(usable/weeks);
+  const W=1123,H=794,PAD=20,bandH=62,footH=28,gap=6;
+  const tableH=H-PAD*2-bandH-footH-gap*2;
+  const rowH=Math.floor(tableH/weeks);
+  const days=['Luni','Marți','Miercuri','Joi','Vineri','Sâmbătă','Duminică'];
+  const head=days.map(d=>`<th style="background:#4e8d78;color:#fff;padding:6px 4px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;border-radius:5px">${d}</th>`).join('');
   let rows='';
   for(let w=0;w<weeks;w++){
     let tr='<tr>';
@@ -1024,32 +1053,51 @@ function printMonth(){
       const d=new Date(start);d.setDate(start.getDate()+w*7+i);
       const ds=dstr(d),out=d.getMonth()!==VM.m,wknd=i>=5;
       const evs=out?[]:eventsOn(ds);
-      const maxEv=S.settings.printSize==='A3'?8:4;
-      tr+=`<td class="${out?'pout':''}${!out&&wknd?' pwknd':''}${ds===tds?' ptoday':''}" style="height:${rowH}mm"><div class="pd">${d.getDate()}</div>`
-        +evs.slice(0,maxEv).map(e=>`<div class="pev" style="background:${pWhoColor(e)}"><span class="pcat" style="background:${(CATS[e.cat]||CATS.altele).c}"></span>${e.time?e.time+' ':''}${esc(e.title)}</div>`).join('')
-        +(evs.length>maxEv?`<div style="font-size:7pt;color:#888">+${evs.length-maxEv} altele</div>`:'')+'</td>';
+      const bg=out?'#f7f7f7':(ds===tds?'#eef7f0':(wknd?'#f3f8f5':'#fff'));
+      const bd=ds===tds?'#4e8d78':(out?'#e8e8e8':'#d6e5de');
+      const numC=out?'#c6c6c6':'#3c7563';
+      const pills=evs.map(e=>{const who=evColor(e),cat=(CATS[e.cat]||CATS.altele).c;return `<div style="margin-top:3px;padding:2px 5px;border-radius:5px;color:#fff;font-weight:600;font-size:10.5px;line-height:1.25;background:${who};word-break:break-word;overflow-wrap:anywhere"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${cat};box-shadow:0 0 0 1px rgba(255,255,255,.75);margin-right:4px;vertical-align:1px"></span>${e.time?e.time+' ':''}${esc(e.title)}</div>`;}).join('');
+      tr+=`<td style="border:${ds===tds?'2px':'1px'} solid ${bd};background:${bg};vertical-align:top;padding:5px;height:${rowH}px;border-radius:6px;overflow:hidden"><div style="font-weight:800;font-size:14px;color:${numC}">${d.getDate()}</div>${pills}</td>`;
     }
     rows+=tr+'</tr>';
   }
-  const gs=S.goals.filter(g=>g.ym===ymKey());
   const monthEvs=icsEvents('month');
   const usedCats=[...new Set(monthEvs.map(e=>e.cat||'altele'))];
   const hasCommon=monthEvs.some(e=>(e.members||[]).filter(id=>memById(id)).length!==1);
   const usedMems=S.members.filter(m=>monthEvs.some(e=>(e.members||[]).filter(id=>memById(id)).length===1&&(e.members||[])[0]===m.id));
-  const persLeg=(hasCommon||usedMems.length)?`<span class="leg"><b>Persoane:</b>${hasCommon?'<i class="dot" style="background:'+PCOMMON+'"></i>Comun':''}${usedMems.map(m=>`<i class="dot" style="background:${m.color}"></i>${esc(m.name)}`).join('')}</span>`:'';
-  const catLeg=usedCats.length?`<span class="leg"><b>Categorii:</b>${usedCats.map(k=>`<i style="background:${(CATS[k]||CATS.altele).c}"></i>${(CATS[k]||CATS.altele).n}`).join('')}</span>`:'';
-  document.getElementById('printArea').innerHTML=`
-    <div class="band">
-      <div class="pm">${MONTHS[VM.m]} ${VM.y}</div>
-      <div class="pmotto">${motto?('„'+esc(motto)+'”'):''}</div>
+  const sw=(c,rnd)=>`<span style="display:inline-block;width:11px;height:11px;border-radius:${rnd?'50%':'3px'};background:${c};vertical-align:-1px;margin:0 4px 0 10px"></span>`;
+  const persLeg=(hasCommon||usedMems.length)?`<span><b style="color:#3c7563">Persoane:</b>${hasCommon?sw('#16a37f',1)+'Comun':''}${usedMems.map(m=>sw(m.color,1)+esc(m.name)).join('')}</span>`:'';
+  const catLeg=usedCats.length?`<span><b style="color:#3c7563">Categorii:</b>${usedCats.map(k=>sw((CATS[k]||CATS.altele).c)+(CATS[k]||CATS.altele).n).join('')}</span>`:'';
+  const gs=S.goals.filter(g=>g.ym===ymKey());
+  const goalsLine=gs.length?`<span style="color:#1e3a34"><b style="color:#3c7563">Obiective:</b> ${gs.map(g=>(g.done?'☑ ':'☐ ')+esc(g.title)).join('  ·  ')}</span>`:'';
+  return `<div style="width:${W}px;height:${H}px;box-sizing:border-box;padding:${PAD}px;background:#fff;font-family:'Segoe UI',Arial,sans-serif;display:flex;flex-direction:column;overflow:hidden">
+    <div style="display:flex;align-items:center;background:linear-gradient(135deg,#3c7563,#4e8d78 55%,#6ba692);border-radius:10px;padding:0 18px;color:#fff;height:${bandH}px;box-sizing:border-box">
+      <div style="font-size:30px;font-weight:800;letter-spacing:.5px;flex:1;text-transform:capitalize">${MONTHS[VM.m]} ${VM.y}</div>
+      <div style="font-style:italic;font-size:14px;opacity:.95;text-align:right;max-width:45%">${motto?('„'+esc(motto)+'”'):''}</div>
     </div>
-    <table><tr><th>Luni</th><th>Marți</th><th>Miercuri</th><th>Joi</th><th>Vineri</th><th>Sâmbătă</th><th>Duminică</th></tr>${rows}</table>
-    ${gs.length?'<div class="pgoals"><b>Obiectivele lunii:</b> '+gs.map(g=>(g.done?'☑ ':'☐ ')+esc(g.title)).join(' &nbsp;·&nbsp; ')+'</div>':''}
-    <div class="pfoot">${persLeg}${catLeg}</div>`;
-  const _title=document.title;document.title='';
-  const restore=()=>{document.title=_title;window.removeEventListener('afterprint',restore);};
-  window.addEventListener('afterprint',restore);
-  setTimeout(()=>window.print(),80);
+    <table style="width:100%;border-collapse:separate;border-spacing:4px;table-layout:fixed;margin-top:${gap}px"><tr>${head}</tr>${rows}</table>
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:2px 22px;margin-top:auto;padding-top:${gap}px;font-size:11px;color:#557a6e;height:${footH}px;align-items:center">${goalsLine}${persLeg}${catLeg}</div>
+  </div>`;
+}
+async function savePDF(){
+  if(!window.html2canvas||!(window.jspdf&&window.jspdf.jsPDF)){toast('Librăriile PDF încă se încarcă — mai încearcă o dată');return;}
+  toast('Generez PDF…');
+  const wrap=document.createElement('div');
+  wrap.style.cssText='position:fixed;left:-10000px;top:0;z-index:-1';
+  wrap.innerHTML=buildPdfHTML();
+  document.body.appendChild(wrap);
+  try{
+    const node=wrap.firstElementChild;
+    const canvas=await html2canvas(node,{scale:2,backgroundColor:'#ffffff',width:1123,height:794,windowWidth:1123,windowHeight:794});
+    const img=canvas.toDataURL('image/jpeg',0.96);
+    const a3=S.settings.printSize==='A3';
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:a3?'a3':'a4'});
+    pdf.addImage(img,'JPEG',0,0,a3?420:297,a3?297:210,undefined,'FAST');
+    pdf.save('FamLink_'+ymKey()+'.pdf');
+    toast('PDF salvat ✓');
+  }catch(e){toast('Eroare PDF: '+e.message);}
+  finally{document.body.removeChild(wrap);}
 }
 
 /* ---------- NOTIFICATIONS ---------- */
