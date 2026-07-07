@@ -627,6 +627,8 @@ main{padding:12px;max-width:920px;margin:0 auto}
       <div class="foldbody">
       <div class="row"><button class="btn sec" onclick="askNotif()"><i data-lucide="bell-ring"></i>Activează notificările</button><span class="muted" id="notifState"></span></div>
       <div class="row" style="margin-top:8px"><button class="btn ghost" onclick="askUser(true)"><i data-lucide="user-round"></i>Schimbă utilizatorul</button></div>
+      <label style="display:flex;align-items:center;gap:9px;margin-top:12px;font-weight:600;cursor:pointer"><input type="checkbox" id="setVoiceAuto" onchange="S.settings.voiceAutoSend=this.checked;save();toast(this.checked?'Trimitere automată pornită':'Trimitere automată oprită')" style="width:18px;height:18px;accent-color:var(--pri);flex:none"> Trimite dictarea automat când te oprești</label>
+      <p class="muted" style="margin:4px 0 0">La microfon, după ~2s de liniște trimite singur la asistent. Dacă e oprit, apeși tu „Gata".</p>
       <label>Format printare</label>
       <select id="setPrint" onchange="S.settings.printSize=this.value;save();applyPage()"><option value="A4">A4 landscape</option><option value="A3">A3 landscape</option></select>
       </div>
@@ -653,7 +655,7 @@ main{padding:12px;max-width:920px;margin:0 auto}
         <input type="file" id="restoreF" accept=".json" style="display:none" onchange="restore(this)">
         <button class="btn warn" onclick="if(confirm('Sigur ștergi TOATE datele?')){localStorage.removeItem(KEY);location.reload()}"><i data-lucide="trash-2"></i>Reset</button>
       </div>
-      <p class="muted" style="margin-top:8px">FamLink v1.7 — datele stau local (sau criptate în cloud dacă activezi sincronizarea).</p>
+      <p class="muted" style="margin-top:8px">FamLink v1.9 — datele stau local (sau criptate în cloud dacă activezi sincronizarea).</p>
       </div>
     </details>
   </section>
@@ -804,7 +806,7 @@ const MONTHS=['ianuarie','februarie','martie','aprilie','mai','iunie','iulie','a
 const DAYS=['duminică','luni','marți','miercuri','joi','vineri','sâmbătă'];
 
 let S = load();
-function defState(){return {members:[{id:'m1',name:'Eu',color:'#16a37f',email:''}],events:[],goals:[],mottos:{},tomb:{},diet:{profiles:{},weights:{},meals:[],sports:[],water:{},fasting:{active:false,start:null,hours:16,history:[]}},settings:{geminiKey:'',model:'gemini-2.5-flash',printSize:'A4',activeUser:'',reminders:[],aiMemory:[]}};}
+function defState(){return {members:[{id:'m1',name:'Eu',color:'#16a37f',email:''}],events:[],goals:[],mottos:{},tomb:{},diet:{profiles:{},weights:{},meals:[],sports:[],water:{},fasting:{active:false,start:null,hours:16,history:[]}},settings:{geminiKey:'',model:'gemini-2.5-flash',printSize:'A4',activeUser:'',reminders:[],aiMemory:[],voiceAutoSend:true}};}
 function tombstone(id){S.tomb=S.tomb||{};S.tomb[id]=Date.now();}
 function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.members){const s=Object.assign(defState(),d);s.diet=Object.assign(defState().diet,d.diet||{});s.settings=Object.assign(defState().settings,d.settings||{});return s;}}catch(e){}return defState();}
 function save(){localStorage.setItem(KEY,JSON.stringify(S));if(typeof schedulePush==='function')schedulePush();}
@@ -909,7 +911,7 @@ function rMonth(){
     const d=new Date(start); d.setDate(start.getDate()+i);
     if(i===35&&d.getMonth()!==VM.m)break;
     const ds=dstr(d),out=d.getMonth()!==VM.m,wknd=d.getDay()===0||d.getDay()===6;
-    const evs=eventsOn(ds).filter(evVisible);
+    const evs=eventsOn(ds).filter(evVisible).filter(e=>!(e.doneOn&&e.doneOn.includes(ds))); // ascunde activitățile terminate din gridul lunar
     let chips='';
     const maxShow=window.innerWidth<560?2:3;
     evs.slice(0,maxShow).forEach(e=>{const c=evColor(e);chips+=`<div class="evchip" style="background:${c}">${e.time?e.time+' ':''}${esc(e.title)}</div>`;});
@@ -1225,6 +1227,7 @@ function rSet(){
   document.getElementById('setModel').value=S.settings.model||'gemini-2.0-flash';
   if(typeof rAIMem==='function')rAIMem();
   document.getElementById('setPrint').value=S.settings.printSize||'A4';
+  document.getElementById('setVoiceAuto').checked=S.settings.voiceAutoSend!==false;
   document.getElementById('notifState').textContent=('Notification' in window)?({granted:'active',denied:'blocate ✕',default:'inactive'}[Notification.permission]):'nesuportate';
   rReminders();
   if(typeof rSyncUI==='function')rSyncUI();
@@ -1812,7 +1815,7 @@ function showPhotoPrev(url){document.getElementById('photoPrev').innerHTML='<div
 function clearPhoto(){_photoBlob=null;document.getElementById('photoPrev').innerHTML='';const inp=document.getElementById('aiPhoto');if(inp)inp.value='';}
 
 /* ---------- Dictare vocală (transcriere live) ---------- */
-let _rec=null,_voFinal='',_voActive=false;
+let _rec=null,_voFinal='',_voActive=false,_voSilence=null;
 function voiceAdd(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR)return toast('Dictarea nu e suportată aici. Deschide în Chrome.');
@@ -1820,7 +1823,7 @@ function voiceAdd(){
   _voFinal='';_voActive=true;
   const btn=document.getElementById('askMic');if(btn)btn.classList.add('rec');
   const lbl=document.getElementById('voLbl'),txt=document.getElementById('voTxt');
-  lbl.textContent='Ascult…';txt.className='votxt dim';txt.textContent='Spune-mi ce ai făcut sau ce vrei, ex: „am alergat 30 min"';
+  lbl.textContent='Ascult…';txt.className='votxt dim';txt.textContent='Spune-mi ce ai făcut sau ce vrei, ex: „am alergat 30 min"'+(S.settings.voiceAutoSend!==false?' — se trimite singur când te oprești':'');
   document.getElementById('voBack').classList.add('show');LI();
   const r=new SR();r.lang='ro-RO';r.interimResults=true;r.continuous=true;r.maxAlternatives=1;
   r.onresult=e=>{
@@ -1831,6 +1834,8 @@ function voiceAdd(){
     }
     const shown=(_voFinal+interim).trim();
     txt.className='votxt';txt.textContent=shown||'…';
+    clearTimeout(_voSilence); // resetează cronometrul de liniște la fiecare cuvânt
+    _voSilence=setTimeout(()=>{if(_voActive&&_voFinal.trim().length>1&&S.settings.voiceAutoSend!==false)voiceStop('add');},2000); // ~2s fără vorbire → trimite singur (dacă e activat în Setări)
   };
   r.onerror=e=>{lbl.textContent='Eroare';document.getElementById('voTxt').textContent='Nu am putut asculta: '+(e.error||'');};
   r.onend=()=>{if(_voActive){try{r.start();}catch(e){}}else{_rec=null;}};
@@ -1838,7 +1843,7 @@ function voiceAdd(){
 }
 function voiceStop(mode){
   if(!_voActive)return;
-  _voActive=false;
+  _voActive=false;clearTimeout(_voSilence);
   if(_rec){try{_rec.stop();}catch(e){}_rec=null;}
   document.getElementById('voBack').classList.remove('show');
   const btn=document.getElementById('askMic');if(btn)btn.classList.remove('rec');
@@ -2057,6 +2062,23 @@ function logWeightKg(kg){const mid=dietMid();S.diet.weights[mid]=S.diet.weights[
 function setMottoCore(text){S.mottos[curYm()]=String(text||'').trim();save();rMotto();}
 function addGoalCore(title,scope){const n=new Date();const k=(/an|year/i.test(scope||''))?String(n.getFullYear()):(n.getFullYear()+'-'+pad(n.getMonth()+1));S.goals.push({id:uid(),title:String(title),ym:k,done:false,memberId:S.settings.activeUser||null});save();if(VIEW==='goals')rGoals();else if(VIEW==='month')rMonth();}
 function addReminderCore(label,time,every){S.settings.reminders=S.settings.reminders||[];const r={id:uid(),label:label||'Memento',on:true};if(Number(every))r.every=Number(every);else r.time=/^\d{1,2}:\d{2}$/.test(time||'')?time:'09:00';S.settings.reminders.push(r);save();if(VIEW==='set'||VIEW==='rem')rReminders();maybeAskNotif();}
+function _normRo(s){return String(s||'').toLowerCase().replace(/[ăâ]/g,'a').replace(/î/g,'i').replace(/[șş]/g,'s').replace(/[țţ]/g,'t').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();}
+function markEventDone(match){
+  const q=_normRo(match);if(!q)return null;
+  const nt=e=>_normRo(e.title);
+  let c=S.events.filter(e=>e.title&&(nt(e).includes(q)||q.includes(nt(e))));
+  if(!c.length){ // potrivire pe cuvinte, tolerantă la diacritice și flexiuni (ședință/ședința)
+    const qw=q.split(' ').filter(w=>w.length>2);
+    c=S.events.filter(e=>{const tw=nt(e).split(' ');return qw.some(w=>tw.some(t=>t.startsWith(w.slice(0,4))||w.startsWith(t.slice(0,4))));});
+  }
+  if(!c.length)return null;
+  const td=todayStr();
+  c.sort((a,b)=>Math.abs(fromStr(a.date||td)-fromStr(td))-Math.abs(fromStr(b.date||td)-fromStr(td)));
+  const e=c[0],d=/^\d{4}-\d{2}-\d{2}$/.test(e.date||'')?e.date:td;
+  e.doneOn=e.doneOn||[];if(!e.doneOn.includes(d))e.doneOn.push(d);e.u=Date.now();
+  save();if(typeof render==='function')render();
+  return e.title;
+}
 function execAction(a){
   switch(a.action){
     case 'fasting_start': if(!S.diet.fasting.active)fastToggle(); break;
@@ -2069,6 +2091,7 @@ function execAction(a){
     case 'motto': if(a.text)setMottoCore(a.text); break;
     case 'goal': if(a.name||a.text)addGoalCore(a.name||a.text,a.scope); break;
     case 'reminder': addReminderCore(a.label||a.name,a.time,a.every); break;
+    case 'done': markEventDone(a.match||a.name||a.text||a.label); break;
     default: break;
   }
 }
@@ -2105,8 +2128,8 @@ CONVERSAȚIA DE PÂNĂ ACUM:
 ${hist}
 MESAJUL NOU AL UTILIZATORULUI: "${text}"
 IMPORTANT: mesajul vine des prin DICTARE VOCALĂ, deci poate avea greșeli de scriere, gramatică, cuvinte lipite sau transcrise fonetic greșit. Înțelege ce a vrut să spună, corectează în minte și tratează-l ca și cum ar fi fost scris corect — nu-l certa pentru greșeli, iar când confirmi folosește exprimarea corectă.
-Răspunde DOAR cu JSON valid, fără markdown: {"actions":[{"action":"fasting_start|fasting_stop|water|drink|meal|sport|weight|motto|goal|reminder|event","ml":număr,"name":"","cal":număr,"type":"Mic dejun|Prânz|Cină|Gustare","minutes":număr,"kg":număr,"scope":"month|year","label":"","time":"HH:MM","every":ore,"text":""}],"memory":["fapt nou durabil de reținut"],"reply":"răspunsul tău"}.
-Reguli acțiuni: "am băut apă/un pahar"→water (pahar=250 ml, sticlă=500, cană=300); cafea/ceai/suc/bere→drink cu cal estimat (cafea simplă 2, cu lapte 60, suc 110, bere 150) și name; mâncare descrisă→meal cu cal estimat realist și type potrivit orei; "am alergat/mers/sală/înot X minute"→sport cu name și minutes; "am/cântărit X kg"→weight; motto→motto cu text; obiectiv→goal cu name și scope; DISTINCȚIE memento↔calendar (FOARTE IMPORTANT): dacă apare o ZI sau DATĂ anume (azi, mâine, poimâine, o zi a săptămânii ca „miercuri", „pe 12", un weekend, o dată clară) → e EVENIMENT DE CALENDAR: action="event", text=comanda originală COMPLETĂ (păstrează ziua ȘI ora exact cum le-a spus, nu le scoate). Un memento (reminder) NU are dată calendaristică — e doar o notificare care se REPETĂ: „în fiecare zi la 9 ia pastila", „amintește-mi seara să…" → reminder cu label și time; „la fiecare 2 ore bea apă" → reminder cu label și every=ore. Regulă fermă: o singură dată/zi anume ⇒ event (NU reminder, mementoul nu poate ține o dată); niciun reper de dată, doar un obicei repetat ⇒ reminder. Dacă mesajul conține mai multe lucruri, pune mai multe acțiuni în array. Dacă e doar o întrebare sau conversație (ex: "câte calorii mai am azi?", "ce am mâine în calendar?", "ce să mănânc la cină?") → "actions":[] și răspunzi din datele de mai sus.
+Răspunde DOAR cu JSON valid, fără markdown: {"actions":[{"action":"fasting_start|fasting_stop|water|drink|meal|sport|weight|motto|goal|reminder|event|done","ml":număr,"name":"","cal":număr,"type":"Mic dejun|Prânz|Cină|Gustare","minutes":număr,"kg":număr,"scope":"month|year","label":"","time":"HH:MM","every":ore,"match":"","text":""}],"memory":["fapt nou durabil de reținut"],"reply":"răspunsul tău"}.
+Reguli acțiuni: "am băut apă/un pahar"→water (pahar=250 ml, sticlă=500, cană=300); cafea/ceai/suc/bere→drink cu cal estimat (cafea simplă 2, cu lapte 60, suc 110, bere 150) și name; mâncare descrisă→meal cu cal estimat realist și type potrivit orei; "am alergat/mers/sală/înot X minute"→sport cu name și minutes; "am/cântărit X kg"→weight; motto→motto cu text; obiectiv→goal cu name și scope; DISTINCȚIE memento↔calendar (FOARTE IMPORTANT): dacă apare o ZI sau DATĂ anume (azi, mâine, poimâine, o zi a săptămânii ca „miercuri", „pe 12", un weekend, o dată clară) → e EVENIMENT DE CALENDAR: action="event", text=comanda originală COMPLETĂ (păstrează ziua ȘI ora exact cum le-a spus, nu le scoate). Un memento (reminder) NU are dată calendaristică — e doar o notificare care se REPETĂ: „în fiecare zi la 9 ia pastila", „amintește-mi seara să…" → reminder cu label și time; „la fiecare 2 ore bea apă" → reminder cu label și every=ore. Regulă fermă: o singură dată/zi anume ⇒ event (NU reminder, mementoul nu poate ține o dată); niciun reper de dată, doar un obicei repetat ⇒ reminder. TERMINAT/BIFARE: dacă utilizatorul spune că a TERMINAT sau a făcut deja o activitate EXISTENTĂ din calendar („am terminat X", „gata cu X", „am făcut deja X", „bifează X") → action="done", match=cuvinte-cheie din numele activității; NU crea eveniment nou și NU o șterge — doar o marchezi ca terminată. Dacă mesajul conține mai multe lucruri, pune mai multe acțiuni în array. Dacă e doar o întrebare sau conversație (ex: "câte calorii mai am azi?", "ce am mâine în calendar?", "ce să mănânc la cină?") → "actions":[] și răspunzi din datele de mai sus.
 REGULĂ DE AUR: execută DOAR ce a cerut utilizatorul explicit, exact cum a cerut — nu adăuga acțiuni în plus, nu schimba cantități, ore sau tipuri din proprie inițiativă. Dacă mesajul e ambiguu sau nu ești sigur ce a vrut (ce acțiune, ce cantitate, ce oră) → "actions":[] și pune în reply o întrebare scurtă de clarificare, în loc să ghicești. În reply spune mereu EXACT ce ai notat (nume, cantitate, oră), ca utilizatorul să vadă imediat dacă ai înțeles greșit.
 MEMORIE — în "memory" pune DOAR informații durabile despre utilizator, care merită ținute minte pe termen lung (preferințe alimentare, alergii/intoleranțe, cine e în familie și detalii despre ei, obiective de fond, obiceiuri, cum îi place să-i vorbești). NU pune lucruri de moment (că a băut apă azi, caloriile de azi) — alea se salvează deja separat. Nu repeta ce e deja în MEMORIE. Dacă nu e nimic nou durabil, pune "memory":[].
 Reguli pentru "reply" — cele mai importante: vorbește ca un om real, cald și direct, la persoana a doua, nu ca un robot și nu ca un raport. Fii PRECIS: folosește cifrele reale din date (kcal rămase = necesar zilnic minus total mâncat, apă, kilograme, ce urmează în calendar). La întrebări răspunde la obiect în 1-3 fraze; la acțiuni confirmă scurt și natural, eventual cu o observație utilă legată de datele lui. Ține cont de conversația de până acum (referiri la mesaje anterioare). Fără liste, fără markdown, fără formule de salut repetate, fără clișee motivaționale.`;
