@@ -48,6 +48,14 @@ header .ttl{font-size:19px;font-weight:700;letter-spacing:.3px}
 header .motto{flex:1;text-align:right;font-size:12px;font-style:italic;opacity:.95;line-height:1.25;cursor:pointer;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 header .gear{background:rgba(255,255,255,.18);border:none;border-radius:12px;width:38px;height:38px;color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
 header .gear svg.lucide{width:20px;height:20px}
+.notifbadge{position:absolute;top:-4px;right:-4px;background:#e85d75;color:#fff;font-size:10px;font-weight:700;min-width:17px;height:17px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:1.5px solid #fff}
+#notifPanel{position:fixed;top:calc(58px + env(safe-area-inset-top));right:10px;z-index:97;width:min(320px,calc(100vw - 20px));background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 36px rgba(20,40,35,.22);display:none;overflow:hidden}
+#notifPanel.show{display:block}
+.npanel-head{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;background:var(--pri2);color:#fff;font-weight:600;font-size:14px}
+.npanel-head button{background:rgba(255,255,255,.16);border:none;color:#fff;border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer}
+.npanel-list{max-height:52vh;overflow-y:auto;padding:8px}
+.notifitem{padding:9px 10px;border-bottom:1px solid var(--line);font-size:13.5px;color:var(--ink);overflow-wrap:anywhere}
+.notifitem:last-child{border:none}
 
 /* Nav — 2 taburi */
 nav{position:fixed;bottom:0;left:0;right:0;z-index:60;background:#fff;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -2px 12px rgba(30,58,52,.06)}
@@ -300,6 +308,7 @@ main{padding:12px;max-width:920px;margin:0 auto}
   <svg class="logo" viewBox="0 0 132 132" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="hg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#eaffde"/></linearGradient></defs><rect x="8" y="8" width="116" height="116" rx="30" fill="url(#hg)"/><path d="M40 104 V36 h52 v15 H57 v14 h30 v15 H57 v24 z" fill="#0e7c60"/><path d="M92 96 c18 2 26-10 26-24 c-16-2-28 6-26 24z" fill="#7bd94a"/></svg>
   <div class="ttl">FamLink</div>
   <div class="motto" id="hMotto" onclick="editMotto()" title="Motto-ul lunii — apasă pentru a edita"></div>
+  <button class="gear" id="notifBtn" onclick="toggleNotifPanel()" title="Notificări" style="position:relative"><i data-lucide="bell"></i><span id="notifBadge" class="notifbadge" style="display:none">0</span></button>
   <button class="gear sync" id="hSync" onclick="syncNow()" title="Sincronizează"><i data-lucide="refresh-cw"></i></button>
   <button class="gear" onclick="go('set')" title="Setări"><i data-lucide="settings"></i></button>
 </header>
@@ -692,6 +701,12 @@ main{padding:12px;max-width:920px;margin:0 auto}
     <p class="muted" style="margin:0 0 10px">Alege membrul activ — profilul, mesele și obiectivele se vor lega de el.</p>
     <div id="userPick" class="chips" style="flex-direction:column;gap:8px"></div>
   </div>
+</div>
+
+<!-- Panou notificări -->
+<div id="notifPanel">
+  <div class="npanel-head"><span>Notificări</span><button onclick="clearNotifs()">Șterge tot</button></div>
+  <div id="notifList" class="npanel-list"></div>
 </div>
 
 <!-- Asistent flotant -->
@@ -1767,6 +1782,27 @@ async function syncPush(silent){
     SYNC.last=new Date().toISOString();saveSync();rSyncUI();if(!silent)toast('Salvat în cloud ✓');
   }catch(e){if(!silent)toast('Sync eșuat: '+e.message);}
 }
+/* ---------- Notificări în aplicație ---------- */
+const NKEY='famlink_notifs';
+let NOTIFS=(function(){try{return JSON.parse(localStorage.getItem(NKEY))||[]}catch(e){return[]}})();
+function saveNotifs(){NOTIFS=NOTIFS.slice(0,50);localStorage.setItem(NKEY,JSON.stringify(NOTIFS));}
+function addNotif(text){NOTIFS.unshift({id:uid(),text,ts:Date.now(),read:false});saveNotifs();renderNotifBadge();try{notify('FamLink',text);}catch(e){}}
+function renderNotifBadge(){const b=document.getElementById('notifBadge');if(!b)return;const n=NOTIFS.filter(x=>!x.read).length;b.textContent=n>9?'9+':n;b.style.display=n?'':'none';}
+function renderNotifList(){document.getElementById('notifList').innerHTML=NOTIFS.length?NOTIFS.map(x=>`<div class="notifitem"><div>${esc(x.text)}</div><div class="muted" style="font-size:11px;margin-top:2px">${new Date(x.ts).toLocaleString('ro-RO')}</div></div>`).join(''):'<div class="empty">Nicio notificare încă.</div>';LI();}
+function toggleNotifPanel(){const p=document.getElementById('notifPanel');const open=p.classList.toggle('show');if(open){renderNotifList();NOTIFS.forEach(x=>x.read=true);saveNotifs();renderNotifBadge();}}
+function clearNotifs(){NOTIFS=[];saveNotifs();renderNotifBadge();renderNotifList();}
+function notifyNewEvents(beforeIds){
+  const au=S.settings.activeUser||S.members[0].id;
+  S.events.forEach(e=>{
+    if(beforeIds.has(e.id))return;
+    const ms=(e.members||[]).filter(id=>memById(id));
+    const isCommon=ms.length!==1;           // 0 sau 2+ membri = familie/comun
+    const includesMe=ms.includes(au);
+    if(isCommon||includesMe){
+      addNotif('Activitate nouă '+(isCommon?'(familie)':'(pentru tine)')+': '+e.title+' — '+e.date+(e.time?' '+e.time:''));
+    }
+  });
+}
 /* MERGE — combină local + remote fără să șteargă (ca ArhiLink): union pe id, nimic nu se pierde */
 function mergeById(a,b){const map={};(b||[]).forEach(x=>{if(x&&x.id)map[x.id]=x;});(a||[]).forEach(x=>{if(x&&x.id)map[x.id]=x;});return Object.values(map);}
 function mergeWeights(a,b){const out={};const mids=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);mids.forEach(mid=>{const map={};(((b||{})[mid])||[]).forEach(w=>map[w.d]=w);(((a||{})[mid])||[]).forEach(w=>map[w.d]=w);out[mid]=Object.values(map).sort((x,y)=>x.d<y.d?-1:1);});return out;}
@@ -1799,7 +1835,13 @@ async function syncPull(silent){
     const d=await r.json(),f=d.files&&d.files['famlink-sync.json'];
     if(!f||!f.content)throw new Error('gist gol');
     const obj=await decJSON(f.content,SYNC.pass);
-    if(obj&&obj.members){S=mergeState(S,obj);localStorage.setItem(KEY,JSON.stringify(S));SYNC.last=new Date().toISOString();saveSync();rSyncUI();render();if(!silent)toast('Sincronizat ✓ (date combinate)');}
+    if(obj&&obj.members){
+      const beforeIds=new Set(S.events.map(e=>e.id));
+      const firstTime=!SYNC.seeded;
+      S=mergeState(S,obj);localStorage.setItem(KEY,JSON.stringify(S));
+      if(!firstTime)notifyNewEvents(beforeIds);
+      SYNC.seeded=true;SYNC.last=new Date().toISOString();saveSync();rSyncUI();render();if(!silent)toast('Sincronizat ✓ (date combinate)');
+    }
   }catch(e){if(!silent)toast(/operation-specific|decrypt/i.test(e.message)?'Parolă greșită de criptare':'Nu am putut încărca: '+e.message);}
 }
 let _syncTimer=null;
@@ -1909,6 +1951,7 @@ function askVoice(){voiceAdd();}
 applyPage();
 go('month');
 askUser();
+renderNotifBadge();
 const _imported=importSyncFromHash();
 if(!_imported&&SYNC.token&&SYNC.pass&&SYNC.gistId&&SYNC.auto!==false)syncPull(true);
 setupSyncTimer();
