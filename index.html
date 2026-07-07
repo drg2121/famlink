@@ -392,19 +392,24 @@ main{padding:12px;max-width:920px;margin:0 auto}
       </div>
 
       <div id="dt-prof">
-        <div class="g3">
-          <div><label>Sex</label><select id="pSex"><option value="M">Bărbat</option><option value="F">Femeie</option></select></div>
-          <div><label>Vârstă</label><input id="pAge" type="number" min="10" max="100"></div>
-          <div><label>Înălțime (cm)</label><input id="pH" type="number" min="100" max="230"></div>
-        </div>
-        <div class="g3">
-          <div><label>Greutate azi (kg)</label><input id="pW" type="number" step="0.1"></div>
-          <div><label>Țintă (kg)</label><input id="pT" type="number" step="0.1"></div>
-          <div><label>Activitate</label><select id="pAct"><option value="1.2">Sedentar</option><option value="1.375">Ușor activ</option><option value="1.55">Moderat</option><option value="1.725">Foarte activ</option></select></div>
-        </div>
-        <div class="row act" style="margin-top:10px"><button class="btn" onclick="saveProfile()"><i data-lucide="save"></i>Salvează + cântărire azi</button><button class="btn sec" onclick="aiProfile()"><i data-lucide="sparkles"></i>Interpretare AI</button></div>
-        <div id="aiProfOut" style="margin-top:8px"></div>
-        <div class="statgrid" id="pStats" style="margin-top:12px"></div>
+        <details class="setfold" style="border:1px solid var(--line);border-radius:12px;margin-bottom:12px">
+          <summary><i data-lucide="user-round-cog"></i>Editează datele mele<span class="chev"><i data-lucide="chevron-down"></i></span></summary>
+          <div class="foldbody">
+            <div class="g3">
+              <div><label>Sex</label><select id="pSex"><option value="M">Bărbat</option><option value="F">Femeie</option></select></div>
+              <div><label>Vârstă</label><input id="pAge" type="number" min="10" max="100"></div>
+              <div><label>Înălțime (cm)</label><input id="pH" type="number" min="100" max="230"></div>
+            </div>
+            <div class="g3">
+              <div><label>Greutate azi (kg)</label><input id="pW" type="number" step="0.1"></div>
+              <div><label>Țintă (kg)</label><input id="pT" type="number" step="0.1"></div>
+              <div><label>Activitate</label><select id="pAct"><option value="1.2">Sedentar</option><option value="1.375">Ușor activ</option><option value="1.55">Moderat</option><option value="1.725">Foarte activ</option></select></div>
+            </div>
+            <div class="row act" style="margin-top:10px"><button class="btn" onclick="saveProfile()"><i data-lucide="save"></i>Salvează + cântărire azi</button><button class="btn sec" onclick="aiProfile()"><i data-lucide="sparkles"></i>Interpretare AI</button></div>
+            <div id="aiProfOut" style="margin-top:8px"></div>
+          </div>
+        </details>
+        <div class="statgrid" id="pStats"></div>
         <h3><i data-lucide="trending-down"></i>Evoluția greutății</h3>
         <div id="wChart" class="center muted">—</div>
       </div>
