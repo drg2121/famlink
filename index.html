@@ -38,7 +38,9 @@ h3 svg.lucide{width:17px;height:17px;color:var(--pri)}
 .ci{width:15px!important;height:15px!important}
 
 /* Header */
-header{position:sticky;top:0;z-index:50;background:linear-gradient(135deg,var(--pri2),var(--pri) 60%,#3cb98c);color:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:var(--sh)}
+header{position:sticky;top:0;z-index:50;background:linear-gradient(135deg,var(--pri2),var(--pri) 60%,#3cb98c);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;display:flex;align-items:center;gap:8px;box-shadow:var(--sh)}
+header .gear.sync.spin svg.lucide{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 header .logo{width:36px;height:36px;flex:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.15))}
 header .ttl{font-size:19px;font-weight:700;letter-spacing:.3px}
 header .motto{flex:1;text-align:right;font-size:12px;font-style:italic;opacity:.95;line-height:1.25;cursor:pointer;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -296,6 +298,7 @@ main{padding:12px;max-width:920px;margin:0 auto}
   <svg class="logo" viewBox="0 0 132 132" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="hg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#eaffde"/></linearGradient></defs><rect x="8" y="8" width="116" height="116" rx="30" fill="url(#hg)"/><path d="M40 104 V36 h52 v15 H57 v14 h30 v15 H57 v24 z" fill="#0e7c60"/><path d="M92 96 c18 2 26-10 26-24 c-16-2-28 6-26 24z" fill="#7bd94a"/></svg>
   <div class="ttl">FamLink</div>
   <div class="motto" id="hMotto" onclick="editMotto()" title="Motto-ul lunii — apasă pentru a edita"></div>
+  <button class="gear sync" id="hSync" onclick="syncNow()" title="Sincronizează"><i data-lucide="refresh-cw"></i></button>
   <button class="gear" onclick="go('set')" title="Setări"><i data-lucide="settings"></i></button>
 </header>
 
@@ -487,24 +490,16 @@ main{padding:12px;max-width:920px;margin:0 auto}
 
   <!-- ===== SETĂRI ===== -->
   <section id="v-set" style="display:none">
-    <details class="card setfold" open>
+    <details class="card setfold">
       <summary><i data-lucide="users-round"></i>Familia<span class="chev"><i data-lucide="chevron-down"></i></span></summary>
       <div class="foldbody">
       <p class="muted">Membrul activ apare cu „activ". Apasă pe pătratul de culoare ca s-o schimbi, sau „Folosește" ca să comuți pe alt membru.</p>
       <div id="memList" style="margin-top:8px"></div>
-      <div class="addmem">
-        <div class="addmem-h"><i data-lucide="user-plus"></i>Adaugă un membru</div>
-        <div class="row" style="gap:8px;align-items:flex-end">
-          <div class="grow"><label>Nume</label><input id="nmName" placeholder="ex: Ana"></div>
-          <div><label>Culoare</label><input id="nmColor" type="color" value="#3b82c4" style="height:41px;width:52px"></div>
-        </div>
-        <label>Email (opțional — pentru invitații în calendar)</label><input id="nmEmail" type="email" placeholder="nume@email.com">
-        <button class="btn addmem-btn" onclick="addMember()"><i data-lucide="user-plus"></i>Adaugă membru</button>
-      </div>
+      <button class="btn addmem-btn" style="width:100%;margin-top:10px" onclick="openAddMember()"><i data-lucide="user-plus"></i>Adaugă un membru</button>
       </div>
     </details>
 
-    <details class="card setfold" open>
+    <details class="card setfold">
       <summary><i data-lucide="refresh-cw"></i>Sincronizare între dispozitive<span class="chev"><i data-lucide="chevron-down"></i></span></summary>
       <div class="foldbody">
       <p class="muted">Datele tale se salvează <b>criptate</b> într-un gist privat GitHub. Le poți încărca pe orice dispozitiv cu același token și aceeași parolă. Nimeni — nici GitHub — nu le poate citi fără parola ta.</p>
@@ -517,6 +512,14 @@ main{padding:12px;max-width:920px;margin:0 auto}
         <button class="btn ghost" onclick="syncPull()"><i data-lucide="cloud-download"></i>Încarcă din cloud</button>
         <button class="btn warn" onclick="syncDisconnect()"><i data-lucide="unlink"></i>Deconectează</button>
       </div>
+      <label>Sincronizare automată</label>
+      <select id="syncEvery" onchange="SYNC.intervalMin=Number(this.value);saveSync();setupSyncTimer()">
+        <option value="0">Manual (doar la buton)</option>
+        <option value="1">La fiecare 1 minut</option>
+        <option value="5">La fiecare 5 minute</option>
+        <option value="15">La fiecare 15 minute</option>
+        <option value="30">La fiecare 30 minute</option>
+      </select>
       <details style="margin-top:10px">
         <summary class="muted" style="cursor:pointer">Cum obțin tokenul GitHub?</summary>
         <ol class="steps" style="margin-top:8px">
@@ -635,6 +638,19 @@ main{padding:12px;max-width:920px;margin:0 auto}
       <button class="btn ghost" onclick="icsOne()" id="eIcsBtn" title="Adaugă în calendarul iPhone"><i data-lucide="calendar-plus"></i></button>
       <button class="btn warn" id="eDel" onclick="delEvent()" style="display:none"><i data-lucide="trash-2"></i></button>
     </div>
+  </div>
+</div>
+
+<!-- Adaugă membru modal -->
+<div class="mback" id="memBack" onclick="if(event.target===this)closeAddMember()">
+  <div class="modal" style="max-width:420px">
+    <div class="mhead"><h2 style="margin:0"><i data-lucide="user-plus"></i>Adaugă un membru</h2><button class="x" onclick="closeAddMember()"><i data-lucide="x"></i></button></div>
+    <div class="row" style="gap:10px;align-items:flex-end">
+      <div class="grow"><label>Nume</label><input id="nmName" placeholder="ex: Ana"></div>
+      <div><label>Culoare</label><input id="nmColor" type="color" value="#3b82c4" style="height:41px;width:52px"></div>
+    </div>
+    <label>Email (opțional — pentru invitații în calendar)</label><input id="nmEmail" type="email" placeholder="nume@email.com">
+    <div class="row" style="margin-top:14px"><button class="btn grow" onclick="addMember()"><i data-lucide="user-plus"></i>Adaugă membru</button></div>
   </div>
 </div>
 
@@ -1127,11 +1143,13 @@ function addWaterPreset(){
 function toggleRem(id){const r=(S.settings.reminders||[]).find(x=>x.id===id);if(r){r.on=r.on===false;save();}}
 function delRem(id){S.settings.reminders=(S.settings.reminders||[]).filter(x=>x.id!==id);save();rReminders();}
 function maybeAskNotif(){if('Notification' in window&&Notification.permission==='default')askNotif();}
+function openAddMember(){document.getElementById('nmName').value='';document.getElementById('nmEmail').value='';document.getElementById('memBack').classList.add('show');LI();setTimeout(()=>document.getElementById('nmName').focus(),60);}
+function closeAddMember(){document.getElementById('memBack').classList.remove('show');}
 function addMember(){
   const n=document.getElementById('nmName').value.trim();if(!n)return toast('Scrie numele');
   S.members.push({id:uid(),name:n,color:document.getElementById('nmColor').value,email:document.getElementById('nmEmail').value.trim()});
   document.getElementById('nmName').value='';document.getElementById('nmEmail').value='';
-  save();rSet();toast('Membru adăugat');
+  save();closeAddMember();rSet();toast('Membru adăugat');
 }
 function setMemberColor(id,color){const m=memById(id);if(!m)return;m.color=color;save();rSet();toast('Culoare actualizată');}
 function delMember(id){if(S.members.length<=1)return toast('Trebuie să rămână cel puțin un membru');if(!confirm('Ștergi membrul?'))return;S.members=S.members.filter(m=>m.id!==id);if(S.settings.activeUser===id)S.settings.activeUser=S.members[0].id;save();rSet();}
@@ -1676,6 +1694,26 @@ async function syncPush(silent){
     SYNC.last=new Date().toISOString();saveSync();rSyncUI();if(!silent)toast('Salvat în cloud ✓');
   }catch(e){if(!silent)toast('Sync eșuat: '+e.message);}
 }
+/* MERGE — combină local + remote fără să șteargă (ca ArhiLink): union pe id, nimic nu se pierde */
+function mergeById(a,b){const map={};(b||[]).forEach(x=>{if(x&&x.id)map[x.id]=x;});(a||[]).forEach(x=>{if(x&&x.id)map[x.id]=x;});return Object.values(map);}
+function mergeWeights(a,b){const out={};const mids=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);mids.forEach(mid=>{const map={};(((b||{})[mid])||[]).forEach(w=>map[w.d]=w);(((a||{})[mid])||[]).forEach(w=>map[w.d]=w);out[mid]=Object.values(map).sort((x,y)=>x.d<y.d?-1:1);});return out;}
+function mergeWater(a,b){const out={};const mids=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);mids.forEach(mid=>{out[mid]={};const days=new Set([...Object.keys((a||{})[mid]||{}),...Object.keys((b||{})[mid]||{})]);days.forEach(d=>{out[mid][d]=Math.max(((a||{})[mid]||{})[d]||0,((b||{})[mid]||{})[d]||0);});});return out;}
+function mergeState(local,remote){
+  const R=Object.assign(defState(),remote);R.diet=Object.assign(defState().diet,remote.diet||{});
+  const m=Object.assign(defState(),local);m.diet=Object.assign(defState().diet,local.diet||{});
+  m.events=mergeById(local.events,R.events);
+  m.goals=mergeById(local.goals,R.goals);
+  m.members=mergeById(local.members,R.members);
+  m.mottos=Object.assign({},R.mottos||{},local.mottos||{});
+  m.diet.meals=mergeById(local.diet.meals,R.diet.meals);
+  m.diet.sports=mergeById(local.diet.sports,R.diet.sports);
+  m.diet.weights=mergeWeights(local.diet.weights,R.diet.weights);
+  m.diet.profiles=Object.assign({},R.diet.profiles||{},local.diet.profiles||{});
+  m.diet.water=mergeWater(local.diet.water,R.diet.water);
+  m.diet.fasting=local.diet.fasting; // cronometru specific dispozitivului
+  m.settings=local.settings;         // cheia/model/mementouri rămân locale
+  return m;
+}
 async function syncPull(silent){
   if(!(SYNC.token&&SYNC.pass&&SYNC.gistId))return silent?0:toast('Conectează-te mai întâi');
   try{
@@ -1684,8 +1722,16 @@ async function syncPull(silent){
     const d=await r.json(),f=d.files&&d.files['famlink-sync.json'];
     if(!f||!f.content)throw new Error('gist gol');
     const obj=await decJSON(f.content,SYNC.pass);
-    if(obj&&obj.members){S=Object.assign(defState(),obj);localStorage.setItem(KEY,JSON.stringify(S));SYNC.last=new Date().toISOString();saveSync();rSyncUI();render();if(!silent)toast('Date încărcate din cloud ✓');}
+    if(obj&&obj.members){S=mergeState(S,obj);localStorage.setItem(KEY,JSON.stringify(S));SYNC.last=new Date().toISOString();saveSync();rSyncUI();render();if(!silent)toast('Sincronizat ✓ (date combinate)');}
   }catch(e){if(!silent)toast(/operation-specific|decrypt/i.test(e.message)?'Parolă greșită de criptare':'Nu am putut încărca: '+e.message);}
+}
+let _syncTimer=null;
+function setupSyncTimer(){clearInterval(_syncTimer);const mn=Number(SYNC.intervalMin);if(mn&&SYNC.token&&SYNC.pass&&SYNC.gistId)_syncTimer=setInterval(()=>syncPull(true),mn*60000);}
+function syncNow(){
+  const b=document.getElementById('hSync');
+  if(!(SYNC.token&&SYNC.pass&&SYNC.gistId)){toast('Activează sincronizarea în Setări');go('set');return;}
+  if(b)b.classList.add('spin');
+  syncPull().then(()=>syncPush(true)).finally(()=>{setTimeout(()=>{if(b)b.classList.remove('spin');},600);});
 }
 async function syncConnect(){
   const token=(document.getElementById('syncToken').value||'').trim();
@@ -1704,15 +1750,17 @@ async function syncConnect(){
       if(!cr.ok)throw new Error('creare eșuată ('+cr.status+')');
       const d=await cr.json();SYNC.gistId=d.id;toast('Conectat — sync creat ✓');
     }
-    SYNC.last=new Date().toISOString();saveSync();rSyncUI();
+    if(!SYNC.intervalMin)SYNC.intervalMin=5;
+    SYNC.last=new Date().toISOString();saveSync();rSyncUI();setupSyncTimer();
   }catch(e){toast('Eroare: '+e.message);}
 }
-function syncDisconnect(){if(!confirm('Te deconectezi? Datele rămân pe acest dispozitiv, dar nu se mai sincronizează.'))return;SYNC={};saveSync();const t=document.getElementById('syncToken'),p=document.getElementById('syncPass');if(t)t.value='';if(p)p.value='';rSyncUI();toast('Deconectat');}
+function syncDisconnect(){if(!confirm('Te deconectezi? Datele rămân pe acest dispozitiv, dar nu se mai sincronizează.'))return;SYNC={};saveSync();const t=document.getElementById('syncToken'),p=document.getElementById('syncPass');if(t)t.value='';if(p)p.value='';rSyncUI();setupSyncTimer();toast('Deconectat');}
 function rSyncUI(){
   const st=document.getElementById('syncStatus');if(!st)return;
   const tI=document.getElementById('syncToken'),pI=document.getElementById('syncPass');
   if(tI&&SYNC.token&&!tI.value)tI.value=SYNC.token;
   if(pI&&SYNC.pass&&!pI.value)pI.value=SYNC.pass;
+  const eI=document.getElementById('syncEvery');if(eI)eI.value=String(SYNC.intervalMin||0);
   st.innerHTML=(SYNC.token&&SYNC.gistId)?('<b style="color:var(--pri2)">Conectat ✓</b>'+(SYNC.last?(' · ultima sincronizare: '+new Date(SYNC.last).toLocaleString('ro-RO')):'')):'Neconectat — datele stau doar pe acest dispozitiv.';
 }
 
@@ -1764,6 +1812,7 @@ applyPage();
 go('month');
 askUser();
 if(SYNC.token&&SYNC.pass&&SYNC.gistId&&SYNC.auto!==false)syncPull(true);
+setupSyncTimer();
 tick();
 window.addEventListener('load',LI);
 </script>
