@@ -233,17 +233,39 @@ main{padding:12px;max-width:920px;margin:0 auto}
 #askFab svg.lucide{width:23px;height:23px}
 #askFab:active{transform:scale(.93)}
 @media(min-width:760px){#askFab{bottom:24px;right:24px}}
-#askPanel{position:fixed;right:16px;bottom:calc(150px + env(safe-area-inset-bottom));z-index:95;width:min(350px,calc(100vw - 32px));background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 36px rgba(20,40,35,.22);display:none;flex-direction:column;overflow:hidden}
-#askPanel.show{display:flex}
+#askPanel{position:fixed;right:16px;bottom:calc(150px + env(safe-area-inset-bottom));z-index:95;width:min(362px,calc(100vw - 32px));background:#fff;border-radius:24px;box-shadow:0 24px 60px rgba(14,60,45,.28),0 4px 14px rgba(14,60,45,.14);display:none;flex-direction:column;overflow:hidden;transform-origin:bottom right}
+#askPanel.show{display:flex;animation:askPop .3s cubic-bezier(.34,1.56,.64,1)}
+@keyframes askPop{from{opacity:0;transform:scale(.82) translateY(16px)}to{opacity:1;transform:none}}
 @media(min-width:760px){#askPanel{bottom:88px;right:24px}}
-.askhead{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;background:var(--pri2);color:#fff;font-weight:600;font-size:14.5px}
-.askhead span{display:inline-flex;align-items:center;gap:7px}
-.askhead .x{background:rgba(255,255,255,.16);border:none;color:#fff;border-radius:8px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.asklog{padding:12px;max-height:42vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;background:var(--soft2)}
-.askmsg{padding:9px 12px;border-radius:13px;font-size:13.5px;line-height:1.45;max-width:88%;overflow-wrap:anywhere;white-space:pre-wrap}
-.askmsg.bot{background:#fff;border:1px solid var(--line);color:var(--ink);align-self:flex-start;border-bottom-left-radius:4px}
-.askmsg.user{background:var(--pri);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
-.askrow{display:flex;gap:6px;padding:10px;border-top:1px solid var(--line);align-items:center}
+.askhead{display:flex;align-items:center;gap:10px;padding:13px 14px;background:linear-gradient(120deg,var(--pri2),var(--pri) 62%,#2cbd90);color:#fff;position:relative;overflow:hidden}
+.askhead::before{content:'';position:absolute;right:-34px;top:-46px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.13)}
+.askhead::after{content:'';position:absolute;right:52px;bottom:-30px;width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.09)}
+.askava{width:40px;height:40px;border-radius:14px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex:none;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.4);position:relative;z-index:1}
+.askava svg.lucide{width:21px;height:21px}
+.askwho{flex:1;min-width:0;line-height:1.2;position:relative;z-index:1}
+.askwho b{font-size:15.5px;display:block;letter-spacing:.2px}
+.askwho small{font-size:11.5px;opacity:.9;display:flex;align-items:center;gap:5px;font-weight:500}
+.askdot{width:7px;height:7px;border-radius:50%;background:#9df5c9;flex:none;animation:askDot 2.2s infinite}
+@keyframes askDot{0%{box-shadow:0 0 0 0 rgba(157,245,201,.65)}70%{box-shadow:0 0 0 6px rgba(157,245,201,0)}100%{box-shadow:0 0 0 0 rgba(157,245,201,0)}}
+.askhead .x{background:rgba(255,255,255,.16);border:none;color:#fff;border-radius:10px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;z-index:1}
+.asklog{padding:14px 12px;max-height:46vh;overflow-y:auto;display:flex;flex-direction:column;gap:10px;background:linear-gradient(180deg,var(--soft2),#fdfefd 70%)}
+.askmsg{padding:10px 13px;border-radius:16px;font-size:13.5px;line-height:1.5;max-width:88%;overflow-wrap:anywhere;white-space:pre-wrap;animation:msgIn .25s ease-out}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.askbot{display:flex;gap:8px;align-items:flex-end;max-width:94%;align-self:flex-start}
+.askbot .mini{width:26px;height:26px;border-radius:9px;background:linear-gradient(135deg,var(--pri),#2cbd90);color:#fff;display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 2px 6px rgba(14,124,96,.3)}
+.askbot .mini svg.lucide{width:14px;height:14px}
+.askmsg.bot{background:#fff;color:var(--ink);border-bottom-left-radius:5px;box-shadow:0 2px 10px rgba(20,60,45,.09)}
+.askmsg.user{background:linear-gradient(135deg,var(--pri),var(--pri2));color:#fff;align-self:flex-end;border-bottom-right-radius:5px;box-shadow:0 3px 10px rgba(14,124,96,.28)}
+.askchips{display:flex;flex-wrap:wrap;gap:7px;padding-left:34px;animation:msgIn .3s ease-out}
+.askchip{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1.5px solid var(--pri);color:var(--pri2);border-radius:999px;padding:7px 12px;font-size:12.5px;font-weight:600;cursor:pointer;box-shadow:0 1px 5px rgba(20,60,45,.07);transition:transform .1s,background .15s}
+.askchip:active{transform:scale(.94)}
+.askchip:hover{background:var(--soft)}
+.askchip svg.lucide{width:13px;height:13px;flex:none}
+.typing{display:inline-flex;gap:4px;padding:3px 2px}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--pri);animation:tb 1.1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes tb{0%,60%,100%{transform:none;opacity:.35}30%{transform:translateY(-4px);opacity:1}}
+.askrow{display:flex;gap:6px;padding:10px;border-top:1px solid var(--line);align-items:center;background:#fff}
 .askrow .micbtn{width:40px;height:40px}
 .askrow .btn{padding:10px 12px}
 .mealsempty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:26px 10px}
@@ -315,6 +337,7 @@ main{padding:12px;max-width:920px;margin:0 auto}
 
 <nav>
   <button data-v="cal" class="on" onclick="go('cal')"><i data-lucide="calendar-days"></i>Calendar</button>
+  <button data-v="rem" onclick="go('rem')"><i data-lucide="alarm-clock"></i>Mementouri</button>
   <button data-v="health" onclick="go('health')"><i data-lucide="heart-pulse"></i>Sănătate</button>
 </nav>
 
@@ -504,6 +527,28 @@ main{padding:12px;max-width:920px;margin:0 auto}
     </div>
   </section>
 
+  <!-- ===== MEMENTOURI ===== -->
+  <section id="v-rem" style="display:none">
+    <div class="card">
+      <h3><i data-lucide="alarm-clock"></i>Mementouri</h3>
+      <p class="muted">Primești o notificare la ora stabilită, în fiecare zi.</p>
+      <div class="row" style="margin:8px 0"><button class="btn sec" onclick="askNotif();setTimeout(rRemView,600)"><i data-lucide="bell-ring"></i>Activează notificările</button><span class="muted" id="remNotifState"></span></div>
+      <div class="chips" style="margin:8px 0">
+        <button class="chip" onclick="addPreset('Mic dejun','08:00')"><i data-lucide="egg-fried"></i>Mic dejun</button>
+        <button class="chip" onclick="addPreset('Prânz','13:00')"><i data-lucide="utensils"></i>Prânz</button>
+        <button class="chip" onclick="addPreset('Cină','19:00')"><i data-lucide="soup"></i>Cină</button>
+        <button class="chip" onclick="addPreset('Cântărire','07:30')"><i data-lucide="scale"></i>Cântărire</button>
+        <button class="chip" onclick="addWaterPreset()"><i data-lucide="glass-water"></i>Bea apă (2h)</button>
+      </div>
+      <div id="remList"></div>
+      <div class="g3" style="margin-top:8px">
+        <div style="grid-column:span 2"><label>Memento</label><input id="remLabel" placeholder="ex: Ia vitaminele"></div>
+        <div><label>Ora</label><input id="remTime" type="time" value="09:00"></div>
+      </div>
+      <div class="row act" style="margin-top:8px"><button class="btn" onclick="addReminder()"><i data-lucide="plus"></i>Adaugă memento</button></div>
+    </div>
+  </section>
+
   <!-- ===== SETĂRI ===== -->
   <section id="v-set" style="display:none">
     <details class="card setfold">
@@ -578,26 +623,6 @@ main{padding:12px;max-width:920px;margin:0 auto}
       <div class="row" style="margin-top:8px"><button class="btn ghost" onclick="askUser(true)"><i data-lucide="user-round"></i>Schimbă utilizatorul</button></div>
       <label>Format printare</label>
       <select id="setPrint" onchange="S.settings.printSize=this.value;save();applyPage()"><option value="A4">A4 landscape</option><option value="A3">A3 landscape</option></select>
-      </div>
-    </details>
-
-    <details class="card setfold">
-      <summary><i data-lucide="alarm-clock"></i>Mementouri<span class="chev"><i data-lucide="chevron-down"></i></span></summary>
-      <div class="foldbody">
-      <p class="muted">Primești o notificare la ora stabilită. Activează întâi notificările (secțiunea de mai sus).</p>
-      <div class="chips" style="margin:8px 0">
-        <button class="chip" onclick="addPreset('Mic dejun','08:00')"><i data-lucide="egg-fried"></i>Mic dejun</button>
-        <button class="chip" onclick="addPreset('Prânz','13:00')"><i data-lucide="utensils"></i>Prânz</button>
-        <button class="chip" onclick="addPreset('Cină','19:00')"><i data-lucide="soup"></i>Cină</button>
-        <button class="chip" onclick="addPreset('Cântărire','07:30')"><i data-lucide="scale"></i>Cântărire</button>
-        <button class="chip" onclick="addWaterPreset()"><i data-lucide="glass-water"></i>Bea apă (2h)</button>
-      </div>
-      <div id="remList"></div>
-      <div class="g3" style="margin-top:8px">
-        <div style="grid-column:span 2"><label>Memento</label><input id="remLabel" placeholder="ex: Ia vitaminele"></div>
-        <div><label>Ora</label><input id="remTime" type="time" value="09:00"></div>
-      </div>
-      <div class="row act" style="margin-top:8px"><button class="btn" onclick="addReminder()"><i data-lucide="plus"></i>Adaugă memento</button></div>
       </div>
     </details>
 
@@ -712,8 +737,12 @@ main{padding:12px;max-width:920px;margin:0 auto}
 <!-- Asistent flotant -->
 <button id="askFab" onclick="toggleAsk()" aria-label="Asistent"><i data-lucide="sparkles"></i></button>
 <div id="askPanel">
-  <div class="askhead"><span><i data-lucide="sparkles"></i> Asistent</span><button class="x" onclick="toggleAsk()"><i data-lucide="x"></i></button></div>
-  <div id="askLog" class="asklog"><div class="askmsg bot">Salut! Scrie sau dictează — notez mese, apă, sport, fasting, cântărire, activități în calendar, obiective, motto și mementouri.</div></div>
+  <div class="askhead">
+    <div class="askava"><i data-lucide="sparkles"></i></div>
+    <div class="askwho"><b>Asistent</b><small><span class="askdot"></span>aici pentru familia ta</small></div>
+    <button class="x" onclick="toggleAsk()"><i data-lucide="x"></i></button>
+  </div>
+  <div id="askLog" class="asklog"></div>
   <div class="askrow">
     <input id="askInput" placeholder="Scrie sau apasă microfonul…" onkeydown="if(event.key==='Enter')askSend()">
     <button id="askMic" class="micbtn" onclick="askVoice()" title="Vorbește"><i data-lucide="mic"></i></button>
@@ -801,10 +830,15 @@ function go(v){
   document.getElementById('v-'+v).style.display='';
   document.getElementById('calTabs').style.display=CALV.includes(v)?'':'none';
   document.querySelectorAll('#calTabs [data-cs]').forEach(b=>b.classList.toggle('on',b.dataset.cs===v));
-  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',(b.dataset.v==='cal'&&CALV.includes(v))||(b.dataset.v==='health'&&v==='health')));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',(b.dataset.v==='cal'&&CALV.includes(v))||(b.dataset.v==='health'&&v==='health')||(b.dataset.v==='rem'&&v==='rem')));
   render();
 }
-function render(){rMotto();if(VIEW==='month')rMonth();else if(VIEW==='year')rYear();else if(VIEW==='day')rDay();else if(VIEW==='goals')rGoals();else if(VIEW==='health')rDiet();else if(VIEW==='set')rSet();LI();}
+function render(){rMotto();if(VIEW==='month')rMonth();else if(VIEW==='year')rYear();else if(VIEW==='day')rDay();else if(VIEW==='goals')rGoals();else if(VIEW==='health')rDiet();else if(VIEW==='rem')rRemView();else if(VIEW==='set')rSet();LI();}
+function rRemView(){
+  rReminders();
+  const el=document.getElementById('remNotifState');
+  if(el)el.textContent=('Notification' in window)?({granted:'notificări active ✓',denied:'notificări blocate ✕',default:'notificări inactive'}[Notification.permission]):'notificări nesuportate';
+}
 
 /* ---------- recurrence ---------- */
 function occursOn(ev,ds){
@@ -1504,19 +1538,23 @@ function rAI(){
 }
 /* lanț de rezervă: dacă modelul ales atinge limita (429) sau nu e disponibil, încearcă automat următorul gratuit */
 const GEM_FALLBACK=['gemini-3.1-flash-lite','gemini-2.5-flash-lite','gemini-2.0-flash','gemini-2.5-flash','gemini-3-flash'];
-async function gemini(parts){
+/* opt: {json:true → modul JSON nativ al API-ului (răspuns garantat JSON), temp: temperatura} */
+async function gemini(parts,opt){
+  opt=opt||{};
   const key=S.settings.geminiKey;
   if(!key){toast('Adaugă cheia Gemini în Setări');throw new Error('no key');}
   const primary=S.settings.model||'gemini-2.5-flash';
   const chain=[primary,...GEM_FALLBACK.filter(m=>m!==primary)];
-  let quotaHit=false,lastMsg='';
+  let quotaHit=false,lastMsg='',badReq=false;
   for(let idx=0;idx<chain.length;idx++){
     const model=chain[idx];
+    const gen={temperature:opt.temp!=null?opt.temp:0.4};
+    if(opt.json)gen.responseMimeType='application/json';
     let r;
     try{
       r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,{
         method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({contents:[{parts}],generationConfig:{temperature:0.4}})
+        body:JSON.stringify({contents:[{parts}],generationConfig:gen})
       });
     }catch(net){lastMsg='rețea';continue;}
     if(r.ok){
@@ -1530,15 +1568,28 @@ async function gemini(parts){
     if(r.status===401||r.status===403)throw new Error('Acces refuzat ('+r.status+'). Cheia nu are permisiuni pentru API.');
     // 429 (cotă) / 404 (model inexistent) / 400 (model incompatibil) / 5xx → încearcă următorul
     if(r.status===429)quotaHit=true;
+    if(r.status===400)badReq=true;
     lastMsg='API '+r.status;
   }
+  // dacă modul JSON nativ nu e suportat de niciun model, reîncearcă o dată fără el
+  if(badReq&&opt.json)return gemini(parts,Object.assign({},opt,{json:false}));
   if(quotaHit)throw new Error('Toate modelele gratuite au atins limita pe azi. Cotele se resetează la miezul nopții ora Pacific (~10:00 România). Poți activa billing în Google AI Studio pentru fără limite.');
   throw new Error('Nu am putut contacta niciun model ('+lastMsg+'). Verifică cheia și conexiunea.');
+}
+/* extrage JSON chiar dacă modelul a pus text sau ``` în jur */
+function parseAIJson(t){
+  t=String(t||'').replace(/```json|```/gi,'').trim();
+  try{return JSON.parse(t);}catch(e){}
+  const m=t.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+  if(m){try{return JSON.parse(m[0]);}catch(e){}}
+  throw new Error('AI-ul a răspuns într-un format neașteptat. Încearcă din nou.');
 }
 function fileToB64(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(f);});}
 
 /* ton uman, nu de robot — folosit în toate cererile de text */
 const AITON=' Foarte important pentru stil: scrie ca un specialist real care stă de vorbă cu mine, la persoana a doua („tu"), natural, cald și direct — ca o discuție, nu ca un raport. Fără formule de salut („Bună ziua"), fără încheieri gen „Sunt alături de tine" sau „Succes!", fără clișee motivaționale. Fără liste numerotate, fără puncte, fără bold, fără titluri, fără markdown — doar 2-3 paragrafe scurte de proză care curg firesc. Nu-mi repeta datele ca într-un tabel; interpretează-le și spune-mi ce înseamnă pentru mine.';
+let _aiFood=null,_aiFoodImg=null;
+const FOOD_PROMPT='Ești nutriționist. Analizează cu mare atenție mâncarea din poză: identifică exact alimentul (atenție la fructe/preparate asemănătoare — măr vs. prună, sarmale vs. chiftele etc.), ține cont de preparate românești și estimează realist mărimea porției din imagine. Răspunde DOAR cu JSON valid, fără markdown: {"nume":"...","portie_g":număr,"calorii":număr,"proteine_g":număr,"carbohidrati_g":număr,"grasimi_g":număr,"incredere":"mare|medie|mică","evaluare":"o frază naturală, la persoana a doua („tu"), despre cât de potrivită e pentru slăbit — fără clișee","sugestie":"o sugestie scurtă și firească de îmbunătățire, la persoana a doua"}';
 async function aiAnalyze(){
   const f=_photoBlob||document.getElementById('aiPhoto').files[0];
   if(!f)return toast('Fă o poză sau alege una mai întâi');
@@ -1546,17 +1597,41 @@ async function aiAnalyze(){
   out.innerHTML='<div class="aibox">Analizez poza…</div>';
   try{
     const b64=await fileToB64(f);
-    const txt=await gemini([
-      {inline_data:{mime_type:f.type||'image/jpeg',data:b64}},
-      {text:'Ești nutriționist. Analizează mâncarea din poză. Răspunde DOAR cu JSON valid, fără markdown: {"nume":"...","calorii":număr,"proteine_g":număr,"carbohidrati_g":număr,"grasimi_g":număr,"evaluare":"o frază naturală, la persoana a doua („tu"), despre cât de potrivită e pentru slăbit — fără clișee","sugestie":"o sugestie scurtă și firească de îmbunătățire, la persoana a doua"}'}
-    ]);
-    const j=JSON.parse(txt.replace(/```json|```/g,'').trim());
-    aiShow('aiPhotoOut',`<b>${esc(j.nume)}</b>
-≈ <b>${j.calorii} kcal</b> · P ${j.proteine_g} g · C ${j.carbohidrati_g} g · G ${j.grasimi_g} g
-
-${esc(j.evaluare)}
-Sugestie: ${esc(j.sugestie)}`,`<button class="btn" style="margin-top:8px" onclick="quickMeal('${esc(j.nume).replace(/'/g,'')}',${Number(j.calorii)||0},'Prânz');dTab('meal')"><i data-lucide="plus"></i>Adaugă la mesele de azi</button>`);
+    _aiFoodImg={mime:f.type||'image/jpeg',data:b64};
+    const txt=await gemini([{inline_data:{mime_type:_aiFoodImg.mime,data:_aiFoodImg.data}},{text:FOOD_PROMPT}],{json:true,temp:0.2});
+    _aiFood=parseAIJson(txt);
+    renderFoodResult();
   }catch(e){out.innerHTML='<div class="aibox">Eroare: '+esc(e.message)+'</div>';}
+}
+function renderFoodResult(){
+  const j=_aiFood;
+  const conf=j.incredere==='mică'?' · <span style="color:var(--amber)">nesigur — corectează mai jos dacă am greșit</span>':'';
+  aiShow('aiPhotoOut',`<div class="row" style="gap:8px;flex-wrap:wrap"><div style="flex:2;min-width:150px"><label>Aliment (poți edita)</label><input id="aiFoodName" value="${esc(j.nume||'')}"></div><div style="flex:1;min-width:80px"><label>Kcal</label><input id="aiFoodCal" type="number" min="0" value="${Number(j.calorii)||0}"></div></div>${j.portie_g?('Porție ≈ '+Number(j.portie_g)+' g · '):''}P ${Number(j.proteine_g)||0} g · C ${Number(j.carbohidrati_g)||0} g · G ${Number(j.grasimi_g)||0} g${conf}
+
+${esc(j.evaluare||'')}${j.sugestie?('\nSugestie: '+esc(j.sugestie)):''}`,
+  `<div class="row" style="margin-top:8px;gap:8px"><input id="aiFoodFix" class="grow" placeholder="AI a greșit? Scrie corecția: „e măr, nu prună”" onkeydown="if(event.key==='Enter')aiFoodFix()"><button class="btn sec" onclick="aiFoodFix()"><i data-lucide="wand-2"></i>Corectează</button></div><button class="btn" style="margin-top:8px" onclick="aiFoodAdd()"><i data-lucide="plus"></i>Adaugă la mesele de azi</button>`);
+}
+async function aiFoodFix(){
+  const fix=(document.getElementById('aiFoodFix')?.value||'').trim();
+  if(!fix)return toast('Scrie ce e greșit, ex: „e măr, nu prună”');
+  if(!_aiFood||!_aiFoodImg)return toast('Analizează întâi o poză');
+  const out=document.getElementById('aiPhotoOut');
+  out.innerHTML='<div class="aibox">Refac analiza cu corecția ta…</div>';
+  try{
+    const txt=await gemini([
+      {inline_data:{mime_type:_aiFoodImg.mime,data:_aiFoodImg.data}},
+      {text:FOOD_PROMPT+`
+IMPORTANT: analiza anterioară a fost ${JSON.stringify(_aiFood)}, dar utilizatorul (care vede alimentul în realitate) te corectează: "${fix}". Corecția lui e adevărul absolut. Refă TOATE valorile (nume, porție, calorii, macro, evaluare, sugestie) pornind de la corecția lui; folosește poza doar pentru a estima porția.`}
+    ],{json:true,temp:0.2});
+    _aiFood=parseAIJson(txt);
+    renderFoodResult();
+    toast('Analiză corectată ✓');
+  }catch(e){out.innerHTML='<div class="aibox">Eroare: '+esc(e.message)+'</div>';}
+}
+function aiFoodAdd(){
+  const n=(document.getElementById('aiFoodName')?.value||'Masă').trim()||'Masă';
+  const c=Number(document.getElementById('aiFoodCal')?.value)||0;
+  quickMeal(n,c,'Prânz');dTab('meal');
 }
 
 async function aiMenu(){
@@ -1614,8 +1689,8 @@ REGULI PENTRU "members" (foarte important). Contează DOAR numele care apar în 
 - Dacă persoana menționată NU e în lista de membri → NU e comună: members=["${au}"], iar numele persoanei se adaugă în titlu (ex. "Cină cu Alin").
 - Dacă se cere EXPLICIT doar pentru altcineva care ESTE membru (ex. "doar pentru Alisa", "programează-i lui Alisa") → members=["id_acelui_membru"] (fără utilizatorul conectat).
 - Dacă mai multe persoane sunt menționate, sunt COMUNE doar dacă cel puțin una (în afară de tine) e în lista de membri.
-Alte reguli: pentru întâlniri repetate ("în fiecare luni", "săptămânal") pune recur.f="w" și date pe prima apariție viitoare; pentru evenimente pe mai multe zile (congres, târg, concediu, ex "12-14 septembrie") pune o singură activitate cu recur.f="d", int=1, until=ultima zi și cat="eveniment"; dacă anul lipsește alege cea mai apropiată dată viitoare; time gol dacă nu se spune ora.${spoken?' ATENȚIE: textul a fost DICTAT prin voce, deci poate conține greșeli de transcriere, cuvinte lipite, numere scrise în litere ("la zece"→10:00) sau nume proprii transcrise fonetic. Interpretează-l fonetic și după sens, corectează greșelile evidente și extrage intenția reală.':''}`}]);
-    let arr=JSON.parse(txt.replace(/```json|```/g,'').trim());
+Alte reguli: pentru întâlniri repetate ("în fiecare luni", "săptămânal") pune recur.f="w" și date pe prima apariție viitoare; pentru evenimente pe mai multe zile (congres, târg, concediu, ex "12-14 septembrie") pune o singură activitate cu recur.f="d", int=1, until=ultima zi și cat="eveniment"; dacă anul lipsește alege cea mai apropiată dată viitoare; time gol dacă nu se spune ora.${spoken?' ATENȚIE: textul a fost DICTAT prin voce, deci poate conține greșeli de transcriere, cuvinte lipite, numere scrise în litere ("la zece"→10:00) sau nume proprii transcrise fonetic. Interpretează-l fonetic și după sens, corectează greșelile evidente și extrage intenția reală.':''}`}],{json:true,temp:0.2});
+    let arr=parseAIJson(txt);
     if(!Array.isArray(arr))arr=[arr];
     const cands=[];
     arr.forEach(e=>{
@@ -1913,12 +1988,40 @@ function rSyncUI(){
 }
 
 /* ============ ASISTENT FLOTANT ============ */
-function toggleAsk(){const p=document.getElementById('askPanel');const open=p.classList.toggle('show');if(open){LI();setTimeout(()=>document.getElementById('askInput').focus(),60);}}
-function appendAsk(who,txt){const log=document.getElementById('askLog');const d=document.createElement('div');d.className='askmsg '+who;d.textContent=txt;log.appendChild(d);log.scrollTop=log.scrollHeight;return d;}
+function toggleAsk(){const p=document.getElementById('askPanel');const open=p.classList.toggle('show');if(open){askWelcome();LI();setTimeout(()=>document.getElementById('askInput').focus(),60);}}
+/* salut personalizat + sugestii rapide, o singură dată */
+function askWelcome(){
+  const log=document.getElementById('askLog');
+  if(log.dataset.init)return;log.dataset.init='1';
+  const h=new Date().getHours();
+  const sal=h<5?'Bună seara':h<12?'Neața':h<18?'Salut':'Bună seara';
+  const me=(memById(S.settings.activeUser||S.members[0].id)||{}).name||'';
+  appendAsk('bot',sal+(me&&me!=='Eu'?', '+me:'')+'! Spune-mi ce ai mâncat sau băut, pune ceva în calendar sau întreabă-mă orice despre ziua ta.');
+  const chips=document.createElement('div');chips.id='askChips';chips.className='askchips';
+  [['glass-water','Am băut un pahar de apă'],['flame','Câte calorii mai am azi?'],['calendar','Ce am mâine în calendar?'],['footprints','Am mers pe jos 30 de minute']].forEach(p=>{
+    const b=document.createElement('button');b.className='askchip';b.innerHTML='<i data-lucide="'+p[0]+'"></i>'+p[1];
+    b.onclick=()=>{document.getElementById('askInput').value=p[1];askSend();};
+    chips.appendChild(b);
+  });
+  log.appendChild(chips);LI();
+}
+function appendAsk(who,txt){
+  const log=document.getElementById('askLog');
+  let bubble;
+  if(who==='bot'){
+    const w=document.createElement('div');w.className='askbot';
+    w.innerHTML='<div class="mini"><i data-lucide="sparkles"></i></div>';
+    bubble=document.createElement('div');bubble.className='askmsg bot';bubble.textContent=txt;
+    w.appendChild(bubble);log.appendChild(w);LI();
+  }else{
+    bubble=document.createElement('div');bubble.className='askmsg user';bubble.textContent=txt;log.appendChild(bubble);
+  }
+  log.scrollTop=log.scrollHeight;return bubble;
+}
 function logWeightKg(kg){const mid=dietMid();S.diet.weights[mid]=S.diet.weights[mid]||[];const ws=S.diet.weights[mid],t=todayStr();const ex=ws.find(x=>x.d===t);if(ex)ex.w=kg;else ws.push({d:t,w:kg});ws.sort((a,b)=>a.d<b.d?-1:1);save();if(VIEW==='health')rDiet();}
 function setMottoCore(text){S.mottos[curYm()]=String(text||'').trim();save();rMotto();}
 function addGoalCore(title,scope){const n=new Date();const k=(/an|year/i.test(scope||''))?String(n.getFullYear()):(n.getFullYear()+'-'+pad(n.getMonth()+1));S.goals.push({id:uid(),title:String(title),ym:k,done:false,memberId:S.settings.activeUser||null});save();if(VIEW==='goals')rGoals();else if(VIEW==='month')rMonth();}
-function addReminderCore(label,time,every){S.settings.reminders=S.settings.reminders||[];const r={id:uid(),label:label||'Memento',on:true};if(Number(every))r.every=Number(every);else r.time=/^\d{1,2}:\d{2}$/.test(time||'')?time:'09:00';S.settings.reminders.push(r);save();if(VIEW==='set')rReminders();maybeAskNotif();}
+function addReminderCore(label,time,every){S.settings.reminders=S.settings.reminders||[];const r={id:uid(),label:label||'Memento',on:true};if(Number(every))r.every=Number(every);else r.time=/^\d{1,2}:\d{2}$/.test(time||'')?time:'09:00';S.settings.reminders.push(r);save();if(VIEW==='set'||VIEW==='rem')rReminders();maybeAskNotif();}
 function execAction(a){
   switch(a.action){
     case 'fasting_start': if(!S.diet.fasting.active)fastToggle(); break;
@@ -1934,23 +2037,48 @@ function execAction(a){
     default: break;
   }
 }
+let _askHist=[];
+/* rezumatul datelor reale ale utilizatorului — ca asistentul să răspundă concret, nu generic */
+function askCtx(){
+  const p=getProf(),w=lastW(),c=calc(p,w);
+  const meals=todayMeals();
+  const kcal=meals.reduce((s,m)=>s+(Number(m.cal)||0),0);
+  const mtxt=meals.map(m=>m.type+': '+m.name+' ('+m.cal+' kcal)').join('; ')||'nimic încă';
+  const t=todayStr();
+  const evs=S.events.filter(e=>e.date>=t).sort((a,b)=>a.date<b.date?-1:(a.time<b.time?-1:1)).slice(0,6).map(e=>e.date+(e.time?' '+e.time:'')+' — '+e.title).join('; ')||'niciuna';
+  const goals=S.goals.filter(g=>!g.done).slice(-5).map(g=>g.title).join('; ')||'niciunul';
+  const me=(memById(S.settings.activeUser||S.members[0].id)||{}).name||'utilizator';
+  const ws=(S.diet.weights[dietMid()]||[]).slice(-5).map(x=>x.d+': '+x.w+' kg').join(', ');
+  return `Utilizator: ${me}. Profil: ${p.sex==='F'?'femeie':'bărbat'}, ${p.age||'?'} ani, ${p.h||'?'} cm, ${w||'?'} kg, țintă ${p.target||'?'} kg${c?(', necesar zilnic '+c.target+' kcal (TDEE '+c.tdee+')'):''}.${ws?(' Ultimele cântăriri: '+ws+'.'):''} Azi a mâncat: ${mtxt} — total ${kcal} kcal. Apă azi: ${waterToday()} ml. Fasting activ: ${S.diet.fasting.active?'da':'nu'} (schemă ${S.diet.fasting.hours||16}:${24-(S.diet.fasting.hours||16)}). Următoarele activități din calendar: ${evs}. Obiective active: ${goals}.`;
+}
 async function askSend(){
   const inp=document.getElementById('askInput');const text=(inp.value||'').trim();
   if(!text)return;
   if(!S.settings.geminiKey){appendAsk('user',text);appendAsk('bot','Adaugă întâi cheia Gemini în Setări → Gemini AI.');inp.value='';return;}
+  const ch=document.getElementById('askChips');if(ch)ch.remove();
   appendAsk('user',text);inp.value='';
-  const wait=appendAsk('bot','…');
+  const wait=appendAsk('bot','');
+  wait.innerHTML='<span class="typing"><i></i><i></i><i></i></span>';
+  const hist=_askHist.slice(-10).map(h=>(h.who==='user'?'Utilizator':'Tu (asistentul)')+': '+h.txt).join('\n')||'(început de conversație)';
+  _askHist.push({who:'user',txt:text});if(_askHist.length>30)_askHist=_askHist.slice(-30);
   try{
-    const prompt=`Ești asistentul aplicației FamLink (sănătate + calendar). Azi: ${todayStr()}. Interpretează comanda și răspunde DOAR cu JSON valid, fără markdown: {"action":"fasting_start|fasting_stop|water|drink|meal|sport|weight|motto|goal|reminder|event|reply","ml":număr,"name":"","cal":număr,"type":"Mic dejun|Prânz|Cină|Gustare","minutes":număr,"kg":număr,"scope":"month|year","label":"","time":"HH:MM","every":ore,"text":"","reply":"confirmare scurtă și prietenoasă în română"}.
-Reguli: "am băut apă/un pahar"→water (un pahar=250 ml, o sticlă=500 ml, o cană=300); "cafea/ceai/suc/bere"→drink cu cal estimat (cafea simplă 2, cu lapte 60, suc 110, bere 150) și name; mâncare descrisă→meal cu cal estimat realist și type; "am alergat/mers/sală/înot X minute"→sport cu name (ex "Alergare") și minutes; "am/cântărit X kg"→weight; "pune motto-ul lunii ..." / "motto ..."→motto cu text; "obiectiv: ..." / "adaugă obiectivul ..." / "vreau să ... anul acesta"→goal cu name și scope (month sau year); "amintește-mi să ... la 9" / "memento ... la 08:00"→reminder cu label și time; "amintește-mi să beau apă la fiecare 2 ore"→reminder cu label și every=2; "programează/adaugă/pune în calendar ..."→event cu text=comanda originală; altfel→reply. Pune MEREU un "reply" scurt. Comanda: "${text}"`;
-    const raw=await gemini([{text:prompt}]);
-    const a=JSON.parse(raw.replace(/```json|```/g,'').trim());
-    if(a.action==='event'){
-      addEventsFromText(a.text||text,false,(msg)=>{wait.textContent=msg;});
-      return;
-    }
-    execAction(a);
-    wait.textContent=a.reply||'Gata ✓';
+    const prompt=`Ești asistentul personal din aplicația FamLink (sănătate + calendar de familie). Vorbești în română, natural. Azi: ${todayStr()}, ora ${new Date().toTimeString().slice(0,5)}.
+DATELE REALE ALE UTILIZATORULUI (folosește-le ca să fii concret și precis): ${askCtx()}
+CONVERSAȚIA DE PÂNĂ ACUM:
+${hist}
+MESAJUL NOU AL UTILIZATORULUI: "${text}"
+Răspunde DOAR cu JSON valid, fără markdown: {"actions":[{"action":"fasting_start|fasting_stop|water|drink|meal|sport|weight|motto|goal|reminder|event","ml":număr,"name":"","cal":număr,"type":"Mic dejun|Prânz|Cină|Gustare","minutes":număr,"kg":număr,"scope":"month|year","label":"","time":"HH:MM","every":ore,"text":""}],"reply":"răspunsul tău"}.
+Reguli acțiuni: "am băut apă/un pahar"→water (pahar=250 ml, sticlă=500, cană=300); cafea/ceai/suc/bere→drink cu cal estimat (cafea simplă 2, cu lapte 60, suc 110, bere 150) și name; mâncare descrisă→meal cu cal estimat realist și type potrivit orei; "am alergat/mers/sală/înot X minute"→sport cu name și minutes; "am/cântărit X kg"→weight; motto→motto cu text; obiectiv→goal cu name și scope; memento la oră→reminder cu label și time; memento repetat→reminder cu label și every=ore; programări în calendar→event cu text=comanda originală. Dacă mesajul conține mai multe lucruri, pune mai multe acțiuni în array. Dacă e doar o întrebare sau conversație (ex: "câte calorii mai am azi?", "ce am mâine în calendar?", "ce să mănânc la cină?") → "actions":[] și răspunzi din datele de mai sus.
+REGULĂ DE AUR: execută DOAR ce a cerut utilizatorul explicit, exact cum a cerut — nu adăuga acțiuni în plus, nu schimba cantități, ore sau tipuri din proprie inițiativă. Dacă mesajul e ambiguu sau nu ești sigur ce a vrut (ce acțiune, ce cantitate, ce oră) → "actions":[] și pune în reply o întrebare scurtă de clarificare, în loc să ghicești. În reply spune mereu EXACT ce ai notat (nume, cantitate, oră), ca utilizatorul să vadă imediat dacă ai înțeles greșit.
+Reguli pentru "reply" — cele mai importante: vorbește ca un om real, cald și direct, la persoana a doua, nu ca un robot și nu ca un raport. Fii PRECIS: folosește cifrele reale din date (kcal rămase = necesar zilnic minus total mâncat, apă, kilograme, ce urmează în calendar). La întrebări răspunde la obiect în 1-3 fraze; la acțiuni confirmă scurt și natural, eventual cu o observație utilă legată de datele lui. Ține cont de conversația de până acum (referiri la mesaje anterioare). Fără liste, fără markdown, fără formule de salut repetate, fără clișee motivaționale.`;
+    const raw=await gemini([{text:prompt}],{json:true,temp:0.5});
+    const a=parseAIJson(raw);
+    const acts=Array.isArray(a.actions)?a.actions:(a.action?[a]:[]);
+    const done=msg=>{wait.textContent=msg;_askHist.push({who:'bot',txt:msg});};
+    const evAct=acts.find(x=>x&&x.action==='event');
+    acts.filter(x=>x&&x.action&&x.action!=='event'&&x.action!=='reply').forEach(execAction);
+    if(evAct){addEventsFromText(evAct.text||text,false,msg=>done(msg));return;}
+    done(a.reply||'Gata ✓');
   }catch(e){wait.textContent='Nu am reușit: '+e.message;}
 }
 function askVoice(){voiceAdd();}
