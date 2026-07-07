@@ -3,7 +3,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#0e7c60">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FamLink">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <title>FamLink — Calendarul Familiei</title>
 <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 132 132"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="%2316a37f"/><stop offset="1" stop-color="%237bd94a"/></linearGradient></defs><rect x="8" y="8" width="116" height="116" rx="30" fill="url(%23g)"/><path d="M40 104 V36 h52 v15 H57 v14 h30 v15 H57 v24 z" fill="%23ffffff"/><path d="M92 96 c18 2 26-10 26-24 c-16-2-28 6-26 24z" fill="%23eaffde"/></svg>'>
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.462.0/dist/umd/lucide.min.js"></script>
@@ -15,7 +18,7 @@
   --rad:16px; --sh:0 2px 10px rgba(30,58,52,.08);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:76px}
+body{font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:96px}
 button{font-family:inherit;cursor:pointer}
 input,select,textarea{font-family:inherit;font-size:15px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);width:100%}
 input:focus,select:focus,textarea:focus{outline:2px solid var(--pri);border-color:transparent}
@@ -61,6 +64,19 @@ main{padding:12px;max-width:920px;margin:0 auto}
 .av{display:inline-flex;width:26px;height:26px;border-radius:50%;color:#fff;font-size:12.5px;font-weight:700;align-items:center;justify-content:center;flex:none}
 .avs{display:inline-flex;width:18px;height:18px;border-radius:50%;color:#fff;font-size:10px;font-weight:700;align-items:center;justify-content:center;flex:none}
 .card{background:var(--card);border-radius:var(--rad);box-shadow:var(--sh);padding:14px;margin-bottom:12px}
+/* setări pliabile */
+.setfold{padding:0;overflow:hidden}
+.setfold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:9px;padding:15px 16px;font-size:16.5px;font-weight:700;color:var(--ink)}
+.setfold>summary::-webkit-details-marker{display:none}
+.setfold>summary::marker{content:''}
+.setfold>summary svg.lucide{width:20px;height:20px;color:var(--pri)}
+.setfold>summary:hover{background:var(--soft2)}
+.setfold>summary .chev{margin-left:auto;display:inline-flex;transition:transform .2s;color:var(--muted)}
+.setfold>summary .chev svg.lucide{width:18px;height:18px}
+.setfold[open]>summary{border-bottom:1px solid var(--line)}
+.setfold[open]>summary .chev{transform:rotate(180deg)}
+.setfold .foldbody{padding:14px 16px 16px}
+.setfold .foldbody h2{display:none}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .grow{flex:1;min-width:0}
 .btn{background:var(--pri);color:#fff;border:none;border-radius:10px;padding:10px 15px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:7px;justify-content:center}
@@ -201,19 +217,19 @@ main{padding:12px;max-width:920px;margin:0 auto}
 .photoprev img{max-width:100%;max-height:230px;border-radius:12px;border:1px solid var(--line);display:block}
 .photoprev .aix{top:8px;right:8px}
 /* asistent flotant */
-#askFab{position:fixed;right:16px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:90;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--pri),var(--acc));color:#fff;border:none;box-shadow:0 6px 18px rgba(22,163,127,.42);display:flex;align-items:center;justify-content:center;cursor:pointer}
-#askFab svg.lucide{width:26px;height:26px}
-#askFab:active{transform:scale(.94)}
+#askFab{position:fixed;right:16px;bottom:calc(90px + env(safe-area-inset-bottom));z-index:90;width:50px;height:50px;border-radius:15px;background:var(--pri2);color:#fff;border:none;box-shadow:0 4px 14px rgba(14,124,96,.32);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s}
+#askFab svg.lucide{width:23px;height:23px}
+#askFab:active{transform:scale(.93)}
 @media(min-width:760px){#askFab{bottom:24px;right:24px}}
-#askPanel{position:fixed;right:16px;bottom:calc(150px + env(safe-area-inset-bottom));z-index:95;width:min(360px,calc(100vw - 32px));background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 14px 44px rgba(20,40,35,.28);display:none;flex-direction:column;overflow:hidden}
+#askPanel{position:fixed;right:16px;bottom:calc(150px + env(safe-area-inset-bottom));z-index:95;width:min(350px,calc(100vw - 32px));background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 36px rgba(20,40,35,.22);display:none;flex-direction:column;overflow:hidden}
 #askPanel.show{display:flex}
-@media(min-width:760px){#askPanel{bottom:92px;right:24px}}
-.askhead{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:linear-gradient(135deg,var(--pri2),var(--pri));color:#fff;font-weight:700;font-size:15px}
+@media(min-width:760px){#askPanel{bottom:88px;right:24px}}
+.askhead{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;background:var(--pri2);color:#fff;font-weight:600;font-size:14.5px}
 .askhead span{display:inline-flex;align-items:center;gap:7px}
-.askhead .x{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.asklog{padding:12px;max-height:44vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
-.askmsg{padding:8px 11px;border-radius:12px;font-size:13.5px;line-height:1.4;max-width:88%;overflow-wrap:anywhere;white-space:pre-wrap}
-.askmsg.bot{background:#fff;border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:4px}
+.askhead .x{background:rgba(255,255,255,.16);border:none;color:#fff;border-radius:8px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.asklog{padding:12px;max-height:42vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;background:var(--soft2)}
+.askmsg{padding:9px 12px;border-radius:13px;font-size:13.5px;line-height:1.45;max-width:88%;overflow-wrap:anywhere;white-space:pre-wrap}
+.askmsg.bot{background:#fff;border:1px solid var(--line);color:var(--ink);align-self:flex-start;border-bottom-left-radius:4px}
 .askmsg.user{background:var(--pri);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
 .askrow{display:flex;gap:6px;padding:10px;border-top:1px solid var(--line);align-items:center}
 .askrow .micbtn{width:40px;height:40px}
@@ -315,18 +331,7 @@ main{padding:12px;max-width:920px;margin:0 auto}
         <button class="btn sec" onclick="printMonth()"><i data-lucide="printer"></i>Printează</button>
         <button class="btn ghost" onclick="exportICS('month')"><i data-lucide="calendar-plus"></i>ICS lună</button>
       </div>
-      <div class="aiadd" style="margin-top:12px">
-        <div class="aiadd-h"><span class="badge"><i data-lucide="sparkles"></i></span>Adaugă cu AI<span class="aiadd-sub">scrie sau dictează</span></div>
-        <div class="row" style="gap:8px">
-          <div class="aiinp">
-            <input id="aiEvText" placeholder="ex: ședință echipă în fiecare luni la 10" oninput="document.getElementById('aiClr').style.display=this.value?'flex':'none'" onkeydown="if(event.key==='Enter')aiQuickEvent()">
-            <button class="aiclr" id="aiClr" title="Șterge textul" onclick="clearAiEv()"><i data-lucide="x"></i></button>
-          </div>
-          <button class="micbtn" id="voiceBtn" onclick="voiceAdd()" title="Dictează cu vocea"><i data-lucide="mic"></i></button>
-          <button class="btn" onclick="aiQuickEvent()"><i data-lucide="wand-2"></i>Adaugă</button>
-        </div>
-        <div id="aiEvOut"></div>
-      </div>
+      <p class="muted" style="margin-top:12px;text-align:center;font-size:12.5px"><i data-lucide="sparkles" style="width:14px;height:14px;color:var(--pri);vertical-align:-2px"></i> Adaugă activități scriind sau vorbind — apasă butonul verde din colțul din dreapta jos.</p>
     </div>
     <div class="card" id="mGoalsCard"></div>
   </section>
@@ -482,8 +487,9 @@ main{padding:12px;max-width:920px;margin:0 auto}
 
   <!-- ===== SETĂRI ===== -->
   <section id="v-set" style="display:none">
-    <div class="card">
-      <h2><i data-lucide="users-round"></i>Familia</h2>
+    <details class="card setfold" open>
+      <summary><i data-lucide="users-round"></i>Familia<span class="chev"><i data-lucide="chevron-down"></i></span></summary>
+      <div class="foldbody">
       <p class="muted">Membrul activ apare cu „activ". Apasă pe pătratul de culoare ca s-o schimbi, sau „Folosește" ca să comuți pe alt membru.</p>
       <div id="memList" style="margin-top:8px"></div>
       <div class="addmem">
@@ -495,67 +501,12 @@ main{padding:12px;max-width:920px;margin:0 auto}
         <label>Email (opțional — pentru invitații în calendar)</label><input id="nmEmail" type="email" placeholder="nume@email.com">
         <button class="btn addmem-btn" onclick="addMember()"><i data-lucide="user-plus"></i>Adaugă membru</button>
       </div>
-    </div>
-
-    <div class="card">
-      <h2><i data-lucide="calendar-plus"></i>Calendar iPhone / Email</h2>
-      <p class="muted">Exportă activitățile ca fișier .ics — se deschide direct în Calendarul de iPhone / Google Calendar. Îl poți trimite și pe email.</p>
-      <div class="row" style="margin-top:10px">
-        <button class="btn" onclick="exportICS('all')"><i data-lucide="download"></i>Descarcă tot (.ics)</button>
-        <button class="btn sec" onclick="exportICS('month')"><i data-lucide="download"></i>Luna curentă</button>
-        <button class="btn ghost" onclick="shareICS()"><i data-lucide="mail"></i>Trimite pe email</button>
       </div>
-    </div>
+    </details>
 
-    <div class="card">
-      <h2><i data-lucide="sparkles"></i>Gemini AI — pas cu pas</h2>
-      <ol class="steps">
-        <li>Intră pe <b>aistudio.google.com</b> și loghează-te cu contul tău Google (cel cu Gemini Pro e perfect).</li>
-        <li>Apasă <b>„Get API key”</b> (stânga sus) → <b>„Create API key”</b>.</li>
-        <li>Copiază cheia (începe cu <b>AIza…</b>).</li>
-        <li>Lipește-o mai jos și gata — analizezi poze cu mâncare și primești meniuri.</li>
-      </ol>
-      <p class="muted">Notă: abonamentul Gemini Pro din aplicația Gemini e separat de API. Cheia din AI Studio are un <b>nivel gratuit generos</b> — suficient pentru uz personal, indiferent de abonament.</p>
-      <label>Cheie API</label><input id="setKey" type="password" placeholder="AIza…" onchange="S.settings.geminiKey=this.value.trim();save();toast('Cheie salvată')">
-      <label>Model</label><select id="setModel" onchange="S.settings.model=this.value;save()">
-        <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite (recomandat — ~500 cereri/zi)</option>
-        <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite (cotă mare)</option>
-        <option value="gemini-2.5-flash">gemini-2.5-flash (echilibrat)</option>
-        <option value="gemini-2.0-flash">gemini-2.0-flash (rapid)</option>
-        <option value="gemini-2.5-pro">gemini-2.5-pro (precis — cotă foarte mică)</option>
-      </select>
-      <p class="muted" style="margin-top:6px">Alege un model <b>„flash"</b>. Dacă modelul ales atinge limita zilnică (429), aplicația <b>trece automat</b> pe alt model gratuit din listă. Modelele „pro" au foarte puține cereri gratuite.</p>
-      <p class="muted" style="margin-top:6px">Cheia se salvează doar local, în browserul tău.</p>
-    </div>
-
-    <div class="card">
-      <h2><i data-lucide="bell"></i>Notificări &amp; Print</h2>
-      <div class="row"><button class="btn sec" onclick="askNotif()"><i data-lucide="bell-ring"></i>Activează notificările</button><span class="muted" id="notifState"></span></div>
-      <div class="row" style="margin-top:8px"><button class="btn ghost" onclick="askUser(true)"><i data-lucide="user-round"></i>Schimbă utilizatorul</button></div>
-      <label>Format printare</label>
-      <select id="setPrint" onchange="S.settings.printSize=this.value;save();applyPage()"><option value="A4">A4 landscape</option><option value="A3">A3 landscape</option></select>
-    </div>
-
-    <div class="card">
-      <h2><i data-lucide="alarm-clock"></i>Mementouri</h2>
-      <p class="muted">Primești o notificare la ora stabilită. Activează întâi notificările, mai sus.</p>
-      <div class="chips" style="margin:8px 0">
-        <button class="chip" onclick="addPreset('Mic dejun','08:00')"><i data-lucide="egg-fried"></i>Mic dejun</button>
-        <button class="chip" onclick="addPreset('Prânz','13:00')"><i data-lucide="utensils"></i>Prânz</button>
-        <button class="chip" onclick="addPreset('Cină','19:00')"><i data-lucide="soup"></i>Cină</button>
-        <button class="chip" onclick="addPreset('Cântărire','07:30')"><i data-lucide="scale"></i>Cântărire</button>
-        <button class="chip" onclick="addWaterPreset()"><i data-lucide="glass-water"></i>Bea apă (2h)</button>
-      </div>
-      <div id="remList"></div>
-      <div class="g3" style="margin-top:8px">
-        <div style="grid-column:span 2"><label>Memento</label><input id="remLabel" placeholder="ex: Ia vitaminele"></div>
-        <div><label>Ora</label><input id="remTime" type="time" value="09:00"></div>
-      </div>
-      <div class="row act" style="margin-top:8px"><button class="btn" onclick="addReminder()"><i data-lucide="plus"></i>Adaugă memento</button></div>
-    </div>
-
-    <div class="card">
-      <h2><i data-lucide="refresh-cw"></i>Sincronizare privată</h2>
+    <details class="card setfold" open>
+      <summary><i data-lucide="refresh-cw"></i>Sincronizare între dispozitive<span class="chev"><i data-lucide="chevron-down"></i></span></summary>
+      <div class="foldbody">
       <p class="muted">Datele tale se salvează <b>criptate</b> într-un gist privat GitHub. Le poți încărca pe orice dispozitiv cu același token și aceeași parolă. Nimeni — nici GitHub — nu le poate citi fără parola ta.</p>
       <div id="syncStatus" class="muted" style="margin:8px 0;font-size:13px"></div>
       <label>Token GitHub (doar scope „gist")</label><input id="syncToken" type="password" placeholder="ghp_…">
@@ -575,10 +526,75 @@ main{padding:12px;max-width:920px;margin:0 auto}
         </ol>
         <p class="muted">Tokenul stă doar local, pe dispozitivul tău. Cu scope „gist" nu poate atinge codul tău, doar gist-urile.</p>
       </details>
-    </div>
+      </div>
+    </details>
 
-    <div class="card">
-      <h2><i data-lucide="database"></i>Date</h2>
+    <details class="card setfold">
+      <summary><i data-lucide="sparkles"></i>Gemini AI (cheie &amp; model)<span class="chev"><i data-lucide="chevron-down"></i></span></summary>
+      <div class="foldbody">
+      <ol class="steps">
+        <li>Intră pe <b>aistudio.google.com</b> și loghează-te cu contul tău Google.</li>
+        <li>Apasă <b>„Get API key”</b> (stânga sus) → <b>„Create API key”</b>.</li>
+        <li>Copiază cheia (începe cu <b>AIza…</b>) și lipește-o mai jos.</li>
+      </ol>
+      <p class="muted">Notă: abonamentul Gemini Pro din aplicația Gemini e separat de API. Cheia din AI Studio are un nivel gratuit — alege un model „flash".</p>
+      <label>Cheie API</label><input id="setKey" type="password" placeholder="AIza…" onchange="S.settings.geminiKey=this.value.trim();save();toast('Cheie salvată')">
+      <label>Model</label><select id="setModel" onchange="S.settings.model=this.value;save()">
+        <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite (recomandat — ~500 cereri/zi)</option>
+        <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite (cotă mare)</option>
+        <option value="gemini-2.5-flash">gemini-2.5-flash (echilibrat)</option>
+        <option value="gemini-2.0-flash">gemini-2.0-flash (rapid)</option>
+        <option value="gemini-2.5-pro">gemini-2.5-pro (precis — cotă foarte mică)</option>
+      </select>
+      <p class="muted" style="margin-top:6px">Dacă modelul atinge limita zilnică (429), aplicația <b>trece automat</b> pe alt model gratuit. Cheia se salvează doar local.</p>
+      </div>
+    </details>
+
+    <details class="card setfold">
+      <summary><i data-lucide="bell"></i>Notificări &amp; afișare<span class="chev"><i data-lucide="chevron-down"></i></span></summary>
+      <div class="foldbody">
+      <div class="row"><button class="btn sec" onclick="askNotif()"><i data-lucide="bell-ring"></i>Activează notificările</button><span class="muted" id="notifState"></span></div>
+      <div class="row" style="margin-top:8px"><button class="btn ghost" onclick="askUser(true)"><i data-lucide="user-round"></i>Schimbă utilizatorul</button></div>
+      <label>Format printare</label>
+      <select id="setPrint" onchange="S.settings.printSize=this.value;save();applyPage()"><option value="A4">A4 landscape</option><option value="A3">A3 landscape</option></select>
+      </div>
+    </details>
+
+    <details class="card setfold">
+      <summary><i data-lucide="alarm-clock"></i>Mementouri<span class="chev"><i data-lucide="chevron-down"></i></span></summary>
+      <div class="foldbody">
+      <p class="muted">Primești o notificare la ora stabilită. Activează întâi notificările (secțiunea de mai sus).</p>
+      <div class="chips" style="margin:8px 0">
+        <button class="chip" onclick="addPreset('Mic dejun','08:00')"><i data-lucide="egg-fried"></i>Mic dejun</button>
+        <button class="chip" onclick="addPreset('Prânz','13:00')"><i data-lucide="utensils"></i>Prânz</button>
+        <button class="chip" onclick="addPreset('Cină','19:00')"><i data-lucide="soup"></i>Cină</button>
+        <button class="chip" onclick="addPreset('Cântărire','07:30')"><i data-lucide="scale"></i>Cântărire</button>
+        <button class="chip" onclick="addWaterPreset()"><i data-lucide="glass-water"></i>Bea apă (2h)</button>
+      </div>
+      <div id="remList"></div>
+      <div class="g3" style="margin-top:8px">
+        <div style="grid-column:span 2"><label>Memento</label><input id="remLabel" placeholder="ex: Ia vitaminele"></div>
+        <div><label>Ora</label><input id="remTime" type="time" value="09:00"></div>
+      </div>
+      <div class="row act" style="margin-top:8px"><button class="btn" onclick="addReminder()"><i data-lucide="plus"></i>Adaugă memento</button></div>
+      </div>
+    </details>
+
+    <details class="card setfold">
+      <summary><i data-lucide="calendar-plus"></i>Export calendar (iPhone / Email)<span class="chev"><i data-lucide="chevron-down"></i></span></summary>
+      <div class="foldbody">
+      <p class="muted">Exportă activitățile ca fișier .ics — se deschide direct în Calendarul de iPhone / Google Calendar. Îl poți trimite și pe email.</p>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" onclick="exportICS('all')"><i data-lucide="download"></i>Descarcă tot (.ics)</button>
+        <button class="btn sec" onclick="exportICS('month')"><i data-lucide="download"></i>Luna curentă</button>
+        <button class="btn ghost" onclick="shareICS()"><i data-lucide="mail"></i>Trimite pe email</button>
+      </div>
+      </div>
+    </details>
+
+    <details class="card setfold">
+      <summary><i data-lucide="database"></i>Date &amp; backup<span class="chev"><i data-lucide="chevron-down"></i></span></summary>
+      <div class="foldbody">
       <div class="row">
         <button class="btn sec" onclick="backup()"><i data-lucide="download"></i>Backup JSON</button>
         <button class="btn ghost" onclick="document.getElementById('restoreF').click()"><i data-lucide="upload"></i>Restaurează</button>
@@ -586,7 +602,8 @@ main{padding:12px;max-width:920px;margin:0 auto}
         <button class="btn warn" onclick="if(confirm('Sigur ștergi TOATE datele?')){localStorage.removeItem(KEY);location.reload()}"><i data-lucide="trash-2"></i>Reset</button>
       </div>
       <p class="muted" style="margin-top:8px">FamLink v1.4 — datele stau local (sau criptate în cloud dacă activezi sincronizarea).</p>
-    </div>
+      </div>
+    </details>
   </section>
 </main>
 
@@ -647,7 +664,7 @@ main{padding:12px;max-width:920px;margin:0 auto}
 <button id="askFab" onclick="toggleAsk()" aria-label="Asistent"><i data-lucide="sparkles"></i></button>
 <div id="askPanel">
   <div class="askhead"><span><i data-lucide="sparkles"></i> Asistent</span><button class="x" onclick="toggleAsk()"><i data-lucide="x"></i></button></div>
-  <div id="askLog" class="asklog"><div class="askmsg bot">Spune-mi ce ai făcut și mă ocup eu: „am băut un pahar cu apă", „am alergat 30 min", „pornește fastingul", „am mâncat o pizza", „programează dentist joi la 15".</div></div>
+  <div id="askLog" class="asklog"><div class="askmsg bot">Salut! Scrie sau dictează — notez mese, apă, sport, fasting, cântărire, activități în calendar, obiective, motto și mementouri.</div></div>
   <div class="askrow">
     <input id="askInput" placeholder="Scrie sau apasă microfonul…" onkeydown="if(event.key==='Enter')askSend()">
     <button id="askMic" class="micbtn" onclick="askVoice()" title="Vorbește"><i data-lucide="mic"></i></button>
@@ -1467,17 +1484,15 @@ async function aiBody(){
   }catch(e){out.innerHTML='<div class="aibox">Eroare: '+esc(e.message)+' — verifică cheia în Setări.</div>';}
 }
 
-/* ---------- AI Quick-Add în calendar ---------- */
-function clearAiEv(){const i=document.getElementById('aiEvText');if(i)i.value='';const x=document.getElementById('aiClr');if(x)x.style.display='none';const o=document.getElementById('aiEvOut');if(o)o.innerHTML='';const inp=document.getElementById('aiEvText');if(inp)inp.focus();}
-let _aiBusy=false;
-async function aiQuickEvent(spoken){
+/* ---------- Adăugare activități din text (folosit de asistent) ---------- */
+let _aiBusy=false,_pendingEv=null,_pendingCb=null;
+async function addEventsFromText(text,spoken,cb){
+  cb=cb||function(){};
   if(_aiBusy)return;
-  const inp=document.getElementById('aiEvText'),out=document.getElementById('aiEvOut');
-  const text=inp.value.trim();
-  if(!text)return toast('Scrie ce vrei să adaugi');
-  if(!S.settings.geminiKey)return toast('Adaugă mai întâi cheia Gemini în Setări → Gemini AI');
+  text=(text||'').trim();
+  if(!text)return cb('Scrie ce vrei să adaugi.',true);
+  if(!S.settings.geminiKey)return cb('Adaugă întâi cheia Gemini în Setări.',true);
   _aiBusy=true;
-  out.innerHTML='<div class="okline"><i data-lucide="loader" class="ok-i"></i><div>Interpretez…</div></div>';LI();
   const today=todayStr();
   const au=S.settings.activeUser||S.members[0].id;
   const meName=(memById(au)||{}).name||'utilizator';
@@ -1510,11 +1525,11 @@ Alte reguli: pentru întâlniri repetate ("în fiecare luni", "săptămânal") p
         notify:null,notes:e.notes||''
       });
     });
-    if(!cands.length){out.innerHTML='<div class="okline"><i data-lucide="alert-circle" class="ok-i" style="color:var(--amber)"></i><div>Nu am putut interpreta textul. Reformulează, te rog.</div></div>';LI();return;}
+    if(!cands.length){cb('Nu am putut interpreta. Reformulează, te rog.',true);return;}
     const warn=sanityWarn(cands);
-    if(warn){_pendingEv=cands;showEvConfirm(warn,cands);return;}
-    commitEvents(cands);
-  }catch(err){out.innerHTML='<div class="okline"><i data-lucide="alert-circle" class="ok-i" style="color:var(--rose)"></i><div>Eroare: '+esc(err.message)+'</div></div>';LI();}
+    if(warn){_pendingEv=cands;_pendingCb=cb;showEvConfirm(warn,cands);return;}
+    commitEvents(cands,cb);
+  }catch(err){cb('Eroare: '+err.message,true);}
   finally{_aiBusy=false;}
 }
 function evMembersLabel(e){
@@ -1538,16 +1553,14 @@ function sanityWarn(cands){
   });
   return reasons.length?reasons.join('; '):null;
 }
-function commitEvents(cands){
+function commitEvents(cands,cb){
   cands.forEach(ev=>S.events.push(ev));
   save();
   const f=fromStr(cands[0].date);VM={y:f.getFullYear(),m:f.getMonth()};
-  const inp=document.getElementById('aiEvText');if(inp)inp.value='';
   render();
-  document.getElementById('aiEvOut').innerHTML='<div class="okline"><i data-lucide="circle-check-big" class="ok-i"></i><div><b>Adăugat:</b> '+cands.map(evSummary).join('; ')+'</div></div>';LI();
+  (cb||function(){})('Adăugat în calendar: '+cands.map(evSummary).join('; '),false);
   toast('Adăugat ✓');
 }
-let _pendingEv=null;
 function showEvConfirm(reason,cands){
   document.getElementById('confReason').textContent='Pare ceva neobișnuit: '+reason+'. Vrei să continui?';
   document.getElementById('confList').innerHTML=cands.map(e=>'<div class="okline"><i data-lucide="calendar" class="ok-i"></i><div>'+evSummary(e)+'</div></div>').join('');
@@ -1555,9 +1568,9 @@ function showEvConfirm(reason,cands){
 }
 function confirmEvents(yes){
   document.getElementById('confBack').classList.remove('show');
-  const c=_pendingEv;_pendingEv=null;
-  if(yes&&c&&c.length){commitEvents(c);}
-  else{document.getElementById('aiEvOut').innerHTML='<div class="okline"><i data-lucide="x" class="ok-i" style="color:var(--muted)"></i><div>Anulat — nu am adăugat nimic.</div></div>';LI();}
+  const c=_pendingEv,cb=_pendingCb;_pendingEv=null;_pendingCb=null;
+  if(yes&&c&&c.length){commitEvents(c,cb);}
+  else if(cb)cb('Am anulat — nu am adăugat nimic.',false);
 }
 
 /* ---------- Cameră foto ---------- */
@@ -1593,9 +1606,9 @@ function voiceAdd(){
   if(!SR)return toast('Dictarea nu e suportată aici. Deschide în Chrome.');
   if(_voActive)return;
   _voFinal='';_voActive=true;
-  const btn=document.getElementById('voiceBtn');if(btn)btn.classList.add('rec');
+  const btn=document.getElementById('askMic');if(btn)btn.classList.add('rec');
   const lbl=document.getElementById('voLbl'),txt=document.getElementById('voTxt');
-  lbl.textContent='Ascult…';txt.className='votxt dim';txt.textContent='Spune activitatea, ex: „cină în familie sâmbătă la 19"';
+  lbl.textContent='Ascult…';txt.className='votxt dim';txt.textContent='Spune-mi ce ai făcut sau ce vrei, ex: „am alergat 30 min"';
   document.getElementById('voBack').classList.add('show');LI();
   const r=new SR();r.lang='ro-RO';r.interimResults=true;r.continuous=true;r.maxAlternatives=1;
   r.onresult=e=>{
@@ -1616,14 +1629,15 @@ function voiceStop(mode){
   _voActive=false;
   if(_rec){try{_rec.stop();}catch(e){}_rec=null;}
   document.getElementById('voBack').classList.remove('show');
-  const btn=document.getElementById('voiceBtn');if(btn)btn.classList.remove('rec');
+  const btn=document.getElementById('askMic');if(btn)btn.classList.remove('rec');
   if(mode==='cancel')return;
   let txt=(_voFinal||'').trim();
-  if(!txt){const s=(document.getElementById('voTxt').textContent||'').trim();if(s&&!/^Spune activitatea|^…$|^Nu am putut/.test(s))txt=s;}
+  if(!txt){const s=(document.getElementById('voTxt').textContent||'').trim();if(s&&!/^Spune-mi|^…$|^Nu am putut/.test(s))txt=s;}
   if(!txt||txt.length<2)return toast('Nu am auzit nimic');
-  const inp=document.getElementById('aiEvText');if(inp)inp.value=txt;
-  if(mode==='add')aiQuickEvent(true);
-  else if(inp){inp.focus();toast('Poți edita, apoi apasă Adaugă');}
+  const p=document.getElementById('askPanel');if(p&&!p.classList.contains('show'))toggleAsk();
+  const inp=document.getElementById('askInput');if(inp)inp.value=txt;
+  if(mode==='add')askSend();
+  else if(inp){inp.focus();toast('Poți edita, apoi trimite');}
 }
 
 /* ---------- Selector utilizator ---------- */
@@ -1706,6 +1720,9 @@ function rSyncUI(){
 function toggleAsk(){const p=document.getElementById('askPanel');const open=p.classList.toggle('show');if(open){LI();setTimeout(()=>document.getElementById('askInput').focus(),60);}}
 function appendAsk(who,txt){const log=document.getElementById('askLog');const d=document.createElement('div');d.className='askmsg '+who;d.textContent=txt;log.appendChild(d);log.scrollTop=log.scrollHeight;return d;}
 function logWeightKg(kg){const mid=dietMid();S.diet.weights[mid]=S.diet.weights[mid]||[];const ws=S.diet.weights[mid],t=todayStr();const ex=ws.find(x=>x.d===t);if(ex)ex.w=kg;else ws.push({d:t,w:kg});ws.sort((a,b)=>a.d<b.d?-1:1);save();if(VIEW==='health')rDiet();}
+function setMottoCore(text){S.mottos[curYm()]=String(text||'').trim();save();rMotto();}
+function addGoalCore(title,scope){const n=new Date();const k=(/an|year/i.test(scope||''))?String(n.getFullYear()):(n.getFullYear()+'-'+pad(n.getMonth()+1));S.goals.push({id:uid(),title:String(title),ym:k,done:false,memberId:S.settings.activeUser||null});save();if(VIEW==='goals')rGoals();else if(VIEW==='month')rMonth();}
+function addReminderCore(label,time,every){S.settings.reminders=S.settings.reminders||[];const r={id:uid(),label:label||'Memento',on:true};if(Number(every))r.every=Number(every);else r.time=/^\d{1,2}:\d{2}$/.test(time||'')?time:'09:00';S.settings.reminders.push(r);save();if(VIEW==='set')rReminders();maybeAskNotif();}
 function execAction(a){
   switch(a.action){
     case 'fasting_start': if(!S.diet.fasting.active)fastToggle(); break;
@@ -1715,7 +1732,9 @@ function execAction(a){
     case 'meal': quickMeal(a.name||'Masă',Number(a.cal)||0,a.type||'Gustare'); break;
     case 'sport': logSport(a.name||'Sport',Number(a.minutes)||0,Number(a.cal)||0); break;
     case 'weight': if(Number(a.kg))logWeightKg(Number(a.kg)); break;
-    case 'event': {const t=a.text||'';if(t){const el=document.getElementById('aiEvText');if(el)el.value=t;aiQuickEvent(false);}break;}
+    case 'motto': if(a.text)setMottoCore(a.text); break;
+    case 'goal': if(a.name||a.text)addGoalCore(a.name||a.text,a.scope); break;
+    case 'reminder': addReminderCore(a.label||a.name,a.time,a.every); break;
     default: break;
   }
 }
@@ -1726,25 +1745,19 @@ async function askSend(){
   appendAsk('user',text);inp.value='';
   const wait=appendAsk('bot','…');
   try{
-    const prompt=`Ești asistentul aplicației FamLink (sănătate + calendar). Azi: ${todayStr()}. Interpretează comanda și răspunde DOAR cu JSON valid, fără markdown: {"action":"fasting_start|fasting_stop|water|drink|meal|sport|weight|event|reply","ml":număr,"name":"","cal":număr,"type":"Mic dejun|Prânz|Cină|Gustare","minutes":număr,"kg":număr,"text":"","reply":"confirmare scurtă și prietenoasă în română despre ce ai făcut"}.
-Reguli: "am băut apă/un pahar"→water (un pahar=250 ml, o sticlă=500 ml, o cană=300); "cafea/ceai/suc/bere"→drink cu cal estimat (cafea simplă 2, cu lapte 60, suc 110, bere 150) și name; mâncare descrisă→meal cu cal estimat realist și type potrivit după oră/denumire; "am alergat/mers/sală/înot/mers cu bicicleta X minute"→sport cu name (ex "Alergare") și minutes; "am/cântărit X kg"→weight; "programează/adaugă/pune în calendar ..."→event cu text=comanda originală; dacă nu e o comandă clară→reply cu un răspuns util. Pune MEREU un "reply" scurt. Comanda: "${text}"`;
+    const prompt=`Ești asistentul aplicației FamLink (sănătate + calendar). Azi: ${todayStr()}. Interpretează comanda și răspunde DOAR cu JSON valid, fără markdown: {"action":"fasting_start|fasting_stop|water|drink|meal|sport|weight|motto|goal|reminder|event|reply","ml":număr,"name":"","cal":număr,"type":"Mic dejun|Prânz|Cină|Gustare","minutes":număr,"kg":număr,"scope":"month|year","label":"","time":"HH:MM","every":ore,"text":"","reply":"confirmare scurtă și prietenoasă în română"}.
+Reguli: "am băut apă/un pahar"→water (un pahar=250 ml, o sticlă=500 ml, o cană=300); "cafea/ceai/suc/bere"→drink cu cal estimat (cafea simplă 2, cu lapte 60, suc 110, bere 150) și name; mâncare descrisă→meal cu cal estimat realist și type; "am alergat/mers/sală/înot X minute"→sport cu name (ex "Alergare") și minutes; "am/cântărit X kg"→weight; "pune motto-ul lunii ..." / "motto ..."→motto cu text; "obiectiv: ..." / "adaugă obiectivul ..." / "vreau să ... anul acesta"→goal cu name și scope (month sau year); "amintește-mi să ... la 9" / "memento ... la 08:00"→reminder cu label și time; "amintește-mi să beau apă la fiecare 2 ore"→reminder cu label și every=2; "programează/adaugă/pune în calendar ..."→event cu text=comanda originală; altfel→reply. Pune MEREU un "reply" scurt. Comanda: "${text}"`;
     const raw=await gemini([{text:prompt}]);
     const a=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    if(a.action==='event'){
+      addEventsFromText(a.text||text,false,(msg)=>{wait.textContent=msg;});
+      return;
+    }
     execAction(a);
     wait.textContent=a.reply||'Gata ✓';
   }catch(e){wait.textContent='Nu am reușit: '+e.message;}
 }
-function askVoice(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR)return toast('Dictarea nu e suportată aici. Deschide în Chrome.');
-  const r=new SR();r.lang='ro-RO';r.interimResults=false;r.maxAlternatives=1;
-  const b=document.getElementById('askMic');if(b)b.classList.add('rec');
-  toast('Ascult…');
-  r.onresult=e=>{const t=e.results[0][0].transcript;const inp=document.getElementById('askInput');if(inp)inp.value=t;askSend();};
-  r.onerror=e=>toast('Nu am auzit: '+(e.error||''));
-  r.onend=()=>{const x=document.getElementById('askMic');if(x)x.classList.remove('rec');};
-  try{r.start();}catch(e){}
-}
+function askVoice(){voiceAdd();}
 
 /* ============ INIT ============ */
 applyPage();
