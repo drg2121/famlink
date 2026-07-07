@@ -512,6 +512,8 @@ main{padding:12px;max-width:920px;margin:0 auto}
         <button class="btn ghost" onclick="syncPull()"><i data-lucide="cloud-download"></i>Încarcă din cloud</button>
         <button class="btn warn" onclick="syncDisconnect()"><i data-lucide="unlink"></i>Deconectează</button>
       </div>
+      <div class="row" style="margin-top:8px"><button class="btn sec grow" onclick="shareSyncAccess()"><i data-lucide="send"></i>Trimite acces altui dispozitiv</button></div>
+      <p class="muted" style="margin-top:4px;font-size:12px"><i data-lucide="shield-alert" style="width:13px;height:13px;color:var(--amber);vertical-align:-2px"></i> Linkul conține tokenul și parola — trimite-l DOAR familiei tale, prin mesaj privat. Cine îl are vede și modifică datele.</p>
       <label>Sincronizare automată</label>
       <select id="syncEvery" onchange="SYNC.intervalMin=Number(this.value);saveSync();setupSyncTimer()">
         <option value="0">Manual (doar la buton)</option>
@@ -644,13 +646,13 @@ main{padding:12px;max-width:920px;margin:0 auto}
 <!-- Adaugă membru modal -->
 <div class="mback" id="memBack" onclick="if(event.target===this)closeAddMember()">
   <div class="modal" style="max-width:420px">
-    <div class="mhead"><h2 style="margin:0"><i data-lucide="user-plus"></i>Adaugă un membru</h2><button class="x" onclick="closeAddMember()"><i data-lucide="x"></i></button></div>
+    <div class="mhead"><h2 style="margin:0" id="memModalTitle"><i data-lucide="user-plus"></i>Adaugă un membru</h2><button class="x" onclick="closeAddMember()"><i data-lucide="x"></i></button></div>
     <div class="row" style="gap:10px;align-items:flex-end">
       <div class="grow"><label>Nume</label><input id="nmName" placeholder="ex: Ana"></div>
       <div><label>Culoare</label><input id="nmColor" type="color" value="#3b82c4" style="height:41px;width:52px"></div>
     </div>
     <label>Email (opțional — pentru invitații în calendar)</label><input id="nmEmail" type="email" placeholder="nume@email.com">
-    <div class="row" style="margin-top:14px"><button class="btn grow" onclick="addMember()"><i data-lucide="user-plus"></i>Adaugă membru</button></div>
+    <div class="row" style="margin-top:14px"><button class="btn grow" id="memSaveBtn" onclick="saveMember()"><i data-lucide="user-plus"></i>Adaugă membru</button></div>
   </div>
 </div>
 
@@ -1103,6 +1105,7 @@ function rSet(){
       ${avatar(m)}
       <div class="grow"><div class="nm">${esc(m.name)}${active?'<span class="activepill">activ</span>':''}</div><div class="em">${esc(m.email||'—')}</div></div>
       <input type="color" value="${m.color}" title="Schimbă culoarea" onchange="setMemberColor('${m.id}',this.value)">
+      <button class="btn sm ghost" onclick="openEditMember('${m.id}')" title="Editează"><i data-lucide="pencil"></i></button>
       ${active?'':`<button class="btn sm sec" onclick="pickUser('${m.id}')"><i data-lucide="check"></i>Folosește</button>`}
       <button class="btn sm warn" onclick="delMember('${m.id}')" title="Șterge"><i data-lucide="trash-2"></i></button>
     </div>`;
@@ -1143,14 +1146,30 @@ function addWaterPreset(){
 function toggleRem(id){const r=(S.settings.reminders||[]).find(x=>x.id===id);if(r){r.on=r.on===false;save();}}
 function delRem(id){S.settings.reminders=(S.settings.reminders||[]).filter(x=>x.id!==id);save();rReminders();}
 function maybeAskNotif(){if('Notification' in window&&Notification.permission==='default')askNotif();}
-function openAddMember(){document.getElementById('nmName').value='';document.getElementById('nmEmail').value='';document.getElementById('memBack').classList.add('show');LI();setTimeout(()=>document.getElementById('nmName').focus(),60);}
-function closeAddMember(){document.getElementById('memBack').classList.remove('show');}
-function addMember(){
-  const n=document.getElementById('nmName').value.trim();if(!n)return toast('Scrie numele');
-  S.members.push({id:uid(),name:n,color:document.getElementById('nmColor').value,email:document.getElementById('nmEmail').value.trim()});
-  document.getElementById('nmName').value='';document.getElementById('nmEmail').value='';
-  save();closeAddMember();rSet();toast('Membru adăugat');
+let _editMemId=null;
+function openAddMember(){
+  _editMemId=null;
+  document.getElementById('memModalTitle').innerHTML='<i data-lucide="user-plus"></i>Adaugă un membru';
+  document.getElementById('memSaveBtn').innerHTML='<i data-lucide="user-plus"></i>Adaugă membru';
+  document.getElementById('nmName').value='';document.getElementById('nmEmail').value='';document.getElementById('nmColor').value='#3b82c4';
+  document.getElementById('memBack').classList.add('show');LI();setTimeout(()=>document.getElementById('nmName').focus(),60);
 }
+function openEditMember(id){
+  const m=memById(id);if(!m)return;_editMemId=id;
+  document.getElementById('memModalTitle').innerHTML='<i data-lucide="user-round-cog"></i>Editează membrul';
+  document.getElementById('memSaveBtn').innerHTML='<i data-lucide="save"></i>Salvează';
+  document.getElementById('nmName').value=m.name||'';document.getElementById('nmEmail').value=m.email||'';document.getElementById('nmColor').value=m.color||'#3b82c4';
+  document.getElementById('memBack').classList.add('show');LI();setTimeout(()=>document.getElementById('nmName').focus(),60);
+}
+function closeAddMember(){document.getElementById('memBack').classList.remove('show');}
+function saveMember(){
+  const n=document.getElementById('nmName').value.trim();if(!n)return toast('Scrie numele');
+  const color=document.getElementById('nmColor').value,email=document.getElementById('nmEmail').value.trim();
+  if(_editMemId){const m=memById(_editMemId);if(m){m.name=n;m.color=color;m.email=email;}toast('Membru actualizat');}
+  else{S.members.push({id:uid(),name:n,color,email});toast('Membru adăugat');}
+  _editMemId=null;save();closeAddMember();render();
+}
+function addMember(){saveMember();}
 function setMemberColor(id,color){const m=memById(id);if(!m)return;m.color=color;save();rSet();toast('Culoare actualizată');}
 function delMember(id){if(S.members.length<=1)return toast('Trebuie să rămână cel puțin un membru');if(!confirm('Ștergi membrul?'))return;S.members=S.members.filter(m=>m.id!==id);if(S.settings.activeUser===id)S.settings.activeUser=S.members[0].id;save();rSet();}
 function backup(){const d=new Date();dl('FamLink_'+dstr(d)+'_v1.0.json',JSON.stringify(S,null,1),'application/json');toast('Backup descărcat');}
@@ -1711,7 +1730,11 @@ function mergeState(local,remote){
   m.diet.profiles=Object.assign({},R.diet.profiles||{},local.diet.profiles||{});
   m.diet.water=mergeWater(local.diet.water,R.diet.water);
   m.diet.fasting=local.diet.fasting; // cronometru specific dispozitivului
-  m.settings=local.settings;         // cheia/model/mementouri rămân locale
+  // setări: rămân locale, DAR cheia Gemini și modelul se propagă între dispozitive dacă lipsesc
+  m.settings=Object.assign({},local.settings);
+  const rs=R.settings||{};
+  if(!m.settings.geminiKey&&rs.geminiKey)m.settings.geminiKey=rs.geminiKey;
+  if(!m.settings.model&&rs.model)m.settings.model=rs.model;
   return m;
 }
 async function syncPull(silent){
@@ -1727,6 +1750,27 @@ async function syncPull(silent){
 }
 let _syncTimer=null;
 function setupSyncTimer(){clearInterval(_syncTimer);const mn=Number(SYNC.intervalMin);if(mn&&SYNC.token&&SYNC.pass&&SYNC.gistId)_syncTimer=setInterval(()=>syncPull(true),mn*60000);}
+function shareSyncAccess(){
+  if(!(SYNC.token&&SYNC.pass&&SYNC.gistId))return toast('Conectează întâi sincronizarea, apoi trimite accesul');
+  const payload=btoa(JSON.stringify({t:SYNC.token,g:SYNC.gistId,p:SYNC.pass}));
+  const link=location.origin+location.pathname+'#sync='+payload;
+  if(navigator.share){navigator.share({title:'FamLink — acces familie',text:'Deschide linkul ca să vezi calendarul familiei pe dispozitivul tău:',url:link}).catch(()=>{});}
+  else{(navigator.clipboard?navigator.clipboard.writeText(link):Promise.reject()).then(()=>toast('Link copiat — trimite-l familiei prin mesaj privat')).catch(()=>prompt('Copiază linkul și trimite-l familiei:',link));}
+}
+function importSyncFromHash(){
+  const h=location.hash||'';
+  if(h.indexOf('#sync=')!==0)return false;
+  let data=null;try{data=JSON.parse(atob(h.slice(6)));}catch(e){}
+  history.replaceState(null,'',location.pathname);
+  if(data&&data.t&&data.g&&data.p){
+    if(confirm('Te conectezi la calendarul familiei partajat? Datele tale de pe acest dispozitiv se vor combina cu cele partajate (nimic nu se șterge).')){
+      SYNC.token=data.t;SYNC.gistId=data.g;SYNC.pass=data.p;SYNC.auto=true;if(!SYNC.intervalMin)SYNC.intervalMin=5;saveSync();
+      syncPull(false).then(()=>{setupSyncTimer();rSyncUI();toast('Conectat la calendarul familiei ✓');});
+      return true;
+    }
+  }
+  return false;
+}
 function syncNow(){
   const b=document.getElementById('hSync');
   if(!(SYNC.token&&SYNC.pass&&SYNC.gistId)){toast('Activează sincronizarea în Setări');go('set');return;}
@@ -1811,7 +1855,8 @@ function askVoice(){voiceAdd();}
 applyPage();
 go('month');
 askUser();
-if(SYNC.token&&SYNC.pass&&SYNC.gistId&&SYNC.auto!==false)syncPull(true);
+const _imported=importSyncFromHash();
+if(!_imported&&SYNC.token&&SYNC.pass&&SYNC.gistId&&SYNC.auto!==false)syncPull(true);
 setupSyncTimer();
 tick();
 window.addEventListener('load',LI);
