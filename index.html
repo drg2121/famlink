@@ -622,7 +622,7 @@ main{padding:12px;max-width:920px;margin:0 auto}
         <input type="file" id="restoreF" accept=".json" style="display:none" onchange="restore(this)">
         <button class="btn warn" onclick="if(confirm('Sigur ștergi TOATE datele?')){localStorage.removeItem(KEY);location.reload()}"><i data-lucide="trash-2"></i>Reset</button>
       </div>
-      <p class="muted" style="margin-top:8px">FamLink v1.5 — datele stau local (sau criptate în cloud dacă activezi sincronizarea).</p>
+      <p class="muted" style="margin-top:8px">FamLink v1.6 — datele stau local (sau criptate în cloud dacă activezi sincronizarea).</p>
       </div>
     </details>
   </section>
@@ -769,7 +769,8 @@ const MONTHS=['ianuarie','februarie','martie','aprilie','mai','iunie','iulie','a
 const DAYS=['duminică','luni','marți','miercuri','joi','vineri','sâmbătă'];
 
 let S = load();
-function defState(){return {members:[{id:'m1',name:'Eu',color:'#16a37f',email:''}],events:[],goals:[],mottos:{},diet:{profiles:{},weights:{},meals:[],sports:[],water:{},fasting:{active:false,start:null,hours:16,history:[]}},settings:{geminiKey:'',model:'gemini-2.5-flash',printSize:'A4',activeUser:'',reminders:[]}};}
+function defState(){return {members:[{id:'m1',name:'Eu',color:'#16a37f',email:''}],events:[],goals:[],mottos:{},tomb:{},diet:{profiles:{},weights:{},meals:[],sports:[],water:{},fasting:{active:false,start:null,hours:16,history:[]}},settings:{geminiKey:'',model:'gemini-2.5-flash',printSize:'A4',activeUser:'',reminders:[]}};}
+function tombstone(id){S.tomb=S.tomb||{};S.tomb[id]=Date.now();}
 function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.members){const s=Object.assign(defState(),d);s.diet=Object.assign(defState().diet,d.diet||{});s.settings=Object.assign(defState().settings,d.settings||{});return s;}}catch(e){}return defState();}
 function save(){localStorage.setItem(KEY,JSON.stringify(S));if(typeof schedulePush==='function')schedulePush();}
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
@@ -926,11 +927,11 @@ function rDay(){
   }).join(''):'<div class="empty">Nimic planificat. Zi liberă!</div>';
   LI();
 }
-function tglDone(id){const e=S.events.find(x=>x.id===id);if(!e)return;e.doneOn=e.doneOn||[];const i=e.doneOn.indexOf(VD.d);i>=0?e.doneOn.splice(i,1):e.doneOn.push(VD.d);save();rDay();}
+function tglDone(id){const e=S.events.find(x=>x.id===id);if(!e)return;e.doneOn=e.doneOn||[];const i=e.doneOn.indexOf(VD.d);i>=0?e.doneOn.splice(i,1):e.doneOn.push(VD.d);e.u=Date.now();save();rDay();}
 function quickDelEvent(id){
   const e=S.events.find(x=>x.id===id);if(!e)return;
   if(e.recur&&e.recur.f&&e.recur.f!=='none'){if(!confirm('„'+e.title+'" se repetă. Ștergi toată seria?'))return;}
-  S.events=S.events.filter(x=>x.id!==id);save();rDay();toast('Șters');
+  S.events=S.events.filter(x=>x.id!==id);tombstone(id);save();rDay();toast('Șters');
 }
 
 /* ---------- EVENT modal ---------- */
@@ -969,10 +970,11 @@ function saveEvent(){
   ev.recur=rf==='none'?{f:'none'}:{f:rf,int:Number(document.getElementById('eRi').value)||1,until:document.getElementById('eRu').value||''};
   const n=document.getElementById('eN').value;ev.notify=n===''?null:Number(n);
   ev.notes=document.getElementById('eNo').value.trim();
+  ev.u=Date.now();
   if(!EID)S.events.push(ev);
   save();closeEvent();render();toast('Salvat ✓');
 }
-function delEvent(){if(!EID)return;if(!confirm('Ștergi această activitate (inclusiv repetările)?'))return;S.events=S.events.filter(x=>x.id!==EID);save();closeEvent();render();toast('Șters');}
+function delEvent(){if(!EID)return;if(!confirm('Ștergi această activitate (inclusiv repetările)?'))return;S.events=S.events.filter(x=>x.id!==EID);tombstone(EID);save();closeEvent();render();toast('Șters');}
 </script>
 <script>
 /* ---------- GOALS ---------- */
@@ -993,7 +995,7 @@ function rGoals(){
 }
 function addGoal(){const t=document.getElementById('gNew').value.trim();if(!t)return;const n=new Date();const k=gScope==='m'?(n.getFullYear()+'-'+pad(n.getMonth()+1)):String(n.getFullYear());S.goals.push({id:uid(),title:t,ym:k,done:false,memberId:document.getElementById('gWho').value||null});document.getElementById('gNew').value='';save();rGoals();}
 function tglGoal(id){const g=S.goals.find(x=>x.id===id);if(g){g.done=!g.done;save();}if(VIEW==='goals')rGoals();else rMonth();}
-function delGoal(id){S.goals=S.goals.filter(x=>x.id!==id);save();rGoals();}
+function delGoal(id){S.goals=S.goals.filter(x=>x.id!==id);tombstone(id);save();rGoals();}
 
 /* ---------- ICS export ---------- */
 function icsDate(ds,t){return ds.replace(/-/g,'')+(t?'T'+t.replace(':','')+'00':'');}
@@ -1234,13 +1236,13 @@ function closeAddMember(){document.getElementById('memBack').classList.remove('s
 function saveMember(){
   const n=document.getElementById('nmName').value.trim();if(!n)return toast('Scrie numele');
   const color=document.getElementById('nmColor').value,email=document.getElementById('nmEmail').value.trim();
-  if(_editMemId){const m=memById(_editMemId);if(m){m.name=n;m.color=color;m.email=email;}toast('Membru actualizat');}
-  else{S.members.push({id:uid(),name:n,color,email});toast('Membru adăugat');}
+  if(_editMemId){const m=memById(_editMemId);if(m){m.name=n;m.color=color;m.email=email;m.u=Date.now();}toast('Membru actualizat');}
+  else{S.members.push({id:uid(),name:n,color,email,u:Date.now()});toast('Membru adăugat');}
   _editMemId=null;save();closeAddMember();render();
 }
 function addMember(){saveMember();}
 function setMemberColor(id,color){const m=memById(id);if(!m)return;m.color=color;save();rSet();toast('Culoare actualizată');}
-function delMember(id){if(S.members.length<=1)return toast('Trebuie să rămână cel puțin un membru');if(!confirm('Ștergi membrul?'))return;S.members=S.members.filter(m=>m.id!==id);if(S.settings.activeUser===id)S.settings.activeUser=S.members[0].id;save();rSet();}
+function delMember(id){if(S.members.length<=1)return toast('Trebuie să rămână cel puțin un membru');if(!confirm('Ștergi membrul?'))return;S.members=S.members.filter(m=>m.id!==id);tombstone(id);if(S.settings.activeUser===id)S.settings.activeUser=S.members[0].id;save();rSet();}
 function backup(){const d=new Date();dl('FamLink_'+dstr(d)+'_v1.0.json',JSON.stringify(S,null,1),'application/json');toast('Backup descărcat');}
 function restore(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.members)throw 0;S=Object.assign(defState(),d);save();toast('Date restaurate');render();}catch(e){toast('Fișier invalid');}};r.readAsText(f);inp.value='';}
 </script>
@@ -1450,7 +1452,7 @@ function logSport(name,min,cal){
   S.diet.sports.push({id:uid(),mid:dietMid(),date:todayStr(),name:name||'Sport',minutes:Number(min)||0,kcal:Number(cal)||sportKcal(name,min)});
   save();if(dietTab==='sport')rSport();toast('Sport adăugat: '+name+' '+min+' min');
 }
-function delSport(id){S.diet.sports=(S.diet.sports||[]).filter(s=>s.id!==id);save();rSport();}
+function delSport(id){S.diet.sports=(S.diet.sports||[]).filter(s=>s.id!==id);tombstone(id);save();rSport();}
 function rSport(){
   const ss=todaySports();
   const totMin=ss.reduce((a,b)=>a+(b.minutes||0),0),totCal=ss.reduce((a,b)=>a+(b.kcal||0),0);
@@ -1493,7 +1495,7 @@ function addMeal(){
   save();rMeals();toast('Masă adăugată ️');
 }
 function quickMeal(n,c,t){S.diet.meals.push({id:uid(),mid:dietMid(),date:todayStr(),type:t,name:n,cal:c});save();rMeals();toast('Adăugat: '+n);}
-function delMeal(id){S.diet.meals=S.diet.meals.filter(m=>m.id!==id);save();rMeals();}
+function delMeal(id){S.diet.meals=S.diet.meals.filter(m=>m.id!==id);tombstone(id);save();rMeals();}
 </script>
 <script>
 /* ============ GEMINI AI ============ */
@@ -1628,7 +1630,7 @@ Alte reguli: pentru întâlniri repetate ("în fiecare luni", "săptămânal") p
         cat:CATS[e.cat]?e.cat:'altele',
         members,
         recur:(e.recur&&e.recur.f&&e.recur.f!=='none')?{f:e.recur.f,int:Number(e.recur.int)||1,until:/^\d{4}-\d{2}-\d{2}$/.test((e.recur.until)||'')?e.recur.until:''}:{f:'none'},
-        notify:null,notes:e.notes||''
+        notify:null,notes:e.notes||'',u:Date.now()
       });
     });
     if(!cands.length){cb('Nu am putut interpreta. Reformulează, te rog.',true);return;}
@@ -1772,15 +1774,17 @@ async function _key(pass,salt){const enc=new TextEncoder();const km=await crypto
 async function encJSON(obj,pass){const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));const key=await _key(pass,salt);const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(obj))));const buf=new Uint8Array(28+ct.length);buf.set(salt,0);buf.set(iv,16);buf.set(ct,28);return b64enc(buf);}
 async function decJSON(b64,pass){const raw=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));const salt=raw.slice(0,16),iv=raw.slice(16,28),ct=raw.slice(28);const key=await _key(pass,salt);const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ct);return JSON.parse(new TextDecoder().decode(pt));}
 let _pushT=null;
-function schedulePush(){if(!(SYNC.token&&SYNC.pass&&SYNC.gistId&&SYNC.auto!==false))return;clearTimeout(_pushT);_pushT=setTimeout(()=>syncPush(true),1600);}
+function schedulePush(){if(!(SYNC.token&&SYNC.pass&&SYNC.gistId&&SYNC.auto!==false))return;clearTimeout(_pushT);_pushT=setTimeout(()=>syncPush(true),700);}
 async function syncPush(silent){
   if(!(SYNC.token&&SYNC.pass&&SYNC.gistId))return silent?0:toast('Conectează-te mai întâi');
+  const hb=document.getElementById('hSync');if(hb)hb.classList.add('spin');
   try{
     const content=await encJSON(S,SYNC.pass);
     const r=await fetch('https://api.github.com/gists/'+SYNC.gistId,{method:'PATCH',headers:ghHeaders(),body:JSON.stringify({files:{'famlink-sync.json':{content}}})});
     if(!r.ok)throw new Error('HTTP '+r.status);
     SYNC.last=new Date().toISOString();saveSync();rSyncUI();if(!silent)toast('Salvat în cloud ✓');
   }catch(e){if(!silent)toast('Sync eșuat: '+e.message);}
+  finally{if(hb)setTimeout(()=>hb.classList.remove('spin'),400);}
 }
 /* ---------- Notificări în aplicație ---------- */
 const NKEY='famlink_notifs';
@@ -1805,17 +1809,21 @@ function notifyNewEvents(beforeIds){
 }
 /* MERGE — combină local + remote fără să șteargă (ca ArhiLink): union pe id, nimic nu se pierde */
 function mergeById(a,b){const map={};(b||[]).forEach(x=>{if(x&&x.id)map[x.id]=x;});(a||[]).forEach(x=>{if(x&&x.id)map[x.id]=x;});return Object.values(map);}
+function mergeTomb(a,b){const out=Object.assign({},b||{});for(const id in (a||{}))out[id]=Math.max(out[id]||0,a[id]);return out;}
+function applyTomb(arr,tomb){return (arr||[]).filter(x=>{const t=(tomb||{})[x.id];if(!t)return true;return (x.u||0)>t;});}
 function mergeWeights(a,b){const out={};const mids=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);mids.forEach(mid=>{const map={};(((b||{})[mid])||[]).forEach(w=>map[w.d]=w);(((a||{})[mid])||[]).forEach(w=>map[w.d]=w);out[mid]=Object.values(map).sort((x,y)=>x.d<y.d?-1:1);});return out;}
 function mergeWater(a,b){const out={};const mids=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);mids.forEach(mid=>{out[mid]={};const days=new Set([...Object.keys((a||{})[mid]||{}),...Object.keys((b||{})[mid]||{})]);days.forEach(d=>{out[mid][d]=Math.max(((a||{})[mid]||{})[d]||0,((b||{})[mid]||{})[d]||0);});});return out;}
 function mergeState(local,remote){
   const R=Object.assign(defState(),remote);R.diet=Object.assign(defState().diet,remote.diet||{});
   const m=Object.assign(defState(),local);m.diet=Object.assign(defState().diet,local.diet||{});
-  m.events=mergeById(local.events,R.events);
-  m.goals=mergeById(local.goals,R.goals);
-  m.members=mergeById(local.members,R.members);
+  m.tomb=mergeTomb(local.tomb,R.tomb);
+  m.events=applyTomb(mergeById(local.events,R.events),m.tomb);
+  m.goals=applyTomb(mergeById(local.goals,R.goals),m.tomb);
+  m.members=applyTomb(mergeById(local.members,R.members),m.tomb);
+  if(!m.members.length)m.members=(local.members&&local.members.length?local.members:defState().members);
   m.mottos=Object.assign({},R.mottos||{},local.mottos||{});
-  m.diet.meals=mergeById(local.diet.meals,R.diet.meals);
-  m.diet.sports=mergeById(local.diet.sports,R.diet.sports);
+  m.diet.meals=applyTomb(mergeById(local.diet.meals,R.diet.meals),m.tomb);
+  m.diet.sports=applyTomb(mergeById(local.diet.sports,R.diet.sports),m.tomb);
   m.diet.weights=mergeWeights(local.diet.weights,R.diet.weights);
   m.diet.profiles=Object.assign({},R.diet.profiles||{},local.diet.profiles||{});
   m.diet.water=mergeWater(local.diet.water,R.diet.water);
