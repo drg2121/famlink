@@ -1,0 +1,14 @@
+{
+  "name": "FamLink — Calendarul Familiei",
+  "short_name": "FamLink",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f1f7f3",
+  "theme_color": "#0e7c60",
+  "lang": "ro",
+  "icons": [
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
