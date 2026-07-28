@@ -207,3 +207,16 @@ Setări → Sincronizare: token GitHub (scope `gist`) + parolă de criptare → 
 - Mesele adăugate de asistent păstrează acum **gramajul și macro-urile** (P/C/G), nu doar caloriile — apar în lista de mese ca la analiza din poză.
 - `askCtx()` (rezumatul trimis la fiecare cerere) include acum bugetul explicit: țintă, bonusul de la sport, cât a mâncat, **cât i-a mai rămas** și macro-urile zilei. Înainte AI-ul primea doar ținta și totalul și trebuia să scadă singur — de aici răspunsuri greșite la „câte calorii mai am azi".
 - Temă întunecată: antetul și bara asistentului aveau fundalul crem scris fix în CSS, iar titlul „Asistentul FamLink" abia se citea pe întuneric. Acum urmează tema.
+
+---
+
+## v3.10.1 — „AI-ul a răspuns într-un format neașteptat" la poza cu meniul (2026-07-28)
+
+**Cauza**: cererea pentru atașamente avea `maxTokens: 1800`. Dar `gemini-2.5-flash` „gândește" înainte să scrie, iar token-urile de gândire se scad tot din `maxOutputTokens` — bugetul se termina pe gândire și API-ul întorcea un candidat **fără `parts`**. `gemini()` transforma asta în șir gol, iar `parseAIJson('')` arunca „format neașteptat", deși formatul n-avea nicio vină. (Analiza foto din Sănătate merge tocmai pentru că n-a avut niciodată plafon.)
+
+**Reparat**
+- Scos plafonul de token-uri la cererea cu atașamente — la fel ca la analiza foto.
+- `gemini()` nu mai returnează șir gol în tăcere: se uită la `finishReason` și spune ce s-a întâmplat — „Răspunsul a fost tăiat", „Modelul a refuzat să răspundă (SAFETY)", „Modelul a răspuns gol". Diagnostic în loc de ghicit.
+- `parseAIJson` repară acum răspunsurile tăiate la mijloc: taie la ultima virgulă completă și închide parantezele rămase deschise, ținând cont de ghilimelele escapate. Un răspuns întrerupt dă tot un plan folosibil, cu felurile care au apucat să iasă întregi.
+- Reparația se încearcă **înaintea** vechii căutări cu regex — altfel aceasta apuca prima pereche de paranteze din text și întorcea un fragment din mijlocul răspunsului.
+- Felurile recuperate pe jumătate (fără kcal) nu mai ajung în card ca rânduri de 0 kcal.

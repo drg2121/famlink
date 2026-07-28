@@ -1192,7 +1192,7 @@ header .ttl:active,header .logo:active{opacity:.75}
 <script>
 /* ============ FamLink v1.0 — arhitectură ArhiLink (single-file, localStorage) ============ */
 const KEY='famlink_v1';
-const APP_VER='3.10.0';
+const APP_VER='3.10.1';
 /* prima literă mare (titluri de obiective, etichete de mementouri, titluri AI) */
 const capFirst=s=>{s=String(s||'').trim();return s?s.charAt(0).toLocaleUpperCase('ro-RO')+s.slice(1):s;};
 /* curăță titlul unui obiectiv: scoate din față formulările de COMANDĂ
@@ -3062,9 +3062,16 @@ async function gemini(parts,opt){
       });
     }catch(net){lastMsg='rețea';continue;}
     if(r.ok){
-      if(idx>0)toast('Am folosit modelul de rezervă: '+model);
       const d=await r.json();
-      return d.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('')||'';
+      const cand=d.candidates&&d.candidates[0];
+      const txt=(cand&&cand.content&&cand.content.parts?cand.content.parts.map(p=>p.text||'').join(''):'')||'';
+      if(txt){if(idx>0)toast('Am folosit modelul de rezervă: '+model);return txt;}
+      /* răspuns gol: modelele care „gândesc" (2.5+) consumă maxOutputTokens pe gândire și nu mai
+         apucă să scrie nimic; alteori răspunsul e blocat. Spunem exact ce s-a întâmplat, nu „format neașteptat". */
+      const fr=(cand&&cand.finishReason)||(d.promptFeedback&&d.promptFeedback.blockReason)||'';
+      if(fr==='MAX_TOKENS')throw new Error('Răspunsul a fost tăiat (prea lung pentru limita modelului). Încearcă din nou.');
+      if(/SAFETY|BLOCK|RECITATION/i.test(fr))throw new Error('Modelul a refuzat să răspundă ('+fr+').');
+      throw new Error('Modelul a răspuns gol'+(fr?(' ('+fr+')'):'')+'. Încearcă din nou.');
     }
     const e=await r.text();
     // erori fatale — nu are rost să încercăm alt model
@@ -3083,10 +3090,34 @@ async function gemini(parts,opt){
 /* extrage JSON chiar dacă modelul a pus text sau ``` în jur */
 function parseAIJson(t){
   t=String(t||'').replace(/```json|```/gi,'').trim();
+  if(!t)throw new Error('AI-ul a răspuns gol. Încearcă din nou.');
   try{return JSON.parse(t);}catch(e){}
+  /* întâi încercăm să reparăm un răspuns tăiat — altfel căutarea de mai jos apucă
+     prima pereche de paranteze din text și întoarce un fragment din mijloc */
+  const rep=repairAIJson(t);
+  if(rep){try{return JSON.parse(rep);}catch(e){}}
   const m=t.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
   if(m){try{return JSON.parse(m[0]);}catch(e){}}
   throw new Error('AI-ul a răspuns într-un format neașteptat. Încearcă din nou.');
+}
+/* răspuns tăiat la mijloc (limită de token-uri): tăiem la ultima virgulă completă
+   și închidem parantezele rămase deschise — salvăm ce a apucat modelul să scrie */
+function repairAIJson(t){
+  const a=t.indexOf('{'),b=t.indexOf('[');
+  const s=a<0?b:(b<0?a:Math.min(a,b));
+  if(s<0)return '';
+  const open=[];let inStr=false,bs=false,cut=-1,cutOpen=null;
+  for(let i=s;i<t.length;i++){
+    const ch=t[i];
+    if(inStr){if(bs)bs=false;else if(ch==='\\')bs=true;else if(ch==='"')inStr=false;continue;}
+    if(ch==='"'){inStr=true;continue;}
+    if(ch==='{')open.push('}');
+    else if(ch==='[')open.push(']');
+    else if(ch==='}'||ch===']')open.pop();
+    else if(ch===','&&open.length){cut=i;cutOpen=open.slice();}
+  }
+  if(!open.length||cut<0||!cutOpen)return ''; // fie e complet, fie n-avem unde tăia curat
+  return t.slice(s,cut)+cutOpen.reverse().join('');
 }
 function fileToB64(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(f);});}
 
@@ -4008,11 +4039,14 @@ Reguli pentru "reply": 2-4 fraze de proză caldă, ca un om real — fără list
 În "memory" pune doar lucruri durabile (preferințe, alergii, ce nu-i place), nu ce a mâncat azi. Dacă nu e nimic nou, pune [].`;
     const parts=files.map(f=>({inline_data:{mime_type:f.mime,data:f.data}}));
     parts.push({text:prompt});
-    const raw=await gemini(parts,{json:true,temp:.15,seed:7,model:'gemini-2.5-flash',maxTokens:1800});
+    /* fără maxTokens: gemini-2.5-flash „gândește" înainte să scrie, iar gândirea consumă din
+       maxOutputTokens — cu plafon, răspunsul ieșea gol. La fel ca la analiza foto din Sănătate. */
+    const raw=await gemini(parts,{json:true,temp:.15,seed:7,model:'gemini-2.5-flash'});
     const j=parseAIJson(raw);
     if(j&&j.memory)rememberAI(j.memory);
     const qs=(Array.isArray(j.intrebari)?j.intrebari:[]).map(x=>String(x||'').trim()).filter(Boolean).slice(0,2);
-    const items=(Array.isArray(j.recomandari)?j.recomandari:[]).filter(x=>x&&(x.nume||'').trim());
+    // kcal>0 scoate și felurile rămase pe jumătate dintr-un răspuns tăiat și reparat
+    const items=(Array.isArray(j.recomandari)?j.recomandari:[]).filter(x=>x&&(x.nume||'').trim()&&Number(x.kcal)>0);
     const reply=String(j.reply||'').trim();
     wait.textContent=reply||(qs.length?qs.join('\n'):'Gata ✓');
     _askHist.push({who:'bot',txt:(reply||'')+(qs.length?' '+qs.join(' '):'')});
