@@ -149,3 +149,61 @@ Setări → Sincronizare: token GitHub (scope `gist`) + parolă de criptare → 
 - Scos numele „Lumi" — asistentul e simplu „Asistent".
 - Mementourile mutate din Setări în meniul de jos: tab dedicat „Mementouri" (Calendar · Mementouri · Sănătate), cu buton de activare notificări + status direct în pagină.
 - Asistent mai fidel comenzii: regulă nouă în prompt — execută DOAR ce s-a cerut explicit, fără să schimbe cantități/ore; dacă mesajul e ambiguu întreabă în loc să ghicească; în confirmare spune exact ce a notat.
+
+---
+
+## v3.9.8 — notificări fără dubluri, linii de masă editabile, mobil mai curat (2026-07-16)
+
+**Notificări duble (apă, cântărire) — rezolvate la rădăcină**
+- Cauza: verificarea anti-dublură din service worker era doar asincronă (Cache API). Două push-uri identice sosite în aceeași secundă (două sloturi de cron pe același email) se verificau în paralel, ambele vedeau „nimic în cache" și ambele se afișau.
+- Acum: marcaj sincron în memorie + verificările puse la coadă una după alta + Cache API ca plasă de siguranță; fereastra anti-dublură crescută de la 90 s la 5 min.
+- Același anti-dublură și pentru mesajele primite cu aplicația deschisă (foreground) — înainte nu exista deloc acolo.
+- Tag-ul notificării e acum pe titlu, nu doar pe tip: două notificări identice se înlocuiesc între ele, dar mementouri diferite (Cântărire vs. Vitamine) nu se mai șterg reciproc cum se întâmpla cu tag-ul comun `fl-rem`.
+- Cache PWA trecut la `famlink-v46` ca SW-ul nou să se activeze imediat.
+
+**Mesele — liniile rămân editabile și după salvare**
+- La „Editează" pe o masă salvată, liniile ei (ingredientele) apar în formular: poți schimba numele, categoria, gramele și kcal-ul fiecărei linii, poți șterge sau adăuga linii noi — inclusiv la mese care n-au avut deloc.
+- Schimbi gramele → kcal-ul liniei se recalculează din densitatea lui (kcal/g); totalul de sus = suma liniilor, mereu la zi.
+- Dacă scrii de mână alt total decât suma liniilor, liniile se scalează proporțional la totalul tău.
+- Macro-urile (P/C/G) se scalează proporțional cu noul total de calorii la salvare.
+
+**Grafică pe mobil**
+- Fix zoom iOS: orice input sub 16px făcea Safari să dea zoom la focus și pagina rămânea mărită/„ciudată". Pe mobil toate inputurile au acum minim 16px.
+- Componentele mesei apar ca listă curată (nume la stânga, g · kcal la dreapta) în loc de chips-uri care se rupeau pe 3 rânduri.
+- Rânduri de masă mai aerisite, editorul de linii aliniat pe ecrane înguste, inputurile de oră/dată mai înalte (44px, țintă de atins mai ușor).
+
+---
+
+## v3.9.9 — dublurile „doar la un membru": slot de cron pe email, nu pe dispozitiv (2026-07-16)
+
+**Diagnostic** (simptom: Cosmin primea totul dublu, Alisa nu): slotul de programare a mementourilor zilnice era legat de DISPOZITIV (`device: DID`). Cine folosește FamLink pe două dispozitive cu același email (telefon + computer) avea DOUĂ sloturi pe server → serverul trimitea fiecare memento de două ori, către toate dispozitivele acelui email. „Repară notificările" curăța doar slotul dispozitivului curent, deci nu ajuta.
+
+**Rezolvare**
+- Slotul de cron e acum legat de EMAIL (`em_<email>`): toate dispozitivele aceluiași membru scriu în același slot → o singură trimitere, indiferent de câte aparate folosești.
+- Migrare automată la pornire (o dată pe dispozitiv): golește slotul vechi legat de dispozitiv.
+- Aplicația ține evidența (sincronizată) a dispozitivelor folosite; „Repară notificările" golește acum sloturile vechi ale TUTUROR dispozitivelor tale + slotul de email, apoi reprogramează curat.
+- De reținut: fix-urile din service worker (v3.9.8) se activează abia după deploy + o închidere/redeschidere completă a aplicației — dublura de la 08:00 a venit cu SW-ul vechi încă activ.
+
+---
+
+## v3.10.0 — atașamente în asistent: „ce mănânc din meniul ăsta și cât?" (2026-07-28)
+
+**De ce**: la cantină/restaurant primești o poză cu meniul zilei. Întrebarea reală nu e „câte calorii are pastrama", ci „din tot ce scrie aici, ce-mi pun în farfurie și **cât**, ca să-mi iasă ziua".
+
+**Cum funcționează**
+- Buton de agrafă în bara asistentului (lângă microfon) → poză din galerie, poză făcută pe loc sau PDF. Maximum 3 atașamente odată, pozele se micșorează la 1400 px înainte de trimitere.
+- Asistentul recunoaște singur ce i-ai trimis: **meniu**, **farfurie** (ce ai mâncat deja), **etichetă de produs**, **rețetă** sau altceva — și se poartă diferit la fiecare.
+- Recomandarea pleacă de la **bugetul real al zilei**, nu de la o valoare generică: ținta ta calorică + caloriile arse la sportul bifat − ce ai mâncat deja. Ține cont și de ora curentă și de mesele deja înregistrate, ca să nu-ți dea tot restul zilei la prânz.
+- Cantitățile se spun **în măsuri de casă** — „3 linguri cu vârf", „un polonic", „o bucată cât palma", „două pumnuri" — cu gramajul și kcal-ul alături. Promptul are un tabel de repere (lingură 15 g, polonic 200 ml, felie de pâine 30–35 g, palmă de carne 100–120 g etc.).
+- **Întreabă când nu e sigur**: dacă nu se citește, dacă nu știe ce porție se servește, la ce masă e sau dacă se bate cap în cap cu o restricție din memoria lui de lungă durată → pune 1–2 întrebări scurte și nu inventează nimic.
+- Poza **rămâne prinsă de discuție** până o scoți cu ✕ sau închizi asistentul, deci răspunsurile tale la întrebări se leagă tot de ea („e cină", „porția e mică"). În conversație apare o singură dată, nu la fiecare mesaj.
+
+**Cardul de plan (în conversație)**
+- Fiecare fel are checkbox; debifezi ce nu iei și totalul + „îți rămân X kcal" se recalculează pe loc (roșu dacă depășești).
+- „Mai bine sari peste" pentru ce nu merită caloriile.
+- Un buton trece tot ce ai bifat în mesele de azi, prin cardul obișnuit de confirmare (poți edita tipul mesei, numele și kcal-ul înainte de salvare).
+
+**Pe lângă**
+- Mesele adăugate de asistent păstrează acum **gramajul și macro-urile** (P/C/G), nu doar caloriile — apar în lista de mese ca la analiza din poză.
+- `askCtx()` (rezumatul trimis la fiecare cerere) include acum bugetul explicit: țintă, bonusul de la sport, cât a mâncat, **cât i-a mai rămas** și macro-urile zilei. Înainte AI-ul primea doar ținta și totalul și trebuia să scadă singur — de aici răspunsuri greșite la „câte calorii mai am azi".
+- Temă întunecată: antetul și bara asistentului aveau fundalul crem scris fix în CSS, iar titlul „Asistentul FamLink" abia se citea pe întuneric. Acum urmează tema.
