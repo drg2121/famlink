@@ -4,6 +4,14 @@ Aplicație într-un singur fișier (`index.html`), pe modelul ArhiLink: fără s
 
 **Module:** Calendar (Lună / An / Zi / Obiective, recurențe, notificări, motto-ul lunii, print A3/A4 landscape, export .ics pentru iPhone) și Sănătate (profil + IMC/BMR/TDEE, jurnal greutate cu grafic, fasting cu contor și notificări, mese + calorii, analiză foto și meniuri cu Gemini AI).
 
+## Noutăți v3.13
+
+- **Meniul de la cantină, până la capăt.** Asistentul îți spune cât să-ți pui, iar după masă îi spui ce ai mâncat de fapt: „tot piureul, jumătate din tocană și murături". Cardul se reface cu cantitățile tale (inclusiv felurile din meniu pe care nu ți le propusese), devine „Ce ai în farfurie" și intră în mese. Fiecare fel are și butoane ½ · ¾ · 1 · 1½ · 2. Dacă ai adăugat deja masa și te răzgândești („de fapt am mâncat doar jumătate din tocană"), asistentul corectează masa notată, nu creează alta. La poza din Mese, aceleași butoane de porție.
+- **Planul tău** (Sănătate → Profil): ținta de kg, data până la care vrei să ajungi, ritmul necesar (lejer / sănătos / ambițios / prea rapid), ritmul tău real din cântăriri și caloriile pe zi care corespund — cu un buton care le setează. Fără dată, alegi un ritm și aplicația fixează data și caloriile.
+- **Săptămâna asta**: obiective mici pe săptămână (kg, cântăriri, minute de mișcare, mese notate, apă la țintă, fasting), bifate din datele reale, editabile.
+- **Notificări inteligente** (Mementouri): cântărire, mișcare, apă, mese și bilanțul de duminică — vin doar când e cazul, cu cifrele tale, pe loc când aplicația e deschisă și prin push când e închisă.
+- Cântarul: afișajul citit ca „E 211" e recunoscut ca 112,3 kg răsturnat și când cifrele vin cu spații sau în câmpul de cod.
+
 ## Noutăți v3.12
 
 - **Sănătate redesenată.** Profilul se deschide cu un card mare: greutatea de acum, cât ai dat jos de la start, ritmul pe săptămână, inelul „din drum" și bara start → țintă cu data estimată la care ajungi. Sub el, tile-uri cu iconițe (IMC, BMR, menținere, țintă, serie de cântăriri, talie). Graficul greutății e netezit, are umplere gradient, media pe 7 zile, linia țintei, un comutator 30 zile / 3 luni / tot și tooltip la atingere.

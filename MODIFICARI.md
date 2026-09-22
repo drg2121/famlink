@@ -336,3 +336,41 @@ Un update de grafică, nu de date: structurile din localStorage rămân aceleaș
 - Fluxurile din asistent cu Gemini simulat: poza de cântar → clasificare → OCR → card → salvare (91,6 kg, mesaj cu diferența și seria, reperul „7,5 kg" sărbătorit); captură din ceas → card cu inele → salvare → ziua intră în `diet.fitness`, cele 530 kcal active intră în bugetul de la Mese, mesajul propune calibrarea (×1,572).
 - Cache PWA: `famlink-v47`.
 
+---
+
+## v3.13.0 — meniul până la capăt, planul tău, notificări inteligente (2026-09-22)
+
+### Cardul de masă din asistent știe ce ai mâncat de fapt
+
+Cazul concret: poza cu **meniul zilei** de la cantină. Asistentul propune „cât să-ți pui", dar la masă iei altfel: tot piureul, jumătate din tocană, plus murăturile pe care nu ți le propusese.
+
+- Fiecare fel din card are butoane **½ · ¾ · 1 · 1½ · 2** (`planMult`), care scalează gramele, kcal-ul și macro-urile de la porția estimată inițial (`_base`), fără nicio cerere la AI.
+- Sub card e un câmp „**Ce ai mâncat de fapt?**" → `planAdjust`: AI-ul primește felurile din card **și tot meniul citit din poză** (câmp nou `meniu` în răspunsul de la atașamente), aplică exact ce spui — scalează, scoate, adaugă feluri noi cu gramaj și kcal realiste — și cardul se reface pe loc. Dacă vorbești la trecut, cardul devine „Ce ai în farfurie" (`mod=mancat`).
+- Cardul intră și în istoricul conversației (`planHist`), ca mesajele următoare să aibă la ce se referi.
+- După „Adaugă la mesele de azi" atașamentul se scoate din discuție, iar cardul rămâne cu „Adaugă din nou".
+- **Corectarea unei mese deja notate**: acțiune nouă `meal_edit` în asistentul text („de fapt am mâncat doar jumătate din tocană", „prânzul a avut 800, nu 540") → `findTodayMeal` găsește masa de azi după cuvinte-cheie (tolerant la diacritice), cardul de confirmare arată „165 → 83 kcal", iar `applyMealEdit` scalează kcal, grame, macro și componentele. Ce mănânci în plus față de ce e notat rămâne masă nouă.
+- **Poza din Mese** primește aceleași butoane de porție („Cât ai mâncat de fapt"), legate de editorul de componente existent.
+
+### Planul tău (Profil)
+
+- Câmp nou în profil: **până la data** (`targetDate`). `planCalc` leagă ținta de kg, data, ritmul necesar (kg/săpt), ritmul real (regresia pe 42 de zile) și caloriile pe zi (7.700 kcal/kg, prag de siguranță 1.200 F / 1.500 M, surplus max 500 la creștere).
+- Cu dată: rânduri clare (cât mai ai, până pe, ritm necesar cu etichetă lejer/sănătos/ambițios/prea rapid, ritmul tău real cu „ești în grafic", caloriile pentru ritmul ăsta) + buton „Setează ținta la X kcal/zi". Peste 1 kg/săpt apare avertismentul și „Mută data" la 0,75 kg/săpt.
+- Fără dată: trei opțiuni (0,25 / 0,5 / 0,75 kg/săpt) cu data și caloriile rezultate; una atinsă = data și ținta de calorii fixate.
+- **Săptămâna asta** (luni → duminică): obiective per săptămână (`p.wk`: kg, cântăriri, minute de mișcare, mese notate, apă la țintă, fasting), bifate din date (`weekCtx`), editabile din rotiță. Greutatea se compară cu ultima cântărire dinaintea săptămânii.
+- Asistentul și „Interpretare AI" primesc planul și săptămâna în context (`planCtxText`).
+
+### Notificări inteligente (Mementouri)
+
+- Cinci notificări condiționate (`NUDGE_DEF`, `nudgeList`): cântărire (dacă nu te-ai cântărit), mișcare (dacă azi n-ai notat și săptămâna e sub țintă), apă (sub 60% din obiectiv), mesele de azi (sub jumătate din calorii), bilanțul de duminică — fiecare cu ora ei și comutator, pe utilizatorul activ.
+- Cu aplicația deschisă sună local din `tick()` (o dată pe zi fiecare, fără dublură când push-ul le acoperă). Pentru aplicația închisă se **programează pe server** cu `action:'schedule'` (grup `hn_<slot email>`), condițiile fiind judecate la programare; se reprogramează la fiecare `save()` (debounce 4 s, doar dacă lista s-a schimbat) — dacă te-ai cântărit sau ai băut apa, notificarea dispare. Cântărirea de mâine se programează mereu și se scoate când te cântărești.
+
+### Cântar
+
+- `scaleGuess` încearcă citirea din `citire`, `cod` și `valoare`, curățată de spații/liniuțe și cu O→0, I→1, drept și răsturnat — „E 211" din câmpul de cod ajunge la 112,3 kg. Ecranul de eroare are și „Citește din nou".
+
+### Testat
+
+- Cu Gemini simulat: meniu → card cu chips → ×½ → „am mâncat tot piureul, jumătate din tocană și murături" → card „Ce ai în farfurie" cu 3 feluri (360 kcal) → adăugat la mese → „de fapt am mâncat doar jumătate din tocană" → confirmare 165 → 83 kcal → masa corectată (grame și macro scalate). Poza din Mese: ¾ → 226 g / 385 kcal, componentele scalate. Cântar: `{tip:'eroare',cod:'E 211'}` → 112,3 kg propus.
+- Planul: fără dată → opțiuni; „sănătos" → 20 noiembrie, 2.010 kcal/zi, ritm real 0,74 „în grafic". Notificări: lista de azi (apă 1250/2500, mese 860/2010, mișcare 35/150) și declanșarea locală din `tick()`.
+- Cache PWA: `famlink-v48`.
+
