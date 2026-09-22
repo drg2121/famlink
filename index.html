@@ -230,7 +230,8 @@ main{padding:12px;max-width:920px;margin:0 auto}
 .mealhero .pbar{background:rgba(255,255,255,.24)}
 .mealhero .pbar i{background:linear-gradient(90deg,#d9f2df,var(--acc))}
 .mealhero .mh-water{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:11px;font-size:13px;font-weight:600;flex-wrap:wrap}
-.mealhero .mh-sport{display:flex;align-items:center;gap:7px;margin-top:8px;font-size:13px;font-weight:600;color:#2f6da6}
+.mealhero .mh-sport{display:flex;align-items:center;gap:7px;margin-top:8px;font-size:13px;font-weight:600;color:#bfe0ff;flex-wrap:wrap}
+.mealhero .mh-sport .muted{color:rgba(255,255,255,.7)}
 .mealhero .mh-sport svg{width:15px;height:15px;flex:none}
 .sportbudget{display:flex;flex-direction:column;gap:6px}
 .sportchk{display:flex;align-items:center;gap:9px;background:#eef4fb;border:1px solid #d3e3f4;border-radius:12px;padding:8px 11px;font-size:13.5px;cursor:pointer}
@@ -658,6 +659,219 @@ header .ttl:active,header .logo:active{opacity:.75}
 #remList .rlab b{display:block;font-size:14.5px}
 #remList .rlab .muted{font-size:12px}
 
+/* ===== v3.12 — redesign Sănătate (profil, progres, fasting, sport, ceas) + carduri ===== */
+:root{--hero:linear-gradient(145deg,#12332a 0%,#1b5244 48%,#2c7a5f 100%);--gc:#2c7a5f;--gc2:#1a5a45}
+html[data-theme="dark"]{--hero:linear-gradient(145deg,#15241d 0%,#1b3b2f 55%,#245a46 100%)}
+.g-w{--gc:#2c7a5f;--gc2:#1a5a45}.g-h{--gc:#e0708a;--gc2:#b9496a}.g-c{--gc:#5b8fc7;--gc2:#3d6ea6}.g-m{--gc:#e2a53f;--gc2:#c1841f}.g-f{--gc:#8f7bd8;--gc2:#6b57b8}
+.card{border:1px solid rgba(34,49,43,.05)}
+html[data-theme="dark"] .card{border-color:rgba(255,255,255,.045)}
+/* antet de secțiune cu iconiță */
+.sech{display:flex;align-items:center;gap:10px;margin:18px 0 10px;flex-wrap:wrap}
+.sech .si{width:32px;height:32px;border-radius:11px;background:var(--soft);display:inline-flex;align-items:center;justify-content:center;flex:none}
+.sech .si svg.lucide{width:16px;height:16px;color:var(--pri)}
+.sech>div{min-width:0;flex:1}
+.sech b{font-size:15.5px;display:block;line-height:1.2}
+.sech .sub{font-size:12px;color:var(--muted);display:block;font-weight:500;margin-top:2px}
+.sech .r{margin-left:auto;flex:none}
+/* tile-uri statistice v2 */
+.statgrid{grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:9px}
+.stat{position:relative;background:var(--soft2);border:1px solid var(--line);border-radius:18px;padding:13px 40px 12px 13px;text-align:left;overflow:hidden}
+.stat b{font-size:22px;letter-spacing:-.5px;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat>span{display:block;margin-top:4px;line-height:1.3}
+.stat .sm{display:inline;font-size:11px;font-weight:800}
+.stat .ti{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:9px;background:var(--card);display:flex;align-items:center;justify-content:center;margin:0;box-shadow:0 1px 4px rgba(34,49,43,.08)}
+.stat .ti svg.lucide{width:14px;height:14px;color:var(--pri)}
+.stat.acc{background:linear-gradient(135deg,var(--soft),var(--soft2))}
+.stat b small{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:0}
+/* taburile din Sănătate */
+#v-health .tabs2{background:var(--soft2);border:1px solid var(--line);padding:4px;gap:3px;border-radius:16px}
+#v-health .tabs2 button{padding:9px 10px;border-radius:12px}
+#v-health .tabs2 button.on{box-shadow:0 3px 10px rgba(20,58,47,.16)}
+/* ---------- profil: hero ---------- */
+.phero{background:var(--hero);color:#fff;border-radius:24px;padding:18px 18px 16px;box-shadow:0 16px 36px rgba(20,58,47,.26);position:relative;overflow:hidden;margin:12px 0}
+.phero::before{content:"";position:absolute;width:280px;height:280px;border-radius:50%;right:-100px;top:-140px;background:radial-gradient(circle,rgba(255,255,255,.15),rgba(255,255,255,0) 70%)}
+.phero::after{content:"";position:absolute;width:200px;height:200px;border-radius:50%;left:-70px;bottom:-120px;background:radial-gradient(circle,rgba(123,217,74,.24),rgba(123,217,74,0) 70%)}
+.phero>*{position:relative;z-index:1}
+.ph-top{display:flex;align-items:center;gap:14px;justify-content:space-between}
+.ph-k{font-size:11.5px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;opacity:.75}
+.ph-big{font-size:48px;font-weight:800;letter-spacing:-2px;line-height:1;font-variant-numeric:tabular-nums;margin-top:5px}
+.ph-big small{font-size:18px;font-weight:700;letter-spacing:0;opacity:.8;margin-left:5px}
+.ph-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.ph-chip{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;white-space:nowrap}
+.ph-chip svg.lucide{width:13px;height:13px}
+.ph-chip.good{background:rgba(123,217,74,.22);border-color:rgba(123,217,74,.35)}
+.ph-chip.bad{background:rgba(224,112,138,.26);border-color:rgba(224,112,138,.4)}
+.ph-ring{width:110px;height:110px;flex:none;position:relative}
+.ph-ring svg{transform:rotate(-90deg);width:100%;height:100%;display:block}
+.ph-ring .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.ph-ring .mid b{font-size:23px;letter-spacing:-.6px;font-variant-numeric:tabular-nums}
+.ph-ring .mid span{font-size:9.5px;font-weight:700;opacity:.75;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+.ph-journey{margin-top:16px}
+.ph-jbar{position:relative;height:10px;border-radius:99px;background:rgba(255,255,255,.18)}
+.ph-jbar i{position:absolute;left:0;top:0;height:100%;border-radius:99px;background:linear-gradient(90deg,#d9f2df,#7bd94a);transition:width .7s cubic-bezier(.2,.8,.2,1)}
+.ph-jbar .dot{position:absolute;top:50%;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.35),0 0 0 3px rgba(123,217,74,.45);transform:translate(-50%,-50%);transition:left .7s cubic-bezier(.2,.8,.2,1)}
+.ph-jlab{display:flex;justify-content:space-between;font-size:12px;font-weight:700;opacity:.9;margin-top:9px;gap:6px}
+.ph-jlab span small{display:block;font-weight:700;opacity:.65;font-size:9.5px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px}
+@media(max-width:420px){.ph-big{font-size:40px}.ph-ring{width:94px;height:94px}.ph-ring .mid b{font-size:20px}}
+/* ---------- grafic greutate ---------- */
+.wchart{position:relative;margin-top:2px}
+.wchart svg{width:100%;display:block;overflow:visible}
+.wrange{display:inline-flex;gap:3px;background:var(--soft2);border:1px solid var(--line);border-radius:999px;padding:3px}
+.wrange button{border:none;background:none;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:700;color:var(--muted);font-family:inherit;cursor:pointer;transition:background .15s}
+.wrange button.on{background:var(--card);color:var(--pri2);box-shadow:0 1px 5px rgba(20,58,47,.12)}
+.wtip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;font-size:11.5px;font-weight:700;padding:5px 9px;border-radius:9px;transform:translate(-50%,-135%);white-space:nowrap;display:none;z-index:2}
+html[data-theme="dark"] .wtip{background:#e7efe9;color:#101613}
+.wlegend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;font-size:11px;color:var(--muted);font-weight:600;margin-top:6px}
+.wlegend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.encour{border-radius:20px}
+/* ---------- progres ---------- */
+.pghero{background:var(--hero);color:#fff;border-radius:24px;padding:17px 17px 16px;display:flex;align-items:center;gap:16px;box-shadow:0 16px 36px rgba(20,58,47,.26);position:relative;overflow:hidden;margin-bottom:12px}
+.pghero::before{content:"";position:absolute;width:280px;height:280px;border-radius:50%;right:-110px;top:-150px;background:radial-gradient(circle,rgba(255,255,255,.15),rgba(255,255,255,0) 70%)}
+.pghero>*{position:relative;z-index:1}
+.pgring{width:112px;height:112px;position:relative;flex:none}
+.pgring svg{transform:rotate(-90deg);width:100%;height:100%;display:block}
+.pgring .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.pgring .mid b{font-size:27px;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.pgring .mid b small{font-size:13px;opacity:.7;font-weight:700;letter-spacing:0}
+.pgring .mid span{font-size:9.5px;text-transform:uppercase;letter-spacing:.6px;opacity:.75;font-weight:700;margin-top:5px}
+.pgh-main{flex:1;min-width:0}
+.pgh-lvl{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:4px 10px;font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase}
+.pgh-lvl svg.lucide{width:13px;height:13px}
+.pgh-main h3{color:#fff;margin:9px 0 4px;font-size:18px;letter-spacing:-.2px;line-height:1.2}
+.pgh-main h3 svg.lucide{display:none}
+.pgh-main p{font-size:12.5px;opacity:.9;line-height:1.45}
+.pgh-stats{display:flex;gap:6px;margin-top:11px;flex-wrap:wrap}
+.pgh-stats span{background:rgba(255,255,255,.12);border-radius:12px;padding:6px 9px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.pgh-stats span b{font-size:14px;font-variant-numeric:tabular-nums}
+.pgh-stats svg.lucide{width:13px;height:13px;opacity:.85}
+@media(max-width:420px){.pgring{width:96px;height:96px}.pgring .mid b{font-size:22px}.pghero{gap:12px;padding:15px 14px}}
+.nextrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-bottom:4px}
+.nx{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 12px 11px;display:flex;gap:10px;align-items:center;box-shadow:var(--sh);position:relative;overflow:hidden}
+.nx.first{border-color:transparent;background:linear-gradient(135deg,var(--aisoft),var(--card) 70%);box-shadow:0 8px 22px rgba(201,107,69,.16)}
+html[data-theme="dark"] .nx.first{background:linear-gradient(135deg,#2a211a,var(--card) 70%)}
+.nx .nr{width:48px;height:48px;flex:none;position:relative}
+.nx .nr>svg{transform:rotate(-90deg);width:100%;height:100%;display:block}
+.nx .nr .ic{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.nx .nr .ic svg.lucide{width:18px;height:18px}
+.nx .nt{flex:1;min-width:0}
+.nx .nt b{display:block;font-size:13.5px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nx .nt span{font-size:11.5px;color:var(--muted);font-weight:600;display:block;margin-top:2px}
+.nx .nt em{font-style:normal;font-size:11px;font-weight:800;color:var(--ai);display:block;margin-top:3px}
+.wkgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px}
+.wk{background:var(--soft2);border:1px solid var(--line);border-radius:16px;padding:10px 11px 10px}
+.wk .wl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);display:flex;align-items:center;gap:4px;white-space:nowrap}
+.wk .wl svg.lucide{width:12px;height:12px}
+.wk b{display:block;font-size:20px;letter-spacing:-.5px;margin-top:4px;font-variant-numeric:tabular-nums;line-height:1.1}
+.wk b small{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:0}
+.wk .pb{height:5px;background:var(--line);border-radius:99px;margin-top:8px;overflow:hidden}
+.wk .pb i{display:block;height:100%;border-radius:99px;transition:width .6s}
+.tl{position:relative;padding-left:22px;margin:2px 0 2px}
+.tl::before{content:"";position:absolute;left:8px;top:10px;bottom:10px;width:2px;background:var(--line);border-radius:2px}
+.tli{position:relative;display:flex;align-items:center;gap:10px;padding:7px 0}
+.tli::before{content:"";position:absolute;left:-18px;top:50%;width:10px;height:10px;border-radius:50%;background:var(--gc);transform:translateY(-50%);box-shadow:0 0 0 3px var(--card)}
+.tli .ic{width:36px;height:36px;border-radius:12px;background:linear-gradient(145deg,var(--gc),var(--gc2));display:inline-flex;align-items:center;justify-content:center;flex:none;box-shadow:0 4px 10px rgba(0,0,0,.12)}
+.tli .ic svg.lucide{width:16px;height:16px;color:#fff}
+.tli>div{min-width:0;flex:1}
+.tli b{display:block;font-size:13.5px;line-height:1.25}
+.tli>div>span{font-size:11.5px;color:var(--muted);font-weight:600;display:block;line-height:1.3}
+.tli .dt{font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap;flex:none}
+.gfilter{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 8px;margin:6px -2px 0}
+.gfilter::-webkit-scrollbar{display:none}
+.gfilter .chip{flex:none;gap:7px}
+.gfilter .chip .gd{width:8px;height:8px;border-radius:50%;background:var(--gc);display:inline-block}
+.gfilter .chip small{color:var(--muted);font-weight:700;font-size:11px}
+.gfilter .chip.on{border-color:var(--gc);color:var(--gc2);background:var(--card)}
+html[data-theme="dark"] .gfilter .chip.on{color:#fff;background:var(--soft)}
+.msgroup{display:flex;align-items:center;gap:7px;margin:14px 0 8px}
+.msgroup .gd{width:8px;height:8px;border-radius:50%;background:var(--gc);display:inline-block}
+.msgroup small{font-weight:700;font-size:11px;opacity:.75;text-transform:none;letter-spacing:0}
+.mstones{grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:9px}
+.ms{opacity:1;background:var(--soft2);border:1px solid var(--line);border-radius:18px;padding:13px 8px 11px;transition:transform .15s;overflow:hidden}
+.ms:active{transform:scale(.97)}
+.ms .ic{position:relative;width:48px;height:48px;border-radius:50%;background:none;margin-bottom:7px;display:inline-flex;align-items:center;justify-content:center;box-shadow:none}
+.ms .ic>svg:not(.lucide){position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.ms .ic svg.lucide{width:18px;height:18px;color:var(--gc);position:relative;z-index:1}
+.ms b{font-size:12.5px;color:var(--ink)}
+.ms>span{font-size:10.5px}
+.ms.on{background:linear-gradient(160deg,var(--gc),var(--gc2));border-color:transparent;box-shadow:0 10px 22px rgba(0,0,0,.16)}
+.ms.on .ic{background:rgba(255,255,255,.2);box-shadow:none}
+.ms.on .ic svg.lucide{color:#fff}
+.ms.on b{color:#fff}
+.ms.on>span,.ms.on .dt{color:#fff;opacity:.88}
+.ms.on::after{content:"";position:absolute;top:-34px;right:-34px;width:86px;height:86px;border-radius:50%;background:rgba(255,255,255,.13)}
+.ms .chk{position:absolute;top:8px;right:8px;width:18px;height:18px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;z-index:1}
+.ms .chk svg.lucide{width:11px;height:11px;color:var(--gc2)}
+html[data-theme="dark"] .ms:not(.on) .ic{background:none}
+/* ---------- fasting ---------- */
+.fring{position:relative;width:240px;height:240px;margin:8px auto 2px}
+.fring svg{width:100%;height:100%;transform:rotate(-90deg);overflow:visible;display:block}
+.fring .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.fring .mid b{font-size:42px;letter-spacing:-1.8px;font-variant-numeric:tabular-nums;line-height:1}
+.fring .mid span{font-size:12.5px;color:var(--muted);font-weight:600;margin-top:6px;text-align:center;max-width:150px;line-height:1.3}
+.fring .mid .fst{margin-top:8px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--pri2);background:var(--soft);border-radius:999px;padding:4px 9px;max-width:none}
+.fstages{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:12px 0 10px}
+.fstage{background:var(--soft2);border:1px solid var(--line);border-radius:13px;padding:8px 5px;text-align:center;font-size:10.5px;font-weight:700;color:var(--muted);line-height:1.25}
+.fstage b{display:block;font-size:12px;color:var(--ink);margin-bottom:2px}
+.fstage.on{background:var(--soft);border-color:var(--acc);color:var(--pri2)}
+.fstage.on b{color:var(--pri2)}
+.fstage.done{opacity:.55}
+.fhist{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 4px}
+.fh{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:44px}
+.fh .c{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;color:#fff;background:linear-gradient(145deg,var(--pri),var(--acc));box-shadow:0 4px 10px rgba(44,122,95,.28)}
+.fh .c.miss{background:linear-gradient(145deg,#e2a53f,#c1841f);box-shadow:0 4px 10px rgba(226,165,63,.3)}
+.fh small{font-size:10px;color:var(--muted);font-weight:700;white-space:nowrap}
+/* ---------- sport: grafic pe săptămână ---------- */
+.kweek .kbar.fit{background:linear-gradient(180deg,#8fb8e6,var(--blue))}
+/* ---------- ceas: inele concentrice ---------- */
+.fitday{border-radius:20px}
+.fbody{display:flex;gap:14px;align-items:center}
+.frings{width:94px;height:94px;flex:none}
+.frings svg{width:100%;height:100%;transform:rotate(-90deg);display:block}
+.fitleg{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.fitleg .fl{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.fitleg .fl i{width:9px;height:9px;border-radius:50%;flex:none}
+.fitleg .fl b{margin-left:auto;font-variant-numeric:tabular-nums}
+.fitleg .fl b small{color:var(--muted);font-weight:700;font-size:11px}
+/* ---------- corp: gauge grăsime ---------- */
+.bfgauge{margin:12px 2px 4px}
+.bfbar{position:relative;height:12px;border-radius:99px}
+.bfbar .mk{position:absolute;top:50%;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid var(--ink);transform:translate(-50%,-50%);box-shadow:0 2px 6px rgba(0,0,0,.25);transition:left .6s}
+.bflab{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);font-weight:700;margin-top:7px}
+/* ---------- mese: gauge în hero ---------- */
+.mealhero{background:var(--hero);position:relative;overflow:hidden}
+.mealhero::before{content:"";position:absolute;width:260px;height:260px;border-radius:50%;right:-90px;top:-140px;background:radial-gradient(circle,rgba(255,255,255,.14),rgba(255,255,255,0) 70%)}
+.mealhero>*{position:relative}
+.mealhero .mh-row{align-items:center}
+.mhgauge{width:72px;height:72px;position:relative;flex:none;margin-right:2px}
+.mhgauge svg{width:100%;height:100%;transform:rotate(-90deg);display:block}
+.mhgauge .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.mh-main{display:flex;align-items:center;gap:12px;flex:1 1 230px;min-width:0}
+.mealhero .mh-big{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;line-height:1.05}
+.mealhero .mh-big b{flex:1 0 100%}
+.mealhero .mh-big span{margin-left:0}
+.mealhero .mh-big .wbtn{margin-left:2px!important;vertical-align:0!important}
+.mealhero .mh-left{flex:0 1 auto}
+@media(max-width:480px){
+  .mealhero .mh-left{flex:1 0 100%;text-align:left;font-size:12.5px;opacity:.9}
+  #v-health .tabs2 button{padding:9px 6px;font-size:12.5px}
+  .sech .r.wrange{flex:1 0 100%;margin-left:0;display:flex;justify-content:center}
+  .sech .r.wrange button{flex:1}
+  .mstones{grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:7px}
+  .ms .ic{width:44px;height:44px}
+  .ms{padding:11px 6px 10px}
+}
+/* ---------- asistent: carduri cântar / ceas ---------- */
+.askcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 13px 13px;box-shadow:0 2px 10px rgba(20,60,45,.09);font-size:13px;line-height:1.45;max-width:94%;align-self:flex-start;margin-left:34px;animation:msgIn .25s ease-out}
+.askcard h4{margin:0 0 8px;font-size:13.5px;display:flex;align-items:center;gap:7px}
+.askcard h4 svg.lucide{width:15px;height:15px;color:var(--ai)}
+.askcard .scaleread{margin:0 0 8px;padding:11px 12px}
+.askcard .scaleread .sr-kg{font-size:26px}
+.askcard label{margin-top:6px}
+.askcard input{background:var(--soft2);border-color:transparent;border-radius:12px}
+.askcard .fitday{padding:10px 11px;margin-bottom:8px}
+.askcard .fbody{gap:10px}
+.askcard .frings{width:74px;height:74px}
+.askcard .pdesc{font-size:12px;color:var(--muted)}
 </style>
 <style id="pageStyle">@page{size:A4 landscape;margin:9mm}</style>
 </head>
@@ -755,7 +969,8 @@ header .ttl:active,header .logo:active{opacity:.75}
       <p class="muted" id="aiKeyWarn" style="margin:6px 0 0"></p>
       <div class="mealhero">
         <div class="mh-row">
-          <div class="mh-big"><b id="mhKcal">0</b><span>/ <span id="mhTgt">2000</span> kcal azi</span><button class="wbtn" onclick="editKcalGoal()" title="Schimbă ținta zilnică" style="margin-left:8px;padding:4px 9px;vertical-align:2px"><i data-lucide="pencil" style="width:12px;height:12px"></i></button></div>
+          <div class="mh-main"><div class="mhgauge"><svg viewBox="0 0 72 72"><defs><linearGradient id="mhg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9f2df"/><stop offset="1" stop-color="#7bd94a"/></linearGradient></defs><circle cx="36" cy="36" r="31" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="8"/><circle id="mhRing" cx="36" cy="36" r="31" fill="none" stroke="url(#mhg)" stroke-width="8" stroke-linecap="round" stroke-dasharray="194.8" stroke-dashoffset="194.8" style="transition:stroke-dashoffset .6s"/></svg><div class="mid" id="mhPct">0%</div></div>
+          <div class="mh-big"><b id="mhKcal">0</b><span>/ <span id="mhTgt">2000</span> kcal azi</span><button class="wbtn" onclick="editKcalGoal()" title="Schimbă ținta zilnică" style="margin-left:8px;padding:4px 9px;vertical-align:2px"><i data-lucide="pencil" style="width:12px;height:12px"></i></button></div></div>
           <div class="mh-left" id="mhLeft"></div>
         </div>
         <div class="pbar" style="margin-top:9px"><i id="calBar" style="width:0%"></i></div>
@@ -822,7 +1037,10 @@ header .ttl:active,header .logo:active{opacity:.75}
       </div>
 
       <div id="dt-prof">
-        <details class="setfold" style="border:1px solid var(--line);border-radius:12px;margin-bottom:12px">
+        <div id="pHero"></div>
+        <div class="statgrid" id="pStats"></div>
+        <div id="pEncour"></div>
+        <details class="setfold" style="border:1px solid var(--line);border-radius:14px;margin:12px 0 4px">
           <summary><i data-lucide="user-round-cog"></i>Editează datele mele<span class="chev"><i data-lucide="chevron-down"></i></span></summary>
           <div class="foldbody">
             <div class="g3">
@@ -841,15 +1059,12 @@ header .ttl:active,header .logo:active{opacity:.75}
             <div id="aiProfOut" style="margin-top:8px"></div>
           </div>
         </details>
-        <div class="statgrid" id="pStats"></div>
-        <div id="pEncour"></div>
 
-        <h3><i data-lucide="scale"></i>Cântărire din poză</h3>
-        <p class="muted" style="margin:-4px 0 10px">Fotografiază afișajul cântarului — AI-ul citește kilogramele și le trece în jurnal. Ține telefonul deasupra afișajului, cu cifrele întregi în cadru.</p>
+        <div class="sech"><span class="si"><i data-lucide="scale"></i></span><div><b>Cântărire din poză</b><span class="sub">fotografiezi afișajul cântarului, AI-ul citește kilogramele și le trece în jurnal</span></div></div>
         <button class="photozone" type="button" onclick="openCamera('scale')">
           <span class="pz-ic"><i data-lucide="scale"></i></span>
           <b>Fă o poză cântarului</b>
-          <span class="hint">AI-ul citește greutatea de pe afișaj și o salvează la cântăririle de azi — se descurcă și dacă poza iese cu susul în jos</span>
+          <span class="hint">Ține telefonul deasupra afișajului, cu cifrele întregi în cadru — merge și dacă poza iese cu susul în jos</span>
         </button>
         <div class="row" style="margin-top:8px;justify-content:center">
           <button class="btn ghost sm" onclick="document.getElementById('scalePhoto').click()"><i data-lucide="image"></i>Alege din galerie</button>
@@ -858,7 +1073,7 @@ header .ttl:active,header .logo:active{opacity:.75}
         <div id="scalePrev"></div>
         <div id="aiScaleOut"></div>
 
-        <h3><i data-lucide="trending-down"></i>Evoluția greutății</h3>
+        <div class="sech"><span class="si"><i data-lucide="trending-down"></i></span><div><b>Evoluția greutății</b><span class="sub">linia netezită, media pe 7 zile și ținta</span></div><div class="r wrange" id="wRange"></div></div>
         <div id="wChart" class="center muted">—</div>
         <div id="wStreak"></div>
       </div>
@@ -871,24 +1086,29 @@ header .ttl:active,header .logo:active{opacity:.75}
           <div id="bHipWrap"><label>Șold (cm)</label><input id="bHip" type="number" step="0.5" placeholder="punctul maxim"></div>
         </div>
         <div class="row act" style="margin-top:10px"><button class="btn" onclick="saveBody()"><i data-lucide="save"></i>Calculează analiza</button><button class="btn sec" onclick="aiBody()"><i data-lucide="sparkles"></i>Sfaturi AI</button></div>
+        <div id="bGauge"></div>
         <div class="statgrid" id="bStats" style="margin-top:12px"></div>
         <div id="bTips"></div>
         <div id="aiBodyOut" style="margin-top:8px"></div>
       </div>
 
       <div id="dt-fast" style="display:none">
-        <div class="center" style="margin-bottom:8px">
+        <div class="center" style="margin-bottom:4px">
           <label style="display:inline-block;margin-right:6px">Protocol</label>
           <select id="fProto" style="width:130px" onchange="fastProto()"><option value="16">16 : 8</option><option value="18">18 : 6</option><option value="20">20 : 4</option><option value="14">14 : 10</option><option value="custom">Custom…</option></select>
           <input id="fCustomH" type="number" min="1" max="72" step="0.5" placeholder="ore" style="width:80px;display:none;margin-left:6px" onchange="fastProto()">
         </div>
-        <div class="ring">
-          <svg class="rsvg" width="190" height="190"><circle cx="95" cy="95" r="84" fill="none" stroke="var(--soft)" stroke-width="14"/><circle id="fRing" cx="95" cy="95" r="84" fill="none" stroke="url(#fgrad)" stroke-width="14" stroke-linecap="round" stroke-dasharray="527.8" stroke-dashoffset="527.8"/><defs><linearGradient id="fgrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16a37f"/><stop offset="1" stop-color="#7bd94a"/></linearGradient></defs></svg>
-          <div class="mid"><b id="fTime">00:00</b><span id="fSub">oprit</span></div>
+        <div class="fring">
+          <svg viewBox="0 0 240 240"><defs><linearGradient id="fgrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16a37f"/><stop offset="1" stop-color="#7bd94a"/></linearGradient><filter id="fglow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+            <circle cx="120" cy="120" r="102" fill="none" stroke="var(--soft)" stroke-width="16"/>
+            <circle id="fRing" cx="120" cy="120" r="102" fill="none" stroke="url(#fgrad)" stroke-width="16" stroke-linecap="round" stroke-dasharray="640.9" stroke-dashoffset="640.9" filter="url(#fglow)" style="transition:stroke-dashoffset .6s"/>
+          </svg>
+          <div class="mid"><b id="fTime">00:00</b><span id="fSub">oprit</span><span class="fst" id="fStage" style="display:none"></span></div>
         </div>
         <div class="center muted" id="fWhen" style="margin:0 0 10px;font-size:13.5px"></div>
         <div class="center"><button class="btn" id="fBtn" onclick="fastToggle()"><i data-lucide="play"></i>Începe fastingul</button></div>
-        <h3><i data-lucide="history"></i>Istoric (ultimele 7)</h3>
+        <div class="fstages" id="fStages"></div>
+        <div class="sech"><span class="si"><i data-lucide="history"></i></span><div><b>Istoric</b><span class="sub">ultimele posturi, verde = țintă atinsă</span></div></div>
         <div id="fHist" class="muted">—</div>
       </div>
 
@@ -904,7 +1124,7 @@ header .ttl:active,header .logo:active{opacity:.75}
           </div>
           <button class="btn mealadd-btn" onclick="addSport()"><i data-lucide="plus"></i>Adaugă sport</button>
         </div>
-        <h3><i data-lucide="flame"></i>Săptămâna aceasta</h3>
+        <div class="sech"><span class="si"><i data-lucide="flame"></i></span><div><b>Ultimele 7 zile</b><span class="sub">minute de mișcare pe zi, față de cele 150 recomandate de OMS</span></div></div>
         <div id="sportWeek" class="muted">—</div>
       </div>
 
@@ -922,13 +1142,17 @@ header .ttl:active,header .logo:active{opacity:.75}
         <div id="fitPrev"></div>
         <div id="aiFitOut"></div>
         <div id="fitCalib"></div>
-        <h3><i data-lucide="history"></i>Zile importate</h3>
+        <div class="sech"><span class="si"><i data-lucide="history"></i></span><div><b>Zile importate</b><span class="sub">inelele și cifrele citite din ceas</span></div></div>
         <div id="fitList" class="muted">—</div>
       </div>
 
       <div id="dt-prog" style="display:none">
         <div id="progHero"></div>
         <div id="progNext"></div>
+        <div id="progWeek"></div>
+        <div id="progRecent"></div>
+        <div class="sech"><span class="si"><i data-lucide="medal"></i></span><div><b>Toate reperele</b><span class="sub">cele atinse sunt colorate, restul arată cât mai ai</span></div></div>
+        <div id="progFilter"></div>
         <div id="progList"></div>
       </div>
 
@@ -1245,7 +1469,7 @@ header .ttl:active,header .logo:active{opacity:.75}
   <div id="askAtt" class="askatt"></div>
   <input type="file" id="askFile" accept="image/*,application/pdf" multiple style="display:none" onchange="askFilesPicked(this)">
   <div class="askrow">
-    <button id="askClip" class="clipbtn" onclick="askPickFile()" title="Atașează o poză (meniu, etichetă, farfurie)" aria-label="Atașează o poză"><i data-lucide="paperclip"></i></button>
+    <button id="askClip" class="clipbtn" onclick="askPickFile()" title="Atașează o poză (meniu, etichetă, farfurie, cântar, captură din ceas)" aria-label="Atașează o poză"><i data-lucide="paperclip"></i></button>
     <textarea id="askInput" rows="1" placeholder="Vorbește sau scrie…" onkeydown="askKey(event)" oninput="askBarSync();askGrow()"></textarea>
     <button id="askSendBtn" class="btn sendbtn" onclick="askSend()" title="Trimite" style="display:none"><i data-lucide="send"></i></button>
     <button id="askMic" class="micbtn" onclick="askVoice()" title="Vorbește"><i data-lucide="mic"></i></button>
@@ -1330,7 +1554,7 @@ header .ttl:active,header .logo:active{opacity:.75}
 <script>
 /* ============ FamLink v1.0 — arhitectură ArhiLink (single-file, localStorage) ============ */
 const KEY='famlink_v1';
-const APP_VER='3.11.1';
+const APP_VER='3.12.0';
 /* prima literă mare (titluri de obiective, etichete de mementouri, titluri AI) */
 const capFirst=s=>{s=String(s||'').trim();return s?s.charAt(0).toLocaleUpperCase('ro-RO')+s.slice(1):s;};
 /* curăță titlul unui obiectiv: scoate din față formulările de COMANDĂ
@@ -2266,25 +2490,51 @@ function calc(p,w){
   return {bmr,tdee,target,bmi};
 }
 function paintStats(pp,ww){
-  const p=pp||getProf(),w=(ww!==undefined&&ww!==null&&ww!=='')?ww:lastW();
+  const p=pp||getProf(),w=(ww!==undefined&&ww!==null&&ww!=='')?Number(ww):lastW();
   const c=calc(p,w);
-  const el=document.getElementById('pStats');
-  if(!c){el.innerHTML='<div class="empty" style="grid-column:1/-1">Completează profilul și salvează pentru a vedea calculele.</div>';return;}
-  const toGo=p.target?(w-p.target).toFixed(1):null;
+  const hero=document.getElementById('pHero'),el=document.getElementById('pStats');
+  if(!c){if(hero)hero.innerHTML='';el.innerHTML='<div class="empty" style="grid-column:1/-1">Completează profilul (vârstă, înălțime, greutate) din „Editează datele mele" și salvează — de aici încolo aplicația ține singură socoteala.</div>';return;}
+  const mc=msCtx();
+  const start=mc.start!=null?mc.start:w,tgt=Number(p.target)||0;
+  const lost=Math.round((start-w)*10)/10;
+  const toGo=tgt?Math.round((w-tgt)*10)/10:null;
   const bmiTxt=c.bmi<18.5?'subponderal':c.bmi<25?'normal':c.bmi<30?'supraponderal':'obezitate';
-  /* v3.8.2: ținta afișată respectă și ținta de calorii setată manual (pKcal / creionul
-     din Mese) — înainte aici apărea mereu doar calculul automat, alt număr decât în Mese */
+  const bmiCol=c.bmi<18.5?'var(--blue)':c.bmi<25?'var(--pri)':c.bmi<30?'var(--amber)':'var(--rose)';
   const custom=Number(p.kcalGoal)>0,tgtK=custom?Math.round(Number(p.kcalGoal)):c.target;
-  el.innerHTML=`
-    <div class="stat"><b>${w}</b><span>kg acum</span></div>
-    ${toGo!==null?`<div class="stat"><b style="color:${toGo>0?'var(--rose)':'var(--pri)'}">${toGo>0?'-'+toGo:'✓'}</b><span>${toGo>0?'kg până la țintă':'țintă atinsă!'}</span></div>`:''}
-    <div class="stat"><b>${c.bmi}</b><span>IMC · ${bmiTxt}</span></div>
-    <div class="stat"><b>${c.bmr}</b><span>BMR kcal</span></div>
-    <div class="stat"><b>${c.tdee}</b><span>menținere kcal</span></div>
-    <div class="stat"><b style="color:var(--pri)">${tgtK}</b><span>ținta zilnică kcal${custom?' · setată de tine':''}</span></div>`;
+  const fmt=v=>String(v).replace('.',',');
+  /* drumul start → țintă: procentul parcurs */
+  let pct=null;
+  if(tgt&&Math.abs(start-tgt)>=0.5)pct=Math.max(0,Math.min(1,(start-w)/(start-tgt)));
+  const R=46,C=2*Math.PI*R;
+  const wk=mc.slope!=null?Math.round(mc.slope*7*100)/100:null;
+  let eta='';
+  if(mc.slope!=null&&tgt&&toGo>0.2&&mc.slope<-0.005){const days=Math.ceil(toGo/(-mc.slope));if(days>0&&days<900){const d=new Date();d.setDate(d.getDate()+days);eta=d.getDate()+' '+MONTHS[d.getMonth()].slice(0,3)+(d.getFullYear()!==new Date().getFullYear()?' '+d.getFullYear():'');}}
+  if(hero)hero.innerHTML=`<div class="phero">
+    <div class="ph-top">
+      <div class="grow" style="min-width:0">
+        <div class="ph-k">Greutatea acum</div>
+        <div class="ph-big">${fmt(w)}<small>kg</small></div>
+        <div class="ph-chips">
+          ${lost>0.05?`<span class="ph-chip good"><i data-lucide="trending-down"></i>−${fmt(lost)} kg de la start</span>`:lost<-0.05?`<span class="ph-chip bad"><i data-lucide="trending-up"></i>+${fmt(Math.abs(lost))} kg de la start</span>`:`<span class="ph-chip"><i data-lucide="minus"></i>la greutatea de start</span>`}
+          ${toGo!==null?(toGo>0.2?`<span class="ph-chip"><i data-lucide="target"></i>mai ai ${fmt(toGo)} kg</span>`:toGo<-0.2?`<span class="ph-chip"><i data-lucide="target"></i>${fmt(Math.abs(toGo))} kg sub țintă</span>`:`<span class="ph-chip good"><i data-lucide="check"></i>țintă atinsă</span>`):''}
+          ${wk!=null&&Math.abs(wk)>=0.05?`<span class="ph-chip"><i data-lucide="activity"></i>${wk>0?'+':'−'}${fmt(Math.abs(wk))} kg/săpt</span>`:''}
+        </div>
+      </div>
+      ${pct!==null?`<div class="ph-ring"><svg viewBox="0 0 108 108"><defs><linearGradient id="phg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9f2df"/><stop offset="1" stop-color="#7bd94a"/></linearGradient></defs><circle cx="54" cy="54" r="${R}" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="9"/><circle cx="54" cy="54" r="${R}" fill="none" stroke="url(#phg)" stroke-width="9" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C*(1-pct)).toFixed(1)}" style="transition:stroke-dashoffset .8s cubic-bezier(.2,.8,.2,1)"/></svg><div class="mid"><b>${Math.round(pct*100)}%</b><span>din drum</span></div></div>`:''}
+    </div>
+    ${tgt?`<div class="ph-journey"><div class="ph-jbar"><i style="width:${pct!==null?Math.round(pct*100):0}%"></i><span class="dot" style="left:${pct!==null?Math.round(pct*100):0}%"></span></div>
+      <div class="ph-jlab"><span><small>Start</small>${fmt(start)} kg</span><span style="text-align:center"><small>${eta?'La țintă pe la':'Acum'}</small>${eta||fmt(w)+' kg'}</span><span style="text-align:right"><small>Țintă</small>${fmt(tgt)} kg</span></div></div>`:''}
+  </div>`;
+  const tile=(v,l,ic,col,extra)=>`<div class="stat${extra||''}"><span class="ti"><i data-lucide="${ic}"></i></span><b${col?` style="color:${col}"`:''}>${v}</b><span>${l}</span></div>`;
+  el.innerHTML=
+    tile(fmt(c.bmi),`IMC · <span class="sm" style="color:${bmiCol}">${bmiTxt}</span>`,'heart-pulse',bmiCol)+
+    tile(c.bmr.toLocaleString('ro-RO'),'BMR · kcal în repaus','bed')+
+    tile(c.tdee.toLocaleString('ro-RO'),'menținere kcal/zi'+(p.actCalib&&p.actCalib.on?' · <span class="sm" style="color:var(--pri2)">după ceas</span>':''),'flame')+
+    tile(tgtK.toLocaleString('ro-RO'),'ținta zilnică kcal'+(custom?' · <span class="sm" style="color:var(--pri2)">setată de tine</span>':''),'target','var(--pri)',' acc')+
+    (mc.wStreak>=2?tile(mc.wStreak,'zile la rând cântărit','calendar-check'):tile(mc.wn,mc.wn===1?'cântărire notată':'cântăriri notate','scale'))+
+    (Number(p.waist)?tile(p.waist+'<small> cm</small>','talie'+(mc.b&&mc.b.whtr?(' · <span class="sm" style="color:'+(mc.b.whtr>0.5?'var(--rose)':'var(--pri2)')+'">'+String(mc.b.whtr).replace('.',',')+' din înălțime</span>'):''),'ruler'):'');
   LI();
-}
-/* v3.8.2: orice schimbare din profil (greutate, țintă kg, țintă kcal, obiectiv apă…)
+}/* v3.8.2: orice schimbare din profil (greutate, țintă kg, țintă kcal, obiectiv apă…)
    împrospătează TOT ce depinde de ea: statisticile, graficul greutății, Mese (ținta kcal,
    apa, graficul pe 7 zile, rețetele), analiza corporală și sportul. */
 function rHealthAll(){
@@ -2321,23 +2571,61 @@ function saveProfile(){
   if(w){S.diet.weights[mid]=S.diet.weights[mid]||[];const ws=S.diet.weights[mid];const t=todayStr();const ex=ws.find(x=>x.d===t);if(ex)ex.w=w;else ws.push({d:t,w});ws.sort((a,b)=>a.d<b.d?-1:1);}
   save();rHealthAll();toast('Profil salvat'); // v3.8.2: recalculează tot, nu doar statisticile + graficul; v3.11: + verificarea reperelor
 }
+let _wRange=90;
+function setWRange(n){_wRange=n;paintChart();}
 function paintChart(){
-  const ws=S.diet.weights[dietMid()]||[];
-  const el=document.getElementById('wChart');
-  if(ws.length<2){el.innerHTML='<span class="muted">Cântărește-te câteva zile ca să apară graficul</span>';return;}
-  const W=560,H=170,P=28;
-  const min=Math.min(...ws.map(x=>x.w))-1,max=Math.max(...ws.map(x=>x.w))+1;
-  const X=i=>P+i*(W-2*P)/(ws.length-1),Y=w=>H-P-(w-min)*(H-2*P)/(max-min||1);
-  const pts=ws.map((x,i)=>X(i)+','+Y(x.w)).join(' ');
-  const tgt=getProf().target;
-  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:620px">
-    ${tgt&&tgt>min&&tgt<max?`<line x1="${P}" x2="${W-P}" y1="${Y(tgt)}" y2="${Y(tgt)}" stroke="#16a37f" stroke-dasharray="5 4" stroke-width="1.5"/><text x="${W-P}" y="${Y(tgt)-4}" font-size="10" fill="#16a37f" text-anchor="end">țintă ${tgt} kg</text>`:''}
-    <polyline points="${pts}" fill="none" stroke="#16a37f" stroke-width="2.5" stroke-linejoin="round"/>
-    ${ws.map((x,i)=>`<circle cx="${X(i)}" cy="${Y(x.w)}" r="3.5" fill="#16a37f"/><text x="${X(i)}" y="${Y(x.w)-8}" font-size="9.5" fill="#1e3a34" text-anchor="middle" font-weight="700">${x.w}</text>`).join('')}
-    ${ws.map((x,i)=>(i===0||i===ws.length-1||ws.length<8)?`<text x="${X(i)}" y="${H-8}" font-size="9" fill="#7d938c" text-anchor="middle">${x.d.slice(5).replace('-','.')}</text>`:'').join('')}
-  </svg>`;
+  const all=(S.diet.weights[dietMid()]||[]).slice();
+  const el=document.getElementById('wChart');if(!el)return;
+  const rg=document.getElementById('wRange');
+  if(rg)rg.innerHTML=[[30,'30 zile'],[90,'3 luni'],[0,'Tot']].map(x=>`<button class="${_wRange===x[0]?'on':''}" onclick="setWRange(${x[0]})">${x[1]}</button>`).join('');
+  if(all.length<2){if(rg)rg.innerHTML='';el.innerHTML='<div class="empty">Cântărește-te câteva zile ca să apară graficul.</div>';return;}
+  const lim=_wRange?Date.now()-_wRange*864e5:0;
+  let ws=all.filter(x=>!lim||fromStr(x.d).getTime()>=lim);
+  if(ws.length<2)ws=all.slice(-2);
+  const W=600,H=230,PL=40,PR=16,PT=24,PB=30;
+  const tgt=Number(getProf().target)||0;
+  const vals=ws.map(x=>Number(x.w));
+  let min=Math.min(...vals),max=Math.max(...vals);
+  if(tgt&&tgt<min&&min-tgt<8)min=tgt;
+  if(tgt&&tgt>max&&tgt-max<8)max=tgt;
+  const span=Math.max(1,max-min);min-=span*.14;max+=span*.14;
+  const t0=fromStr(ws[0].d).getTime(),t1=fromStr(ws[ws.length-1].d).getTime(),ts=Math.max(1,t1-t0);
+  const X=x=>PL+(fromStr(x.d).getTime()-t0)/ts*(W-PL-PR);
+  const Y=v=>PT+(max-v)/(max-min)*(H-PT-PB);
+  const pts=ws.map(x=>[X(x),Y(Number(x.w))]);
+  const f1=n=>n.toFixed(1);
+  /* curbă netezită (Catmull-Rom → Bézier), fără să sară peste puncte */
+  const path=pts.map((p,i)=>{if(!i)return 'M'+f1(p[0])+' '+f1(p[1]);const p0=pts[i-1],pm=pts[i-2]||p0,pn=pts[i+1]||p;const c1=[p0[0]+(p[0]-pm[0])/6,p0[1]+(p[1]-pm[1])/6],c2=[p[0]-(pn[0]-p0[0])/6,p[1]-(pn[1]-p0[1])/6];return 'C'+f1(c1[0])+' '+f1(c1[1])+' '+f1(c2[0])+' '+f1(c2[1])+' '+f1(p[0])+' '+f1(p[1]);}).join('');
+  const area=path+' L'+f1(pts[pts.length-1][0])+' '+(H-PB)+' L'+f1(pts[0][0])+' '+(H-PB)+' Z';
+  /* media mobilă pe 7 zile — linia pe care merită să te uiți */
+  const ma=ws.map(x=>{const t=fromStr(x.d).getTime();const win=ws.filter(y=>{const u=fromStr(y.d).getTime();return u<=t&&u>t-7*864e5;});return [X(x),Y(win.reduce((a,y)=>a+Number(y.w),0)/win.length)];});
+  const maPath=ma.map((p,i)=>(i?'L':'M')+f1(p[0])+' '+f1(p[1])).join('');
+  const gy=[];for(let i=0;i<=3;i++){const v=min+(max-min)*i/3,y=f1(Y(v));gy.push(`<line x1="${PL}" x2="${W-PR}" y1="${y}" y2="${y}" style="stroke:var(--line)" stroke-dasharray="2 4"/><text x="${PL-7}" y="${f1(Y(v)+3.5)}" font-size="10" style="fill:var(--muted)" text-anchor="end" font-weight="600">${(Math.round(v*10)/10).toString().replace('.',',')}</text>`);}
+  const nx=Math.min(5,ws.length),gx=[];
+  for(let i=0;i<nx;i++){const k=Math.round(i*(ws.length-1)/(nx-1||1)),x=ws[k],d=fromStr(x.d);gx.push(`<text x="${f1(X(x))}" y="${H-9}" font-size="10" style="fill:var(--muted)" text-anchor="${i===0?'start':i===nx-1?'end':'middle'}" font-weight="600">${d.getDate()} ${MONTHS[d.getMonth()].slice(0,3)}</text>`);}
+  const iMin=vals.indexOf(Math.min(...vals)),last=pts[pts.length-1],lv=vals[vals.length-1];
+  const first=vals[0],delta=Math.round((lv-first)*10)/10;
+  el.innerHTML=`<div class="wchart"><svg viewBox="0 0 ${W} ${H}" id="wSvg">
+    <defs><linearGradient id="wga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--pri);stop-opacity:.3"/><stop offset="1" style="stop-color:var(--pri);stop-opacity:0"/></linearGradient><linearGradient id="wgl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--acc)"/><stop offset="1" style="stop-color:var(--pri)"/></linearGradient></defs>
+    ${gy.join('')}
+    ${tgt&&tgt>min&&tgt<max?`<line x1="${PL}" x2="${W-PR}" y1="${f1(Y(tgt))}" y2="${f1(Y(tgt))}" style="stroke:var(--ai)" stroke-dasharray="6 4" stroke-width="1.5"/><text x="${W-PR}" y="${f1(Y(tgt)-5)}" font-size="10" style="fill:var(--ai)" text-anchor="end" font-weight="800">țintă ${String(tgt).replace('.',',')}</text>`:''}
+    <path d="${area}" fill="url(#wga)"/>
+    ${ws.length>=4?`<path d="${maPath}" fill="none" style="stroke:var(--muted)" stroke-width="1.6" stroke-opacity=".6" stroke-linejoin="round"/>`:''}
+    <path d="${path}" fill="none" stroke="url(#wgl)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    ${pts.map(p=>`<circle cx="${f1(p[0])}" cy="${f1(p[1])}" r="${ws.length>40?2:3}" style="fill:var(--card);stroke:var(--pri)" stroke-width="1.5"/>`).join('')}
+    ${iMin!==vals.length-1&&iMin!==0?`<text x="${f1(pts[iMin][0])}" y="${f1(pts[iMin][1]+15)}" font-size="9.5" style="fill:var(--pri2)" text-anchor="middle" font-weight="800">min ${String(vals[iMin]).replace('.',',')}</text>`:''}
+    <circle cx="${f1(last[0])}" cy="${f1(last[1])}" r="8" style="fill:var(--pri);fill-opacity:.18"/><circle cx="${f1(last[0])}" cy="${f1(last[1])}" r="4.5" style="fill:var(--pri);stroke:var(--card)" stroke-width="2"/>
+    <text x="${f1(last[0])}" y="${f1(last[1]-12)}" font-size="11.5" style="fill:var(--ink)" text-anchor="${last[0]>W-70?'end':'middle'}" font-weight="800">${String(lv).replace('.',',')} kg</text>
+    ${gx.join('')}
+  </svg><div class="wtip" id="wTip"></div></div>
+  <div class="wlegend"><span><i style="background:var(--pri)"></i>greutatea</span>${ws.length>=4?'<span><i style="background:var(--muted)"></i>media pe 7 zile</span>':''}${tgt?'<span><i style="background:var(--ai)"></i>ținta</span>':''}<span style="color:${delta<0?'var(--pri2)':delta>0?'var(--rose)':'var(--muted)'}">${delta>0?'+':''}${String(delta).replace('.',',')} kg în perioada afișată</span></div>`;
+  const svg=document.getElementById('wSvg'),tip=document.getElementById('wTip');
+  if(svg&&tip){
+    const show=e=>{const r=svg.getBoundingClientRect();if(!r.width)return;const px=(e.clientX-r.left)/r.width*W;let bi=0,bd=1e9;pts.forEach((p,i)=>{const d=Math.abs(p[0]-px);if(d<bd){bd=d;bi=i;}});const p=pts[bi];tip.style.left=(p[0]/W*100)+'%';tip.style.top=(p[1]/H*100)+'%';tip.style.display='block';tip.textContent=remDateLabel(ws[bi].d)+' · '+String(ws[bi].w).replace('.',',')+' kg';};
+    svg.addEventListener('pointermove',show);svg.addEventListener('pointerdown',show);
+    svg.addEventListener('pointerleave',()=>{tip.style.display='none';});
+  }
 }
-
 /* ---- analiză corporală (US Navy + praguri OMS) ---- */
 function rBody(){
   const p=getProf();
@@ -2368,16 +2656,23 @@ function bfCat(bf,sex){
 }
 function paintBody(){
   const p=getProf(),w=lastW(),b=bodyCalc();
-  const st=document.getElementById('bStats'),tp=document.getElementById('bTips');
-  if(!b){st.innerHTML='<div class="empty" style="grid-column:1/-1">Completează profilul (înălțime + greutate) și măsurile de mai sus.</div>';tp.innerHTML='';return;}
+  const st=document.getElementById('bStats'),tp=document.getElementById('bTips'),gg=document.getElementById('bGauge');
+  if(!b){st.innerHTML='<div class="empty" style="grid-column:1/-1">Completează profilul (înălțime + greutate) și măsurile de mai sus.</div>';tp.innerHTML='';if(gg)gg.innerHTML='';return;}
   const cat=bfCat(b.bf,p.sex);
   const waistRisk=p.sex==='F'?(p.waist>88?2:p.waist>80?1:0):(p.waist>102?2:p.waist>94?1:0);
-  st.innerHTML=`
-    <div class="stat"><b style="color:var(--pri)">${b.bf}%</b><span>grăsime corporală · ${cat}</span></div>
-    <div class="stat"><b>${b.fatKg}</b><span>kg masă grasă</span></div>
-    <div class="stat"><b>${b.leanKg}</b><span>kg masă slabă</span></div>
-    <div class="stat"><b style="color:${b.whtr>0.5?'var(--rose)':'var(--pri)'}">${b.whtr}</b><span>talie/înălțime ${b.whtr>0.5?'· peste 0,5':'· OK'}</span></div>
-    <div class="stat"><b style="color:${['var(--pri)','var(--amber)','var(--rose)'][waistRisk]}">${p.waist} cm</b><span>talie · risc ${['scăzut','crescut','ridicat'][waistRisk]}</span></div>`;
+  /* gauge: benzile de grăsime corporală (US Navy / ACE) pe o scară 0–45 % */
+  const t=p.sex==='F'?[20,24,31]:[13,17,24],pc=v=>Math.round(Math.min(100,v/45*100));
+  const catCol=cat==='ridicat'?'var(--rose)':cat==='mediu'?'var(--amber)':'var(--pri)';
+  if(gg)gg.innerHTML=`<div class="bfgauge"><div class="spread" style="margin-bottom:8px"><span style="font-size:13px;font-weight:700">Grăsime corporală</span><span class="pill" style="background:var(--soft2);color:${catCol}">${String(b.bf).replace('.',',')} % · ${cat}</span></div>
+    <div class="bfbar" style="background:linear-gradient(90deg,#5b8fc7 0 ${pc(t[0])}%,#67b98d ${pc(t[0])}% ${pc(t[1])}%,#e2a53f ${pc(t[1])}% ${pc(t[2])}%,#e0708a ${pc(t[2])}% 100%)"><span class="mk" style="left:${pc(b.bf)}%"></span></div>
+    <div class="bflab"><span>atletic</span><span>fitness</span><span>mediu</span><span>ridicat</span></div></div>`;
+  const tile=(v,l,ic,col)=>`<div class="stat"><span class="ti"><i data-lucide="${ic}"></i></span><b${col?` style="color:${col}"`:''}>${v}</b><span>${l}</span></div>`;
+  st.innerHTML=
+    tile(String(b.bf).replace('.',',')+'<small> %</small>','grăsime corporală · <span class="sm" style="color:'+catCol+'">'+cat+'</span>','percent',catCol)+
+    tile(String(b.fatKg).replace('.',',')+'<small> kg</small>','masă grasă','circle-dashed')+
+    tile(String(b.leanKg).replace('.',',')+'<small> kg</small>','masă slabă (mușchi, oase, apă)','biceps-flexed')+
+    tile(String(b.whtr).replace('.',','),'talie / înălțime · <span class="sm" style="color:'+(b.whtr>0.5?'var(--rose)':'var(--pri2)')+'">'+(b.whtr>0.5?'peste 0,5':'sub 0,5, OK')+'</span>','ruler',b.whtr>0.5?'var(--rose)':'var(--pri)')+
+    tile(p.waist+'<small> cm</small>','talie · risc <span class="sm" style="color:'+['var(--pri2)','var(--amber)','var(--rose)'][waistRisk]+'">'+['scăzut','crescut','ridicat'][waistRisk]+'</span>','ruler',['var(--pri)','var(--amber)','var(--rose)'][waistRisk]);
   const tips=[];
   if(waistRisk>0)tips.push('Talia peste pragul OMS ('+(p.sex==='F'?'80':'94')+' cm) crește riscul cardiometabolic — prioritizează reducerea ei, nu doar kilogramele.');
   if(b.whtr>0.5)tips.push('Regula OMS „ține talia sub jumătate din înălțime": ținta ta de talie e sub '+Math.round(p.h/2)+' cm.');
@@ -2385,11 +2680,10 @@ function paintBody(){
   tips.push('Un deficit de ~500 kcal/zi ≈ 0,5 kg/săptămână (CDC/NIH) — ritm sigur și sustenabil; evită scăderi sub 1.200 kcal/zi fără supraveghere medicală.');
   tips.push('La slăbit, 1,2–1,6 g proteine/kg corp/zi ajută sațietatea și mușchii — pentru tine ≈ '+Math.round(w*1.2)+'–'+Math.round(w*1.6)+' g/zi.');
   tips.push('Zahăr adăugat sub 10% din calorii și 25–30 g fibre/zi (OMS); somnul de 7–9 h susține hormonii sațietății.');
-  tp.innerHTML='<h3><i data-lucide="clipboard-list"></i>Sfaturi (ghiduri OMS / CDC / NIH)</h3>'+tips.map(t=>`<div class="mealrow" style="justify-content:flex-start;gap:8px"><i data-lucide="check" style="color:var(--pri);width:16px;height:16px;flex:none;margin-top:2px"></i><span>${t}</span></div>`).join('')+
+  tp.innerHTML='<div class="sech"><span class="si"><i data-lucide="clipboard-list"></i></span><div><b>Sfaturi</b><span class="sub">ghiduri OMS / CDC / NIH, aplicate pe cifrele tale</span></div></div>'+tips.map(t=>`<div class="mealrow" style="justify-content:flex-start;gap:8px;align-items:flex-start"><i data-lucide="check" style="color:var(--pri);width:16px;height:16px;flex:none;margin-top:2px"></i><span>${t}</span></div>`).join('')+
     '<p class="muted" style="margin-top:8px">Surse publice: WHO Guidelines on physical activity (2020), WHO healthy diet fact sheet, CDC Healthy Weight, NIH/NHLBI Obesity Guidelines, metoda US Navy (Hodgdon &amp; Beckett, 1984). Informativ — nu înlocuiește medicul.</p>';
   LI();
 }
-
 /* ---- fasting ---- */
 function fastProto(){
   const sel=document.getElementById('fProto'),ci=document.getElementById('fCustomH');
@@ -2438,6 +2732,8 @@ function fmtDT(d){
   const lbl=ds===todayStr()?'azi':ds===dstr(tom)?'mâine':ds===dstr(yest)?'ieri':d.toLocaleDateString('ro-RO',{weekday:'short',day:'numeric',month:'short'});
   return lbl+' la '+pad(d.getHours())+':'+pad(d.getMinutes());
 }
+/* ce se întâmplă în corp pe parcursul postului — repere orientative, nu diagnostic */
+const FAST_STAGES=[[0,'Digestie','0–4 h','glicemia urcă și coboară'],[4,'Glicogen','4–12 h','corpul consumă rezervele din ficat'],[12,'Ardere','12–16 h','trece pe grăsimi ca sursă'],[16,'Autofagie','16 h+','curățenie celulară']];
 function fastPaint(full){
   const f=S.diet.fasting;
   if(document.getElementById('dt-fast').style.display==='none'&&!full)return;
@@ -2447,12 +2743,13 @@ function fastPaint(full){
     if(['14','16','18','20'].includes(hv)){selP.value=hv;ci.style.display='none';}
     else{selP.value='custom';ci.style.display='';if(!ci.value)ci.value=hv;}
   }else{ci.style.display='';}
-  const C=527.8,ring=document.getElementById('fRing');
-  const when=document.getElementById('fWhen');
+  const C=640.9,ring=document.getElementById('fRing');
+  const when=document.getElementById('fWhen'),stEl=document.getElementById('fStage'),sgEl=document.getElementById('fStages');
+  let elH=0;
   if(f.active&&f.start){
     const st=new Date(f.start),en=new Date(st.getTime()+f.hours*3600e3);
     const el=(Date.now()-st)/1000,goal=f.hours*3600;
-    const pct=Math.min(1,el/goal);
+    const pct=Math.min(1,el/goal);elH=el/3600;
     ring.style.strokeDashoffset=C*(1-pct);
     const hh=Math.floor(el/3600),mm=Math.floor(el%3600/60);
     document.getElementById('fTime').textContent=hh+':'+pad(mm);
@@ -2460,24 +2757,22 @@ function fastPaint(full){
     document.getElementById('fSub').textContent=rem>0?('mai ai '+Math.floor(rem/3600)+':'+pad(Math.floor(rem%3600/60))+' din '+f.hours+' h'):'țintă atinsă — bravo!';
     if(when)when.innerHTML='<i data-lucide="play" style="width:13px;height:13px;color:var(--pri);vertical-align:-2px"></i> A început <b>'+fmtDT(st)+'</b> &nbsp;·&nbsp; <i data-lucide="utensils" style="width:13px;height:13px;color:var(--pri);vertical-align:-2px"></i> poți mânca <b>'+fmtDT(en)+'</b>';
     if(document.getElementById('fBtn').dataset.st!=='on'){document.getElementById('fBtn').innerHTML='<i data-lucide="square"></i>Oprește fastingul';document.getElementById('fBtn').dataset.st='on';}
-    LI();
   }else{
     ring.style.strokeDashoffset=C;
     document.getElementById('fTime').textContent='00:00';
     document.getElementById('fSub').textContent='oprit';
     if(when){const en=new Date(Date.now()+(f.hours||16)*3600e3);when.innerHTML='Dacă începi acum ('+(f.hours||16)+' h), poți mânca <b>'+fmtDT(en)+'</b>';}
     if(document.getElementById('fBtn').dataset.st!=='off'){document.getElementById('fBtn').innerHTML='<i data-lucide="play"></i>Începe fastingul';document.getElementById('fBtn').dataset.st='off';}
-    LI();
   }
-  document.getElementById('fHist').innerHTML=f.history.length?f.history.slice(0,7).map(h=>{
-    const ok=h.h>=h.goal;
-    const st=new Date(h.start),en=h.end?new Date(h.end):null;
-    const dpart=st.toLocaleDateString('ro-RO',{day:'numeric',month:'short'})+' '+pad(st.getHours())+':'+pad(st.getMinutes())+(en?(' → '+(dstr(en)===dstr(st)?'':en.toLocaleDateString('ro-RO',{day:'numeric',month:'short'})+' ')+pad(en.getHours())+':'+pad(en.getMinutes())):'');
-    return `<div class="mealrow"><span>${dpart} <span class="muted">· ${h.h} h / ${h.goal} h</span></span><i data-lucide="${ok?'circle-check':'triangle-alert'}" style="color:${ok?'var(--pri)':'var(--amber)'};width:17px;height:17px"></i></div>`;
-  }).join(''):'<div class="empty">Încă niciun fasting încheiat.</div>';
+  /* etapele postului — cea curentă e evidențiată, cele trecute se estompează */
+  const cur=f.active?FAST_STAGES.filter(s=>elH>=s[0]).pop():null;
+  if(stEl){const k=cur?(cur[1]+' · '+cur[3]):'';if(stEl.textContent!==k)stEl.textContent=k;stEl.style.display=cur?'':'none';}
+  if(sgEl){const h=FAST_STAGES.map((s,i)=>{const nx=FAST_STAGES[i+1];const on=f.active&&elH>=s[0]&&(!nx||elH<nx[0]);const done=f.active&&nx&&elH>=nx[0];return '<div class="fstage'+(on?' on':'')+(done?' done':'')+'"><b>'+s[1]+'</b>'+s[2]+'</div>';}).join('');if(sgEl.innerHTML!==h)sgEl.innerHTML=h;}
+  const hist=f.history.slice(0,10),okN=f.history.filter(h=>Number(h.h)>=Number(h.goal)).length;
+  const hh=hist.length?('<div class="fhist">'+hist.map(h=>{const ok=Number(h.h)>=Number(h.goal);const st=new Date(h.start);return '<div class="fh" title="'+h.h+' h din '+h.goal+' h"><span class="c'+(ok?'':' miss')+'">'+(Math.round(h.h*10)/10).toString().replace('.',',')+'h</span><small>'+st.getDate()+' '+MONTHS[st.getMonth()].slice(0,3)+'</small></div>';}).join('')+'</div><p class="muted" style="font-size:12px;margin-top:6px">'+okN+' din '+f.history.length+' duse la capăt · galben = oprit înainte de țintă</p>'):'<div class="empty">Încă niciun fasting încheiat.</div>';
+  const fhEl=document.getElementById('fHist');if(fhEl.innerHTML!==hh)fhEl.innerHTML=hh;
   LI();
-}
-setInterval(()=>{if(S.diet.fasting.active&&document.getElementById('dt-fast').style.display!=='none'&&VIEW==='health')fastPaint();},1000);
+}setInterval(()=>{if(S.diet.fasting.active&&document.getElementById('dt-fast').style.display!=='none'&&VIEW==='health')fastPaint();},1000);
 
 /* ---- mese ---- */
 const RECS=[
@@ -2514,14 +2809,25 @@ function rSport(){
   const totMin=ss.filter(s=>!s.off).reduce((a,b)=>a+(b.minutes||0),0),totCal=sportKcalToday();
   document.getElementById('sportPill').textContent=totMin+' min · '+totCal+' kcal';
   document.getElementById('sportList').innerHTML=ss.length?ss.map(s=>`<div class="mealrow"${s.off?' style="opacity:.5"':''}><label style="display:flex;align-items:center;gap:9px;cursor:pointer;margin:0"><input type="checkbox" ${s.off?'':'checked'} onchange="toggleSportOff('${s.id}')" style="width:16px;height:16px;accent-color:var(--pri);flex:none" title="Include în bugetul de calorii"><span><b>${esc(s.name)}</b> · ${s.minutes} min</span></label><span class="row" style="gap:8px"><span class="k">${s.kcal} kcal</span><button class="btn sm warn" onclick="delSport('${s.id}')">✕</button></span></div>`).join(''):'<div class="empty mealsempty"><i data-lucide="dumbbell"></i><span>Niciun sport azi. Hai, mișcă-te!</span></div>';
-  // săptămâna (doar sesiunile bifate)
-  const now=new Date(),wk=(S.diet.sports||[]).filter(s=>{if(s.mid!==dietMid()||s.off)return false;const d=fromStr(s.date);return (now-d)/864e5<7;});
-  const wm=wk.reduce((a,b)=>a+(b.minutes||0),0),wc=wk.reduce((a,b)=>a+(b.kcal||0),0);
-  const goal=150;
-  document.getElementById('sportWeek').innerHTML=`<div class="statgrid"><div class="stat"><b style="color:${wm>=goal?'var(--pri)':'var(--ink)'}">${wm}</b><span>min / ${goal} (OMS)</span></div><div class="stat"><b>${wk.length}</b><span>sesiuni</span></div><div class="stat"><b>${wc}</b><span>kcal arse</span></div></div>`;
+  /* săptămâna: minutele pe zi din sesiunile bifate, completate cu minutele de exercițiu din ceas */
+  const now=new Date(),mid=dietMid(),days=[];
+  for(let i=6;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i);days.push(dstr(d));}
+  const per=days.map(ds=>(S.diet.sports||[]).filter(s=>s.mid===mid&&!s.off&&s.date===ds).reduce((a,s)=>a+(Number(s.minutes)||0),0));
+  const fitPer=days.map(ds=>{const f=(typeof fitForDay==='function')?fitForDay(ds):null;return f&&Number(f.exMin)>0?Number(f.exMin):0;});
+  const tot=days.map((d,i)=>Math.max(per[i],fitPer[i]));
+  const wm=tot.reduce((a,b)=>a+b,0);
+  const wk=(S.diet.sports||[]).filter(s=>s.mid===mid&&!s.off&&days.includes(s.date));
+  const wc=wk.reduce((a,b)=>a+(Number(b.kcal)||0),0);
+  const goal=150,mx=Math.max(30,...tot),DL=['Du','Lu','Ma','Mi','Jo','Vi','Sâ'];
+  document.getElementById('sportWeek').innerHTML=`<div class="statgrid" style="margin-bottom:12px">
+      <div class="stat acc"><span class="ti"><i data-lucide="activity"></i></span><b style="color:${wm>=goal?'var(--pri)':'var(--ink)'}">${wm}<small> / ${goal} min</small></b><span>mișcare · recomandarea OMS</span></div>
+      <div class="stat"><span class="ti"><i data-lucide="dumbbell"></i></span><b>${wk.length}</b><span>${wk.length===1?'sesiune notată':'sesiuni notate'}</span></div>
+      <div class="stat"><span class="ti"><i data-lucide="flame"></i></span><b>${wc.toLocaleString('ro-RO')}</b><span>kcal arse la sport</span></div></div>
+    <div class="kweek">`+days.map((ds,i)=>{const v=tot[i],h=Math.max(3,Math.round(v/mx*92)),today=ds===todayStr();return `<div class="kb" title="${ds}: ${v} min"><span class="kv">${v||''}</span><i class="kbar${fitPer[i]>per[i]?' fit':''}" style="height:${h}px${today?';outline:2px solid var(--pri2);outline-offset:1px':''}"></i><span class="kd"${today?' style="color:var(--pri2)"':''}>${DL[fromStr(ds).getDay()]}</span></div>`;}).join('')+`</div>
+    <div class="pbar" style="margin-top:10px;height:8px"><i style="width:${Math.min(100,Math.round(wm/goal*100))}%"></i></div>
+    <p class="muted" style="text-align:center;font-size:11.5px;margin:6px 0 0">${wm>=goal?'Ai bifat recomandarea OMS pe săptămâna asta.':('Mai ai '+(goal-wm)+' min până la cele 150 recomandate de OMS.')}${fitPer.some(Boolean)?' · albastru = minute citite din ceas':''}</p>`;
   LI();
-}
-/* ---- apă ---- */
+}/* ---- apă ---- */
 function logWater(ml){
   const mid=dietMid(),t=todayStr();
   S.diet.water=S.diet.water||{};S.diet.water[mid]=S.diet.water[mid]||{};
@@ -2551,6 +2857,9 @@ function rMeals(){
     spEl.innerHTML=ss.length?('<div class="sportbudget">'+ss.map(s=>`<label class="sportchk${(s.off||_bn.src==='fit')?' off':''}"><input type="checkbox" ${(s.off||_bn.src==='fit')?'':'checked'} ${_bn.src==='fit'?'disabled':''} onchange="toggleSportOff('${s.id}')"><i data-lucide="dumbbell"></i><span class="grow"><b>${esc(s.name)}</b> · ${s.minutes} min</span><span class="k">+${s.kcal} kcal</span></label>`).join('')+'</div>'+_fw):(_fw);
   }
   const bar=document.getElementById('calBar');if(bar)bar.style.width=Math.min(100,tot/tgt*100)+'%';
+  const mr=document.getElementById('mhRing'),mp=document.getElementById('mhPct');
+  if(mr){const C=194.8,p=Math.max(0,Math.min(1,tgt?tot/tgt:0));mr.style.strokeDashoffset=C*(1-p);mr.style.stroke=tot>tgt?'#f2b7c4':'';}
+  if(mp)mp.textContent=Math.round((tgt?tot/tgt:0)*100)+'%';
   const pill=document.getElementById('calPill');
   if(pill){pill.textContent=tot+' / '+tgt+' kcal';pill.style.cssText='background:'+(tot>tgt?'#fdeef1;color:#c94258':'var(--soft);color:var(--pri2)');}
   const ml=document.getElementById('mealList');
@@ -3375,43 +3684,75 @@ function msNext(c){
   open.sort((x,y)=>y.p-x.p);
   return open[0];
 }
+const MS_COL={'Greutate':'g-w','Sănătate':'g-h','Constanță':'g-c','Mișcare':'g-m','Fasting':'g-f'};
+const MS_HEX={'Greutate':'#2c7a5f','Sănătate':'#e0708a','Constanță':'#5b8fc7','Mișcare':'#e2a53f','Fasting':'#8f7bd8'};
+let _pgFilter='all';
+function setPgFilter(g){_pgFilter=g;rProg();}
+function pgLevel(n){return n>=30?['Maestru','crown']:n>=21?['Avansat','medal']:n>=13?['Constant','award']:n>=6?['Pe drum','flag']:n>=1?['Început','sprout']:['Start','sprout'];}
+/* inel de progres SVG (culorile prin style, ca să meargă și cu var(--x)) */
+function ringSvg(p,col,size,sw,track){const r=(size-sw)/2,c=2*Math.PI*r;p=Math.max(0,Math.min(1,Number(p)||0));return `<svg viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" style="stroke:${track||'var(--line)'}" stroke-width="${sw}"/><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" style="stroke:${col};transition:stroke-dashoffset .8s cubic-bezier(.2,.8,.2,1)" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${(c*(1-p)).toFixed(1)}"/></svg>`;}
 function rProg(){
   checkMilestones();
   const c=msCtx(),b=msBag();
   const rel=MILES.filter(m=>!m.rel||m.rel(c));
-  const got=rel.filter(m=>b[m.k]).length;
+  const got=rel.filter(m=>b[m.k]);
+  const pct=rel.length?got.length/rel.length:0,lv=pgLevel(got.length);
+  const fmt=v=>String(v).replace('.',',');
   const hero=document.getElementById('progHero');
-  if(hero)hero.innerHTML='<div class="mscount"><div><span class="big">'+got+'<small>/'+rel.length+'</small></span></div>'+
-    '<p>'+(got===0?'Niciun reper încă — primul vine la prima cântărire. De acolo, aplicația ține singură socoteala.'
-      :(got===rel.length?'Le-ai bifat pe toate cele care ți se potrivesc acum. Când apar date noi (talie, pași din ceas, o țintă nouă), apar și repere noi.'
-      :'Repere atinse până acum. Următorul e la o distanță mai mică decât pare.'))+'</p></div>';
-  const nx=msNext(c),el=document.getElementById('progNext');
-  if(el){
-    if(!nx)el.innerHTML='';
-    else{
-      const m=nx.m,v=msVal(m,c),rest=Math.max(0,m.n-v);
-      const restTxt=m.n>=1000?Math.round(rest).toLocaleString('ro-RO'):(Math.round(rest*10)/10).toString().replace('.',',');
-      el.innerHTML='<div class="msnext"><div class="mh"><span class="ic"><i data-lucide="'+m.ic+'"></i></span><span><b>Urmează: '+esc(m.t)+'</b><span>'+esc(m.d)+'</span></span></div>'+
-        '<div class="pbar"><i style="width:'+Math.round(nx.p*100)+'%"></i></div>'+
-        '<div class="go">Ești la <b>'+msFmt(m,v)+'</b> — mai ai <b>'+restTxt+(m.u||'')+'</b>.</div></div>';
-    }
+  if(hero)hero.innerHTML=`<div class="pghero"><div class="pgring">${ringSvg(pct,'#7bd94a',112,10,'rgba(255,255,255,.18)')}<div class="mid"><b>${got.length}<small>/${rel.length}</small></b><span>repere</span></div></div>
+    <div class="pgh-main"><span class="pgh-lvl"><i data-lucide="${lv[1]}"></i>Nivel · ${lv[0]}</span>
+    <h3>${got.length===0?'Primul reper vine la prima cântărire':got.length===rel.length?'Le-ai bifat pe toate':Math.round(pct*100)+'% din repere atinse'}</h3>
+    <p>${got.length===0?'De acolo, aplicația ține singură socoteala: greutate, constanță, mișcare, fasting.':got.length===rel.length?'Când apar date noi (talie, pași din ceas, o țintă nouă), apar și repere noi.':'Fiecare reper e o dovadă, nu o decorațiune. Următorul e mai aproape decât pare.'}</p>
+    <div class="pgh-stats"><span><i data-lucide="calendar-check"></i><b>${c.wStreak}</b> zile la rând</span><span><i data-lucide="dumbbell"></i><b>${c.sportN}</b> antrenamente</span><span><i data-lucide="timer"></i><b>${c.fastOk}</b> fasting</span>${c.lost>0?`<span><i data-lucide="trending-down"></i><b>−${fmt(c.lost)}</b> kg</span>`:''}</div></div></div>`;
+  /* urmează: cele mai apropiate trei repere */
+  const open=rel.filter(m=>!b[m.k]).map(m=>({m,v:msVal(m,c),p:Math.min(1,msVal(m,c)/m.n)})).sort((x,y)=>y.p-x.p).slice(0,3);
+  const nxEl=document.getElementById('progNext');
+  if(nxEl)nxEl.innerHTML=open.length?'<div class="sech"><span class="si"><i data-lucide="flag"></i></span><div><b>Urmează</b><span class="sub">reperele de care ești cel mai aproape</span></div></div><div class="nextrow">'+open.map((o,i)=>{
+      const m=o.m,rest=Math.max(0,m.n-o.v),col=MS_HEX[m.g],bool=m.n===1&&!m.u;
+      const r=m.n>=1000?Math.round(rest).toLocaleString('ro-RO'):fmt(Math.round(rest*10)/10);
+      return `<div class="nx${i===0?' first':''}"><div class="nr">${ringSvg(o.p,col,48,5)}<span class="ic"><i data-lucide="${m.ic}" style="color:${col}"></i></span></div><div class="nt"><b>${esc(m.t)}</b><span>${bool?esc(m.d):msFmt(m,o.v)}</span><em>${bool?'încă neatins':('mai ai '+r+(m.u||''))}</em></div></div>`;}).join('')+'</div>':'';
+  /* ultimele 7 zile, concret */
+  const wkEl=document.getElementById('progWeek');
+  if(wkEl){
+    const now=Date.now(),mid=c.mid,in7=d=>(now-fromStr(d).getTime())/864e5<7;
+    const w7=c.ws.filter(x=>in7(x.d)),dw=w7.length>=2?Math.round((Number(w7[w7.length-1].w)-Number(w7[0].w))*10)/10:null;
+    const spMin=c.wkSportMin;
+    const mealDays=new Set((S.diet.meals||[]).filter(m=>m.mid===mid&&in7(m.date)).map(m=>m.date)).size;
+    const wat=(S.diet.water||{})[mid]||{},wg=waterGoal(),watDays=Object.keys(wat).filter(d=>in7(d)&&Number(wat[d])>=wg).length;
+    const fOk=((S.diet.fasting&&S.diet.fasting.history)||[]).filter(h=>h.start&&(now-h.start)/864e5<7&&Number(h.h)>=Number(h.goal)).length;
+    const steps=fitAll().filter(f=>in7(f.d)).reduce((a,f)=>a+(Number(f.steps)||0),0);
+    const tile=(ic,l,v,unit,p,col)=>`<div class="wk"><div class="wl"><i data-lucide="${ic}"></i>${l}</div><b>${v}${unit?`<small> ${unit}</small>`:''}</b>${p!=null?`<div class="pb"><i style="width:${Math.round(Math.max(0,Math.min(1,p))*100)}%;background:${col}"></i></div>`:''}</div>`;
+    wkEl.innerHTML='<div class="sech"><span class="si"><i data-lucide="calendar-range"></i></span><div><b>Ultimele 7 zile</b><span class="sub">ce ai făcut concret săptămâna asta</span></div></div><div class="wkgrid">'+
+      tile('scale','Greutate',dw==null?'—':((dw>0?'+':'')+fmt(dw)),dw==null?'':'kg',dw==null?null:(dw<0?1:0.15),dw<0?MS_HEX['Greutate']:'var(--rose)')+
+      tile('dumbbell','Mișcare',spMin,'/ 150 min',spMin/150,MS_HEX['Mișcare'])+
+      tile('utensils','Mese notate',mealDays,'/ 7 zile',mealDays/7,MS_HEX['Greutate'])+
+      tile('droplets','Apă la țintă',watDays,'/ 7 zile',watDays/7,MS_HEX['Constanță'])+
+      tile('timer','Fasting reușite',fOk,'',fOk/7,MS_HEX['Fasting'])+
+      (steps?tile('footprints','Pași',steps.toLocaleString('ro-RO'),'',steps/70000,MS_HEX['Mișcare']):'')+'</div>';
   }
+  /* ce ai atins: ultimele repere bifate, cu data */
+  const rcEl=document.getElementById('progRecent');
+  if(rcEl){
+    const earned=got.map(m=>({m,d:b[m.k].d,t:b[m.k].t||0})).sort((x,y)=>(y.d+String(y.t).padStart(14,'0')).localeCompare(x.d+String(x.t).padStart(14,'0'))).slice(0,6);
+    rcEl.innerHTML=earned.length?'<div class="sech"><span class="si"><i data-lucide="trophy"></i></span><div><b>Ce ai atins</b><span class="sub">ultimele repere bifate</span></div></div><div class="tl">'+earned.map(e=>`<div class="tli ${MS_COL[e.m.g]}"><span class="ic"><i data-lucide="${e.m.ic}"></i></span><div><b>${esc(e.m.t)}</b><span>${esc(e.m.d)}</span></div><span class="dt">${remDateLabel(e.d)}</span></div>`).join('')+'</div>':'';
+  }
+  const fl=document.getElementById('progFilter');
+  if(fl)fl.innerHTML='<div class="gfilter"><button class="chip'+(_pgFilter==='all'?' on':'')+'" onclick="setPgFilter(\'all\')">Toate <small>'+got.length+'/'+rel.length+'</small></button>'+MS_GROUPS.map(g=>{const it=rel.filter(m=>m.g===g);if(!it.length)return '';const n=it.filter(m=>b[m.k]).length;return '<button class="chip '+MS_COL[g]+(_pgFilter===g?' on':'')+'" onclick="setPgFilter(\''+g+'\')"><i class="gd"></i>'+g+' <small>'+n+'/'+it.length+'</small></button>';}).join('')+'</div>';
   const list=document.getElementById('progList');
   if(list){
-    list.innerHTML=MS_GROUPS.map(g=>{
+    list.innerHTML=MS_GROUPS.filter(g=>_pgFilter==='all'||_pgFilter===g).map(g=>{
       const items=rel.filter(m=>m.g===g);
       if(!items.length)return '';
-      return '<div class="msgroup">'+g+'</div><div class="mstones">'+items.map(m=>{
+      const n=items.filter(m=>b[m.k]).length;
+      return '<div class="msgroup '+MS_COL[g]+'"><i class="gd"></i>'+g+' <small>· '+n+'/'+items.length+'</small></div><div class="mstones">'+items.map(m=>{
         const on=!!b[m.k],v=msVal(m,c),p=Math.min(1,v/m.n);
-        return '<div class="ms'+(on?' on':'')+'" title="'+esc(m.d)+'"><span class="ic"><i data-lucide="'+m.ic+'"></i></span><b>'+esc(m.t)+'</b>'+
-          (on?('<span class="dt">'+remDateLabel(b[m.k].d)+'</span>')
-             :('<span>'+msFmt(m,v)+'</span><span class="pb"><i style="width:'+Math.round(p*100)+'%"></i></span>'))+'</div>';
+        return '<div class="ms '+MS_COL[g]+(on?' on':'')+'" title="'+esc(m.d)+'">'+(on?'<span class="chk"><i data-lucide="check"></i></span>':'')+'<span class="ic">'+(on?'':ringSvg(p,MS_HEX[g],48,4))+'<i data-lucide="'+m.ic+'"></i></span><b>'+esc(m.t)+'</b>'+
+          (on?('<span class="dt">'+remDateLabel(b[m.k].d)+'</span>'):('<span>'+((m.n===1&&!m.u)?'neatins':msFmt(m,v))+'</span>'))+'</div>';
       }).join('')+'</div>';
     }).join('');
   }
   LI();
 }
-
 /* ---------- linia de încurajare din Profil ---------- */
 function paintEncour(){
   const el=document.getElementById('pEncour');if(!el)return;
@@ -3660,12 +4001,14 @@ function renderFitResult(){
   aiShow('aiFitOut',esc(_fitJ.nota||'Am citit capturile. Verifică cifrele și salvează.')+'\n\n'+rows,
     '<button class="btn" style="margin-top:8px;width:100%" onclick="saveFitDays()"><i data-lucide="save"></i>Salvează '+(zile.length>1?('cele '+zile.length+' zile'):'ziua')+' și calibrează</button>');
 }
-function saveFitDays(){
+/* scrie zilele citite din ceas în jurnal (folosit și din Sănătate → Ceas, și din asistent) */
+function saveFitRecords(zile){
   const mid=dietMid();
   S.diet.fitness=S.diet.fitness||{};
   const arr=S.diet.fitness[mid]=S.diet.fitness[mid]||[];
   let n=0;
-  ((_fitJ&&_fitJ.zile)||[]).forEach(z=>{
+  (zile||[]).forEach(z=>{
+    if(!z||!/^\d{4}-\d{2}-\d{2}$/.test(String(z.data||'')))return;
     const rec={d:z.data,src:String(z.sursa||'fitness').slice(0,40),
       move:fitNum(z.move_kcal),moveGoal:fitNum(z.move_goal),total:fitNum(z.total_kcal),
       exMin:fitNum(z.exercitiu_min),exGoal:fitNum(z.exercitiu_goal),moveMin:fitNum(z.miscare_min),
@@ -3678,12 +4021,18 @@ function saveFitDays(){
   });
   arr.sort((a,b)=>a.d<b.d?-1:1);
   save();
+  if(VIEW==='health'&&dietTab==='fit')rFit();
+  if(typeof rMeals==='function')rMeals();
+  checkMilestones();
+  return n;
+}
+function saveFitDays(){
+  const n=saveFitRecords((_fitJ&&_fitJ.zile)||[]);
   _fitJ=null;_fitFiles=[];
   document.getElementById('fitPrev').innerHTML='';clearAI('aiFitOut');
-  rFit();rMeals();checkMilestones();
+  rFit();
   toast(n>1?(n+' zile salvate din ceas'):'Ziua salvată din ceas');
-}
-function delFitDay(id){
+}function delFitDay(id){
   const mid=dietMid();
   S.diet.fitness[mid]=(S.diet.fitness[mid]||[]).filter(x=>x.id!==id);
   tombstone(id);save();rFit();rMeals();toast('Zi ștearsă');
@@ -3736,20 +4085,30 @@ function setActSelect(v){
   }
   sel.value=v;
 }
+/* inelele din ceas (active / exercițiu / în picioare), concentrice ca pe telefon */
+const FIT_RINGS=[['Active','#e0506e','move','moveGoal','kcal'],['Exercițiu','#7bd94a','exMin','exGoal','min'],['În picioare','#3fbfd6','stand','standGoal','h']];
+function fitRingsSvg(f){
+  const S=94,sw=9;let out='';
+  FIT_RINGS.forEach((r,i)=>{const v=f[r[2]],g=f[r[3]],rad=S/2-sw/2-i*(sw+2),c=2*Math.PI*rad;const p=(v!=null&&g)?Math.min(1,Number(v)/Number(g)):(v!=null?0:0);
+    out+=`<circle cx="${S/2}" cy="${S/2}" r="${rad}" fill="none" style="stroke:${r[1]};opacity:${v!=null?.22:.1}" stroke-width="${sw}"/>`+(v!=null&&g?`<circle cx="${S/2}" cy="${S/2}" r="${rad}" fill="none" style="stroke:${r[1]}" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${(c*(1-p)).toFixed(1)}"/>`:'');});
+  return `<div class="frings"><svg viewBox="0 0 ${S} ${S}">${out}</svg></div>`;
+}
+function fitLegend(f){
+  const rows=FIT_RINGS.filter(r=>f[r[2]]!=null).map(r=>`<div class="fl"><i style="background:${r[1]}"></i>${r[0]}<b>${Math.round(f[r[2]]).toLocaleString('ro-RO')}${f[r[3]]?`<small> / ${Math.round(f[r[3]]).toLocaleString('ro-RO')} ${r[4]}</small>`:`<small> ${r[4]}</small>`}</b></div>`);
+  return rows.join('')||'<div class="fl muted" style="white-space:normal">fără inele în captură — doar cifrele de mai jos</div>';
+}
+function fitStatsGrid(f){
+  const st=(v,lbl,fm)=>v==null?'':'<div class="fitstat"><b>'+(fm?fm(v):Math.round(v).toLocaleString('ro-RO'))+'</b><span>'+lbl+'</span></div>';
+  const h=st(f.total,'total kcal')+st(f.steps,'pași')+st(f.km,'km',v=>String(Math.round(v*100)/100).replace('.',','))+st(f.floors,'etaje')+st(f.moveMin,'min mers');
+  return h?('<div class="fitgrid" style="margin-top:9px">'+h+'</div>'):'';
+}
 function rFit(){
   const list=document.getElementById('fitList'),days=fitAll().slice().reverse();
   if(list){
     list.innerHTML=days.length?days.slice(0,14).map(f=>{
-      const ring=(lbl,ic,col,v,goal,unit)=>{
-        if(v==null)return '';
-        const pc=goal?Math.min(100,Math.round(v/goal*100)):0;
-        return '<div class="fitring"><div class="rl" style="color:'+col+'"><i data-lucide="'+ic+'"></i>'+lbl+(unit?(' · '+unit):'')+'</div><div class="rv">'+Math.round(v).toLocaleString('ro-RO')+(goal?'<small> / '+Math.round(goal).toLocaleString('ro-RO')+'</small>':'')+'</div>'+(goal?('<div class="rb"><i style="width:'+pc+'%;background:'+col+'"></i></div>'):'')+'</div>';
-      };
-      const st=(v,lbl,fmt)=>v==null?'':'<div class="fitstat"><b>'+(fmt?fmt(v):Math.round(v).toLocaleString('ro-RO'))+'</b><span>'+lbl+'</span></div>';
       const today=f.d===todayStr();
       return '<div class="fitday"><div class="fh"><b>'+remDateLabel(f.d)+(today?' · azi':'')+'</b><span class="row" style="gap:6px"><span class="src">'+esc(f.src||'fitness')+'</span><button class="btn sm warn" onclick="delFitDay(\''+f.id+'\')" title="Șterge ziua">✕</button></span></div>'+
-        '<div class="fitrings">'+ring('Active','flame','#c94258',f.move,f.moveGoal,'kcal')+ring('Mișcare','activity','#5fa832',f.exMin,f.exGoal,'min')+ring('Picioare','arrow-up','#1b9fb3',f.stand,f.standGoal,'h')+'</div>'+
-        '<div class="fitgrid">'+st(f.total,'total kcal')+st(f.steps,'pași')+st(f.km,'km',v=>String(Math.round(v*100)/100).replace('.',','))+st(f.floors,'etaje')+st(f.moveMin,'min mers')+'</div>'+
+        '<div class="fbody">'+fitRingsSvg(f)+'<div class="fitleg">'+fitLegend(f)+'</div></div>'+fitStatsGrid(f)+
         (today&&Number(f.move)>0?('<label class="fituse"><input type="checkbox" '+(f.useMove?'checked':'')+' onchange="toggleFitUse(\''+f.id+'\')"><span>Folosește cele '+Math.round(f.move)+' kcal active la bugetul zilei (în locul estimării din sesiunile de sport)</span></label>'):'')+
         '</div>';
     }).join(''):'<div class="empty">Nicio zi importată încă. Trimite un screenshot cu rezumatul zilei din aplicația ta de fitness.</div>';
@@ -3778,8 +4137,7 @@ function rFit(){
     }
   }
   LI();
-}
-</script>
+}</script>
 
 <script>
 /* ============ GEMINI AI ============ */
@@ -4617,9 +4975,9 @@ function askWelcome(){
   const h=new Date().getHours();
   const sal=h<5?'Bună seara':h<12?'Neața':h<18?'Salut':'Bună seara';
   const me=(memById(S.settings.activeUser||S.members[0].id)||{}).name||'';
-  appendAsk('bot',sal+(me&&me!=='Eu'?', '+me:'')+'! Spune-mi ce ai mâncat sau băut, pune ceva în calendar sau întreabă-mă orice despre ziua ta. Poți să-mi trimiți și o poză — meniul zilei, o etichetă sau farfuria — și îți spun ce să iei și cât.');
+  appendAsk('bot',sal+(me&&me!=='Eu'?', '+me:'')+'! Spune-mi ce ai mâncat sau băut, pune ceva în calendar sau întreabă-mă orice despre ziua ta. Poți să-mi trimiți și o poză: meniul zilei, o etichetă sau farfuria (îți spun ce să iei și cât), afișajul cântarului (îți notez kilogramele) sau o captură din aplicația de fitness (îți trec ziua în jurnal).');
   const chips=document.createElement('div');chips.id='askChips';chips.className='askchips';
-  [['image','Poza cu meniul zilei','att'],['glass-water','Am băut un pahar de apă'],['flame','Câte calorii mai am azi?'],['calendar','Ce am mâine în calendar?'],['footprints','Am mers pe jos 30 de minute']].forEach(p=>{
+  [['image','Poza cu meniul zilei','att'],['scale','Poza cu cântarul','att'],['watch','Captură din ceas','att'],['glass-water','Am băut un pahar de apă'],['flame','Câte calorii mai am azi?'],['calendar','Ce am mâine în calendar?']].forEach(p=>{
     const b=document.createElement('button');b.className='askchip';b.innerHTML='<i data-lucide="'+p[0]+'"></i>'+p[1];
     b.onclick=p[2]==='att'?(()=>askPickFile()):(()=>{document.getElementById('askInput').value=p[1];askSend();});
     chips.appendChild(b);
@@ -4784,7 +5142,7 @@ CONVERSAȚIA DE PÂNĂ ACUM:
 ${hist}
 MESAJUL LUI ACUM: "${text||'(fără text — a trimis doar atașamentul)'}"
 
-PASUL 1 — Citește TOT din atașament (inclusiv textul mic, alergenii, gramajele scrise) și stabilește ce este: un MENIU (listă de feluri, ex. meniul zilei la cantină sau restaurant), o FARFURIE cu mâncare, o ETICHETĂ nutrițională de produs, o REȚETĂ, o listă de cumpărături sau altceva.
+PASUL 1 — Citește TOT din atașament (inclusiv textul mic, alergenii, gramajele scrise) și stabilește ce este: un MENIU (listă de feluri, ex. meniul zilei la cantină sau restaurant), o FARFURIE cu mâncare, o ETICHETĂ nutrițională de produs, o REȚETĂ, o listă de cumpărături sau altceva. Poate fi și un CÂNTAR (afișajul cu cifre al unui cântar de baie, cu segmente LED/LCD, de obicei fotografiat de sus) sau o captură FITNESS (ecran din Apple Fitness/Health, Google Fit, Samsung Health, Fitbit, Garmin, Strava: inele de activitate, calorii active, pași, minute de exercițiu). Dacă e CÂNTAR → tip_imagine="cantar"; dacă e FITNESS → tip_imagine="fitness"; în ambele cazuri pune "recomandari":[] și "intrebari":[], iar în reply o singură frază scurtă că ai văzut cântarul/captura și o citești acum — cifrele exacte le citește alt pas, nu tu.
 PASUL 2 — Dacă e MENIU sau REȚETĂ: alege din el ce i se potrivește și spune-i EXACT cât să-și pună din fiecare fel. Ținta e să acopere frumos caloriile rămase la masa asta — nu-l lăsa flămând, dar nici nu-l trece peste buget. Dacă mai urmează mese azi (uită-te la oră și la ce a mâncat deja), lasă loc și pentru ele; dacă e ultima masă a zilei, poate folosi tot restul. Dacă un fel nu încape deloc, nu i-l propune.
 Dacă e o FARFURIE și din mesaj reiese că a mâncat-o deja (sau tocmai mănâncă) → mod="mancat": estimează ce e efectiv în farfurie, nu-i mai recomanda altceva.
 Dacă e o ETICHETĂ de produs → spune-i ce porție din produsul ăla se încadrează.
@@ -4792,7 +5150,7 @@ PASUL 3 — CANTITĂȚILE se spun în măsuri de casă, nu doar în grame: „3 
 PASUL 4 — Du-l spre proteină (carne, pește, ou, brânză, iaurt) și legume, și ține în frâu garniturile grase sau prăjite, sosurile și pâinea, ținând cont de macro consumate azi.
 PASUL 5 — ÎNTREABĂ dacă nu ești sigur: nu se citește, nu știi care e felul principal, nu știi dacă porția servită e mare sau mică, nu știi la ce masă e (prânz sau cină), nu știi dacă a mâncat deja din ea, sau ceva din meniu se bate cap în cap cu o restricție de-a lui. Atunci pune maximum 2 întrebări scurte în "intrebari" și lasă "recomandari" gol. Dacă neclaritatea e mică, mergi mai departe și spune-i în reply pe ce ai mizat.
 
-Răspunde DOAR cu JSON valid, fără markdown: {"tip_imagine":"meniu|farfurie|eticheta|reteta|lista|altceva","mod":"plan|mancat","descriere":"o frază despre ce ai văzut","tip_masa":"Mic dejun|Prânz|Cină|Gustare","recomandari":[{"nume":"felul, exact cum e scris în meniu","cantitate":"măsura de casă cu gramaj, ex: 3 linguri cu vârf (≈ 150 g)","grame":număr,"kcal":număr,"proteine_g":număr,"carbohidrati_g":număr,"grasimi_g":număr,"motiv":"de ce atâta, foarte scurt"}],"de_evitat":[{"nume":"","motiv":""}],"intrebari":["întrebare scurtă"],"memory":["fapt durabil nou despre el"],"reply":"răspunsul tău"}
+Răspunde DOAR cu JSON valid, fără markdown: {"tip_imagine":"meniu|farfurie|eticheta|reteta|lista|cantar|fitness|altceva","mod":"plan|mancat","descriere":"o frază despre ce ai văzut","tip_masa":"Mic dejun|Prânz|Cină|Gustare","recomandari":[{"nume":"felul, exact cum e scris în meniu","cantitate":"măsura de casă cu gramaj, ex: 3 linguri cu vârf (≈ 150 g)","grame":număr,"kcal":număr,"proteine_g":număr,"carbohidrati_g":număr,"grasimi_g":număr,"motiv":"de ce atâta, foarte scurt"}],"de_evitat":[{"nume":"","motiv":""}],"intrebari":["întrebare scurtă"],"memory":["fapt durabil nou despre el"],"reply":"răspunsul tău"}
 Reguli pentru "reply": 2-4 fraze de proză caldă, ca un om real — fără liste, fără markdown, fără clișee motivaționale, fără formule de salut. Folosește cifrele reale și spune-i clar cu câte kcal rămâne după ce mănâncă ce i-ai propus. Dacă pui întrebări, reply-ul e scurt și se termină cu întrebarea.
 În "memory" pune doar lucruri durabile (preferințe, alergii, ce nu-i place), nu ce a mâncat azi. Dacă nu e nimic nou, pune [].`;
     const parts=files.map(f=>({inline_data:{mime_type:f.mime,data:f.data}}));
@@ -4802,6 +5160,15 @@ Reguli pentru "reply": 2-4 fraze de proză caldă, ca un om real — fără list
     const raw=await gemini(parts,{json:true,temp:.15,seed:7,model:'gemini-2.5-flash'});
     const j=parseAIJson(raw);
     if(j&&j.memory)rememberAI(j.memory);
+    /* v3.12: cântarul și capturile din ceas au pașii lor dedicați (OCR de segmente, respectiv cititorul de fitness) */
+    const kind=String((j&&j.tip_imagine)||'').toLowerCase();
+    if(kind==='cantar'||kind==='fitness'){
+      const imgs=files.filter(f=>!f.isPdf);
+      const r0=String(j.reply||'').trim()||(kind==='cantar'?'Văd afișajul cântarului — îl citesc acum.':'Văd o captură din aplicația de fitness — o citesc acum.');
+      wait.textContent=r0;_askHist.push({who:'bot',txt:r0});
+      clearAskFiles();
+      return kind==='cantar'?askScaleFlow(imgs):askFitFlow(imgs);
+    }
     const qs=(Array.isArray(j.intrebari)?j.intrebari:[]).map(x=>String(x||'').trim()).filter(Boolean).slice(0,2);
     // kcal>0 scoate și felurile rămase pe jumătate dintr-un răspuns tăiat și reparat
     const items=(Array.isArray(j.recomandari)?j.recomandari:[]).filter(x=>x&&(x.nume||'').trim()&&Number(x.kcal)>0);
@@ -4904,6 +5271,94 @@ Reguli pentru "reply" — cele mai importante: vorbește ca un om real, cald și
     done(a.reply||'Gata ✓');
   }catch(e){wait.textContent='Nu am reușit: '+e.message;}
 }
+/* ============ v3.12 — asistentul citește și cântarul, și capturile din ceas ============ */
+/* interpretarea răspunsului OCR de la cântar: greutatea, sau ce a distins dacă n-a ieșit una */
+function scaleInterpret(j){
+  j=j||{};const raw=String(j.citire||'').trim();
+  let kg=Number(j.kg);
+  if(!(kg>0)&&Number(j.valoare)>0){const u=String(j.unitate||'kg').toLowerCase(),v=Number(j.valoare);kg=u==='lb'?v*0.45359237:(u==='st'?v*6.35029318:(u==='jin'?v*0.5:v));}
+  kg=kg>0?Math.round(kg*10)/10:0;
+  let flipped=j.orientare==='rasturnata';
+  if(!(j.tip==='greutate'&&kg>=20&&kg<=350)){const g=weightFromDisplay(raw);if(g){kg=g.kg;flipped=g.flipped;}else kg=0;}
+  const w0=lastW(),diff=(kg&&w0!=null)?Math.round((kg-w0)*10)/10:null;
+  return {kg,raw,flipped,diff,low:j.incredere==='mică',jump:diff!=null&&Math.abs(diff)>=4,cod:String(j.cod||''),explic:String(j.explicatie||'')};
+}
+function askTyping(){const w=appendAsk('bot','');w.innerHTML='<span class="typing"><i></i><i></i><i></i></span>';return w;}
+function askDropBubble(w){const p=w&&w.parentNode;if(p&&p.classList&&p.classList.contains('askbot'))p.remove();else if(w)w.remove();}
+function askSay(msg){appendAsk('bot',msg);_askHist.push({who:'bot',txt:msg});}
+async function askScaleFlow(imgs){
+  const o=imgs&&imgs[0];if(!o)return askSay('Trimite-mi o poză cu afișajul cântarului, nu un PDF.');
+  const wait=askTyping();
+  try{
+    const parts=[{inline_data:{mime_type:o.mime,data:o.data}}];
+    try{const r=await imgRot180(o);parts.push({inline_data:{mime_type:r.mime,data:r.data}});}catch(e){}
+    parts.push({text:scalePrompt()});
+    const j=parseAIJson(await gemini(parts,{json:true,temp:0,seed:7,model:'gemini-2.5-flash'}));
+    askDropBubble(wait);
+    askScaleCard(scaleInterpret(j));
+  }catch(e){wait.textContent='Nu am reușit să citesc afișajul: '+e.message;}
+}
+function askScaleCard(r){
+  const id='askScale'+(_planN++),log=document.getElementById('askLog');
+  const box=document.createElement('div');box.className='askcard';box.id=id;
+  const fmt=v=>String(v).replace('.',',');
+  const fields=(v)=>`<div class="row" style="gap:8px;align-items:flex-end"><div style="flex:1;min-width:88px"><label>Kg</label><input type="number" step="0.1" min="20" max="350" id="${id}kg" value="${v||''}"></div><div style="flex:1.3;min-width:120px"><label>Ziua</label><input type="date" id="${id}d" value="${todayStr()}" max="${todayStr()}"></div></div><button class="btn sm" style="margin-top:10px;width:100%" onclick="askScaleSave('${id}')"><i data-lucide="save"></i>Salvează cântărirea</button>`;
+  if(r.kg){
+    box.innerHTML=`<h4><i data-lucide="scale"></i>Cântărire din poză</h4><div class="scaleread"><span class="sr-ic"><i data-lucide="scale"></i></span><span class="sr-main"><span class="sr-kg">${fmt(r.kg)}<small>kg</small></span><span class="sr-sub">${r.raw?('afișajul arată „'+esc(r.raw)+'"'):'citit de pe afișaj'}${r.flipped?' · poza era răsturnată, am întors-o':''}${r.diff!=null?(' · '+(r.diff===0?'la fel ca ultima dată':((r.diff>0?'+':'')+fmt(r.diff)+' kg față de ultima'))):''}</span></span></div>`+
+      (r.low?'<p class="pdesc" style="margin:0 0 6px">Cifrele nu se văd foarte clar — verifică numărul înainte să-l salvezi.</p>':'')+
+      (r.jump?'<p class="pdesc" style="margin:0 0 6px">Diferență mare față de ultima cântărire. Dacă nu e o greșeală de citire, salveaz-o liniștit.</p>':'')+fields(r.kg);
+  }else{
+    box.innerHTML=`<h4><i data-lucide="scale"></i>Nu am putut citi cântarul</h4><p style="margin:0 0 6px">${r.cod?('Afișajul arată <b>'+esc(r.cod)+'</b>. '+esc(r.explic)+' '):(r.raw?('Tot ce am distins a fost „'+esc(r.raw)+'". '):'Cifrele nu se disting. ')}Scrie greutatea de mână sau trimite altă poză, de sus, fără umbră peste cifre.</p>`+fields(lastW()||'');
+  }
+  log.appendChild(box);LI();log.scrollTop=log.scrollHeight;
+}
+function askScaleSave(id){
+  const v=Number((document.getElementById(id+'kg')||{}).value),d=(document.getElementById(id+'d')||{}).value||todayStr();
+  if(!(v>=20&&v<=350))return toast('Greutatea trebuie să fie între 20 și 350 kg');
+  const kg=Math.round(v*10)/10,prev=lastW();
+  logWeightKg(kg,d);
+  const box=document.getElementById(id);if(box)box.remove();
+  const pw=document.getElementById('pW');if(pw)pw.value=kg;
+  if(VIEW==='health')rHealthAll();
+  const c=msCtx(),dd=(prev!=null)?Math.round((kg-prev)*10)/10:null,fmt=x=>String(x).replace('.',',');
+  askSay('Am notat '+fmt(kg)+' kg'+(d!==todayStr()?(' pentru '+remDateLabel(d)):'')+(dd!=null&&dd!==0?(' ('+(dd>0?'+':'')+fmt(dd)+' kg față de ultima cântărire)'):'')+'.'+(c.lost>0?(' Ești cu '+fmt(c.lost)+' kg sub greutatea de start.'):'')+(c.wStreak>1?(' A '+c.wStreak+'-a zi la rând cu cântărire.'):''));
+}
+const _askFitDays={};
+async function askFitFlow(imgs){
+  if(!imgs||!imgs.length)return askSay('Trimite-mi o captură de ecran din aplicația de fitness, nu un PDF.');
+  const wait=askTyping();
+  try{
+    const parts=imgs.map(o=>({inline_data:{mime_type:o.mime,data:o.data}}));parts.push({text:fitPrompt()});
+    const j=parseAIJson(await gemini(parts,{json:true,temp:0,seed:7,model:'gemini-2.5-flash'}));
+    const zile=(j&&Array.isArray(j.zile))?j.zile.filter(z=>z&&/^\d{4}-\d{2}-\d{2}$/.test(String(z.data||''))):[];
+    askDropBubble(wait);
+    if(!zile.length)return askSay('N-am găsit cifre de fitness în captură. Trimite ecranul cu rezumatul zilei — inelele, caloriile, minutele, pașii.');
+    askFitCard(zile,String((j&&j.nota)||'').trim());
+  }catch(e){wait.textContent='Nu am reușit să citesc captura: '+e.message;}
+}
+function fitRecFromDay(z){return {d:z.data,src:z.sursa,move:fitNum(z.move_kcal),moveGoal:fitNum(z.move_goal),total:fitNum(z.total_kcal),exMin:fitNum(z.exercitiu_min),exGoal:fitNum(z.exercitiu_goal),stand:fitNum(z.stand_ore),standGoal:fitNum(z.stand_goal),steps:fitNum(z.pasi),km:fitNum(z.distanta_km),floors:fitNum(z.etaje),moveMin:fitNum(z.miscare_min)};}
+function askFitCard(zile,nota){
+  const id='askFit'+(_planN++);_askFitDays[id]=zile;
+  const box=document.createElement('div');box.className='askcard';box.id=id;
+  const inp=(i,lbl,key,v)=>`<div><label>${lbl}</label><input type="number" min="0" value="${v!=null?v:''}" oninput="_askFitDays['${id}'][${i}].${key}=this.value===''?null:Number(this.value)"></div>`;
+  box.innerHTML=`<h4><i data-lucide="watch"></i>Din aplicația de fitness</h4>`+(nota?'<p class="pdesc" style="margin:0 0 8px">'+esc(nota)+'</p>':'')+zile.map((z,i)=>{const f=fitRecFromDay(z);
+    return '<div class="fitday"><div class="fh"><b>'+remDateLabel(f.d)+(f.d===todayStr()?' · azi':'')+'</b><span class="src">'+esc(f.src||'fitness')+'</span></div><div class="fbody">'+fitRingsSvg(f)+'<div class="fitleg">'+fitLegend(f)+'</div></div>'+fitStatsGrid(f)+
+      '<div class="g3" style="margin-top:4px">'+inp(i,'Active kcal','move_kcal',f.move)+inp(i,'Total kcal','total_kcal',f.total)+inp(i,'Pași','pasi',f.steps)+'</div></div>';}).join('')+
+    `<p class="pdesc" style="margin:2px 0 8px">Verifică cifrele — le poți corecta înainte de salvare.</p><button class="btn sm" style="width:100%" onclick="askFitSave('${id}')"><i data-lucide="save"></i>Salvează ${zile.length>1?('cele '+zile.length+' zile'):'ziua'} și calibrează</button>`;
+  const log=document.getElementById('askLog');log.appendChild(box);LI();log.scrollTop=log.scrollHeight;
+}
+function askFitSave(id){
+  const zile=_askFitDays[id];if(!zile)return;
+  const n=saveFitRecords(zile);delete _askFitDays[id];
+  const box=document.getElementById(id);if(box)box.remove();
+  const c=fitCalib(),f=fitForDay(todayStr());
+  let msg=n>1?(n+' zile salvate din ceas.'):'Ziua salvată din ceas.';
+  if(f&&f.useMove&&Number(f.move)>0)msg+=' Cele '+Math.round(f.move)+' kcal active de azi intră în bugetul de la Mese.';
+  if(c&&c.solid&&Math.abs(c.diff)>=60)msg+=' Ceasul arată cu '+Math.abs(c.diff)+' kcal/zi '+(c.diff>0?'mai mult':'mai puțin')+' decât calculează aplicația din formulă — poți aplica calibrarea din Sănătate → Ceas (×'+String(c.factor).replace('.',',')+').';
+  else if(c&&c.solid)msg+=' Consumul măsurat e practic cel calculat de aplicație, nu e nimic de corectat.';
+  else if(c&&!c.solid)msg+=' Mai am nevoie de '+(3-c.n)+' '+((3-c.n)===1?'zi':'zile')+' cu totalul de calorii ca să calibrez consumul tău.';
+  askSay(msg);
+}
 function askVoice(){voiceAdd();}
 /* Send apare doar când e text scris — microfonul rămâne butonul principal */
 /* schimbă din cardul de confirmare AI pentru cine e activitatea (toți selectați = toată familia) */
@@ -4950,6 +5405,7 @@ console.info('%cFamLink v'+APP_VER,'font-weight:bold;color:#2c7a5f',
 '\n• Cântărire din poză: fotografiezi afișajul cântarului, AI-ul citește kilogramele (kg/lb/st), recunoaște codurile de eroare și lasă mereu o cale de corectare manuală.'+
 '\n• Repere (Sănătate → Progres): 35+ borne pe greutate, sănătate, constanță, mișcare și fasting, cu următorul reper și cât mai ai până la el; la prima rulare se însămânțează tăcut, apoi fiecare reper nou se sărbătorește o singură dată.'+
 '\n• Calibrare după ceas (Sănătate → Ceas): import de screenshot-uri din Apple Fitness/Health, Google Fit, Samsung Health, Fitbit sau Garmin; consumul total măsurat înlocuiește factorul de activitate din formulă, iar caloriile active ale zilei intră în bugetul de la Mese în locul estimării MET.'+
+'\n• v3.12: Sănătate redesenată (hero de profil cu drumul start→țintă, grafic netezit cu medie pe 7 zile, Progres cu nivel, „Urmează", „Ce ai atins" și recapitularea săptămânii, fasting cu etape, inele din ceas); asistentul citește și poza cântarului, și capturile din aplicația de fitness.'+
 '\n• Temă întunecată (auto/manual), acuratețe restore/backup, igienă memorie, accesibilitate.');
 </script>
 </body></html>

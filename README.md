@@ -4,6 +4,14 @@ Aplicație într-un singur fișier (`index.html`), pe modelul ArhiLink: fără s
 
 **Module:** Calendar (Lună / An / Zi / Obiective, recurențe, notificări, motto-ul lunii, print A3/A4 landscape, export .ics pentru iPhone) și Sănătate (profil + IMC/BMR/TDEE, jurnal greutate cu grafic, fasting cu contor și notificări, mese + calorii, analiză foto și meniuri cu Gemini AI).
 
+## Noutăți v3.12
+
+- **Sănătate redesenată.** Profilul se deschide cu un card mare: greutatea de acum, cât ai dat jos de la start, ritmul pe săptămână, inelul „din drum" și bara start → țintă cu data estimată la care ajungi. Sub el, tile-uri cu iconițe (IMC, BMR, menținere, țintă, serie de cântăriri, talie). Graficul greutății e netezit, are umplere gradient, media pe 7 zile, linia țintei, un comutator 30 zile / 3 luni / tot și tooltip la atingere.
+- **Progres refăcut.** Un hero cu inelul reperelor atinse și nivelul tău (Start → Început → Pe drum → Constant → Avansat → Maestru), „Urmează" cu cele mai apropiate trei repere, „Ultimele 7 zile" (greutate, mișcare, mese notate, apă, fasting, pași), „Ce ai atins" ca o cronologie cu date, filtre pe grupă și insigne colorate pe grupă, cu inel de progres pentru cele neatinse.
+- **Fasting cu etape.** Inel mai mare cu strălucire, etapa curentă (digestie, glicogen, ardere, autofagie) și istoricul ca bule verzi/galbene.
+- **Sport pe 7 zile** (bare cu minutele pe zi, inclusiv cele din ceas) și **inele concentrice** din ceas, ca pe telefon, în tabul Ceas. Corp primește un gauge pentru grăsimea corporală.
+- **Asistentul citește cântarul și ceasul.** Trimiți poza afișajului de cântar sau o captură din aplicația de fitness direct în chat: recunoaște singur ce e, citește cifrele și îți dă un card de confirmare (editabil) înainte să salveze.
+
 ## Noutăți v3.11
 
 - **Cântărire din poză** (Sănătate → Profil): fotografiezi afișajul cântarului și AI-ul citește kilogramele — inclusiv `lb`/`st`, convertite în kg. Dacă afișajul arată un cod de eroare sau cifre neclare, îți spune ce a văzut, îți dă pașii de reîncercare și te lasă să scrii greutatea de mână.

@@ -289,3 +289,50 @@ Până acum consumul zilnic era o formulă (Mifflin-St Jeor × factor de activit
 **Pragul care ține plasa strânsă**: minimum 3 caractere. Altfel `E5` s-ar fi „recuperat" ca 53 kg, iar codurile scurte de eroare trebuie să rămână erori. Verificat: `E211`→112,3 · `1123`→112,3 · `9.16`→91,6 · `92.4`→92,4, în timp ce `Err`, `E1`, `E5`, `Lo`, `O-Ld`, `bAt`, `0.0` și `---` rămân neinterpretate.
 
 **Pe lângă**: promptul primește ultimele trei cântăriri, dar strict ca departajare între două citiri la fel de plauzibile vizual — cu instrucțiunea explicită să nu forțeze cifra spre istoric.
+
+---
+
+## v3.12.0 — grafică nouă în Sănătate, Progres refăcut, asistentul citește cântarul și ceasul (2026-09-22)
+
+Un update de grafică, nu de date: structurile din localStorage rămân aceleași, sincronizarea nu se schimbă. Ce se schimbă e felul în care se văd cifrele și un drum în plus pentru cântar și ceas, prin asistent.
+
+### Profil
+
+- **Hero de profil** (`#pHero`, `paintStats`): greutatea de acum cu cifre mari, chips cu „−X kg de la start", „mai ai Y kg", ritmul pe săptămână (panta pe 42 de zile, din `weightSlope`), inelul „din drum" (procentul parcurs între start și țintă) și **bara start → țintă** cu marker pe poziția curentă și data estimată la care ajungi la țintă. Se recalculează live când modifici câmpurile din „Editează datele mele" (`previewProfile`).
+- **Tile-uri cu iconițe** (`.stat` v2, aliniate stânga, iconiță în colț): IMC colorat pe categorie, BMR, menținere (cu „după ceas" când profilul e calibrat), ținta zilnică, seria de cântăriri (sau numărul lor) și talia cu raportul talie/înălțime.
+- **Graficul greutății** (`paintChart`): curbă netezită Catmull-Rom → Bézier, umplere gradient, **media mobilă pe 7 zile** (linia pe care merită să te uiți), linia țintei, grilă, etichete de dată, minimul marcat, ultimul punct evidențiat, **comutator 30 zile / 3 luni / tot** (`_wRange`) și **tooltip** la atingere/mișcare (cel mai apropiat punct). Culorile vin din variabilele temei (prin `style=`, nu atribute), deci graficul urmează și tema întunecată.
+
+### Progres (`rProg`)
+
+- **Hero**: inel cu reperele atinse din cele relevante, procent, **nivel** (`pgLevel`: Start / Început / Pe drum / Constant / Avansat / Maestru, după numărul de repere) și patru cifre-cheie: zile la rând, antrenamente, fasting-uri, kg date jos.
+- **Urmează**: cele trei repere cele mai apropiate, fiecare cu inel de progres în culoarea grupei și „mai ai …". Reperele de tip da/nu (ex. „Primul pas") arată descrierea și „încă neatins", nu „0 / 1".
+- **Ultimele 7 zile**: greutatea (Δ pe 7 zile), minute de mișcare (sesiuni + minute din ceas, față de 150), zile cu mese notate, zile cu apa la țintă, fasting-uri reușite, pași din ceas — fiecare cu bară de progres.
+- **Ce ai atins**: cronologie cu ultimele șase repere bifate, iconița în culoarea grupei și data reală (din `badges`).
+- **Toate reperele**: filtre pe grupă (cu contor n/total), insigne colorate pe grupă (`.g-w`, `.g-h`, `.g-c`, `.g-m`, `.g-f` → `--gc`/`--gc2`), cele atinse cu gradient și bifă, cele neatinse cu **inel de progres în jurul iconiței** în loc de bară. Pe telefon, trei pe rând.
+
+### Fasting, Sport, Ceas, Corp
+
+- **Fasting**: inel de 240 px cu gradient și strălucire (`feGaussianBlur`), etapa curentă în interiorul inelului (`FAST_STAGES`: digestie 0–4 h, glicogen 4–12 h, ardere 12–16 h, autofagie 16 h+) și un rând cu cele patru etape, cea curentă evidențiată, cele trecute estompate. Istoricul e o linie de bule: verde = țintă atinsă, galben = oprit mai devreme, cu orele și data. Randările pe secundă compară HTML-ul înainte să-l rescrie, ca să nu clipească.
+- **Sport**: tile-uri cu iconițe și **grafic cu minutele pe fiecare zi din ultimele 7** (verde = sesiuni notate, albastru = minute de exercițiu citite din ceas, când sunt mai multe), plus bara față de cele 150 min OMS.
+- **Ceas**: fiecare zi importată are **inele concentrice** (active / exercițiu / în picioare) desenate în SVG, ca pe telefon, cu legenda alături; cifrele (total, pași, km, etaje, minute de mers) rămân dedesubt. `fitRingsSvg`, `fitLegend`, `fitStatsGrid` sunt reutilizate și în asistent.
+- **Corp**: gauge pentru grăsimea corporală cu benzile atletic / fitness / mediu / ridicat (pragurile diferă pe sex) și marker pe valoarea ta; tile-urile primesc iconițe.
+
+### Asistentul citește cântarul și capturile din ceas
+
+- Promptul pentru atașamente primește două tipuri noi: `cantar` și `fitness`. Când le recunoaște, nu inventează cifre — răspunde cu o frază scurtă și lasă cititul **pașilor dedicați**: `askScaleFlow` (același OCR de segmente ca în Profil, cu poza trimisă în ambele orientări și plasa de siguranță `weightFromDisplay`) și `askFitFlow` (același `fitPrompt` ca în tabul Ceas).
+- Rezultatul apare **în chat**, ca un card: la cântar — kilogramele, ce arată afișajul, dacă poza era răsturnată, diferența față de ultima cântărire, avertismente pentru încredere mică sau salt mare, câmp de corectare și ziua; la ceas — inelele, cifrele și trei câmpuri editabile (active, total, pași). Nimic nu se salvează fără apăsarea butonului.
+- La salvare, asistentul confirmă cu cifrele reale: kg notate, diferența, cât ai dat jos de la start, a câta zi la rând; la ceas — caloriile active intrate în buget și dacă merită aplicată calibrarea (`fitCalib`). Salvarea din ceas trece prin `saveFitRecords()`, aceeași funcție ca butonul din Sănătate → Ceas.
+- Atașamentul se scoate din discuție după ce a fost citit (nu mai e retrimis cu mesajele următoare), iar chips-urile de bun venit includ „Poza cu cântarul" și „Captură din ceas".
+
+### Mese și restul cardurilor
+
+- Hero-ul din Mese primește un **inel cu procentul din țintă** lângă cifra mare (roz când depășești), fundal în același gradient ca hero-urile din Sănătate și linia „Mișcare azi (din ceas)" lizibilă (era albastru închis pe verde închis). Pe telefon cifra, ținta și creionul stau pe două rânduri curate, iar „îți mai rămân" trece dedesubt.
+- Cardurile au un contur fin, antetele de secțiune (`.sech`) au iconiță în chip verde și subtitlu, tile-urile `.stat` sunt aceleași peste tot (Profil, Corp, Sport).
+- Pe telefon: taburile Sănătate rămân compacte, comutatorul de perioadă al graficului coboară pe rândul lui, insignele sunt trei pe rând.
+
+### Testat
+
+- Profil, Progres, Fasting, Sport, Ceas, Corp, Mese — desktop și 375 px, temă luminoasă și întunecată, cu date de test (62 de cântăriri pe 70 de zile, mese, sport, apă, fasting, 7 zile din ceas) și cu stare goală (utilizator nou, fără nicio cifră): fără erori în consolă.
+- Fluxurile din asistent cu Gemini simulat: poza de cântar → clasificare → OCR → card → salvare (91,6 kg, mesaj cu diferența și seria, reperul „7,5 kg" sărbătorit); captură din ceas → card cu inele → salvare → ziua intră în `diet.fitness`, cele 530 kcal active intră în bugetul de la Mese, mesajul propune calibrarea (×1,572).
+- Cache PWA: `famlink-v47`.
+
