@@ -272,3 +272,20 @@ Până acum consumul zilnic era o formulă (Mifflin-St Jeor × factor de activit
 - `.tabs2` (bara de taburi secundare, inclusiv cea din Calendar) rămăsese pe fundal bej și în tema întunecată, cu text gri abia lizibil.
 - Pe ecrane sub 480 px, bara de taburi din Sănătate ascunde iconițele, ca toate cele șase etichete să încapă fără scroll orizontal.
 - `logWeightKg(kg, zi)` acceptă acum și o zi anume, nu doar „azi" — cântăririle din poză se pot salva retroactiv.
+
+---
+
+## v3.11.1 — cântarul fotografiat cu susul în jos (2026-09-22)
+
+**Simptomul**: un afișaj care arăta limpede `112.3` era raportat ca eroare `E211`, cu explicația (corectă în sine, dar nelalocul ei) că „E" e cod de eroare de măsurare.
+
+**Cauza**: poza fusese făcută cu cântarul rotit 180° — se întâmplă firesc, urci pe cântar de pe partea opusă afișajului și fotografiezi de sus. Un afișaj cu șapte segmente citit invers nu devine ilizibil, devine **alt text plauzibil**: `3` arată exact ca `E`, `6` ca `9`, `9` ca `6`, `2`/`5`/`8`/`0` rămân la fel, `1` rămâne `1` dar sare pe marginea stângă a casetei, iar punctul zecimal urcă sus. Așa `112.3` devine literalmente `E211` cu un punct în aer. Modelul citea corect pixelii și greșea doar orientarea — deci nici un prompt mai insistent despre „citește cu atenție" n-ar fi ajutat.
+
+**Reparat, în două straturi independente**
+
+1. **Ambele orientări ajung la model.** `imgRot180()` rotește poza pe canvas, iar cererea trimite originalul *și* varianta întoarsă, spunând explicit care e care. Promptul dă regula decisivă — *punctul zecimal al unui cântar stă întotdeauna jos, pe linia de bază; dacă apare sus, imaginea e răsturnată* — plus tabelul de cifre care se transformă una în alta. Mai adaugă o regulă de bun-simț: un șir care începe cu literă dar continuă cu trei cifre nu e cod de eroare, fiindcă erorile reale sunt scurte (`Err`, `E1`, `Lo`, `O-Ld`, `bAt`) și n-au zecimale. Răspunsul întoarce acum și `orientare`, iar cardul spune „poza era răsturnată, am întors-o".
+2. **Plasă de siguranță în cod, fără AI.** `segFlip()` aplică transformarea de 180° pe șirul citit, iar `readingToKg()` îl validează ca greutate (2–3 cifre cu cel mult o zecimală, 20–350 kg; fără punct, ultima cifră devine zecimala — `1123` → `112,3`). `weightFromDisplay()` încearcă întâi citirea directă, apoi pe cea întoarsă. Dacă iese o greutate plauzibilă, ecranul de eroare e înlocuit cu propunerea gata de salvat, plus un buton „Nu e asta — citește din nou".
+
+**Pragul care ține plasa strânsă**: minimum 3 caractere. Altfel `E5` s-ar fi „recuperat" ca 53 kg, iar codurile scurte de eroare trebuie să rămână erori. Verificat: `E211`→112,3 · `1123`→112,3 · `9.16`→91,6 · `92.4`→92,4, în timp ce `Err`, `E1`, `E5`, `Lo`, `O-Ld`, `bAt`, `0.0` și `---` rămân neinterpretate.
+
+**Pe lângă**: promptul primește ultimele trei cântăriri, dar strict ca departajare între două citiri la fel de plauzibile vizual — cu instrucțiunea explicită să nu forțeze cifra spre istoric.

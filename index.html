@@ -849,7 +849,7 @@ header .ttl:active,header .logo:active{opacity:.75}
         <button class="photozone" type="button" onclick="openCamera('scale')">
           <span class="pz-ic"><i data-lucide="scale"></i></span>
           <b>Fă o poză cântarului</b>
-          <span class="hint">AI-ul citește greutatea de pe afișaj și o salvează la cântăririle de azi</span>
+          <span class="hint">AI-ul citește greutatea de pe afișaj și o salvează la cântăririle de azi — se descurcă și dacă poza iese cu susul în jos</span>
         </button>
         <div class="row" style="margin-top:8px;justify-content:center">
           <button class="btn ghost sm" onclick="document.getElementById('scalePhoto').click()"><i data-lucide="image"></i>Alege din galerie</button>
@@ -1330,7 +1330,7 @@ header .ttl:active,header .logo:active{opacity:.75}
 <script>
 /* ============ FamLink v1.0 — arhitectură ArhiLink (single-file, localStorage) ============ */
 const KEY='famlink_v1';
-const APP_VER='3.11.0';
+const APP_VER='3.11.1';
 /* prima literă mare (titluri de obiective, etichete de mementouri, titluri AI) */
 const capFirst=s=>{s=String(s||'').trim();return s?s.charAt(0).toLocaleUpperCase('ro-RO')+s.slice(1):s;};
 /* curăță titlul unui obiectiv: scoate din față formulările de COMANDĂ
@@ -3453,13 +3453,54 @@ function paintEncour(){
 <script>
 /* ============ v3.11 — CITIREA CÂNTARULUI DIN POZĂ ============ */
 let _scaleBlob=null,_scaleJ=null;
-const SCALE_PROMPT='Ești un sistem OCR specializat în afișaje cu segmente (LED/LCD) de pe cântare de baie. În poză e afișajul unui cântar, fotografiat de sus, adesea oblic și cu picioarele utilizatorului în cadru.\n'+
-'1) Citește EXACT ce scrie pe afișaj, caracter cu caracter, inclusiv punctul zecimal și eventualele litere. Nu completa și nu „corecta" cifre pe care nu le vezi clar. Atenție la confuziile tipice de segmente: 8 vs 0 vs 6, 1 vs 7, 5 vs 6, E vs 8.\n'+
-'2) Decide ce este: o GREUTATE (un număr plauzibil, de obicei între 20 și 350, cu una sau două zecimale), un COD DE EROARE sau de stare (ex. Err, E urmat de cifre, O-Ld, Lo, bAt, ---, 0.0) sau ceva NECITIBIL (afișaj tăiat, mișcat, prea luminos).\n'+
-'3) Dacă e greutate, spune și unitatea: kg dacă scrie kg sau nu scrie nimic (cântarele europene sunt în kg), lb dacă scrie lb/LB, st dacă e în stone, jin dacă scrie 斤.\n'+
-'4) Dacă e cod de eroare sau de stare, explică pe scurt, în română, ce înseamnă de obicei pe cântarele de baie — și spune clar că e o interpretare probabilă, nu o certitudine, pentru că fiecare producător are alte coduri.\n'+
-'5) „incredere" = mare doar dacă toate caracterele se văd clar și neambiguu.\n'+
-'Răspunde DOAR cu JSON valid, fără markdown: {"citire":"exact ce scrie pe afișaj","tip":"greutate|eroare|necitibil","valoare":număr sau null,"unitate":"kg|lb|st|jin","kg":număr_convertit_în_kg sau null,"cod":"codul afișat, dacă e eroare","explicatie":"o frază scurtă, la persoana a doua","incredere":"mare|medie|mică"}';
+/* v3.11.1 — oamenii fotografiază cântarul stând pe el și de multe ori urcă de pe
+   partea opusă, deci afișajul iese cu susul în jos. Un afișaj cu segmente citit
+   invers minte sistematic (3 pare E, 6 pare 9, 1 se lipește de marginea stângă,
+   iar punctul zecimal ajunge sus), așa că trimitem AMBELE orientări. */
+const SEG180={'0':'0','1':'1','2':'2','3':'E','4':'h','5':'5','6':'9','7':'L','8':'8','9':'6','E':'3','e':'3','h':'4','L':'7','.':'.',',':'.'};
+function segFlip(raw){
+  const t=String(raw||'').trim().replace(/\s+/g,'');
+  if(!t)return '';
+  const out=[];
+  for(let i=t.length-1;i>=0;i--){const c=SEG180[t[i]];if(c===undefined)return '';out.push(c);}
+  return out.join('');
+}
+/* un șir de pe afișaj → greutate plauzibilă, dacă se poate. Cântarele arată o zecimală,
+   deci „1123" înseamnă 112,3. Minimum 3 caractere: codurile scurte (E1, E5, Lo) rămân coduri. */
+function readingToKg(t){
+  t=String(t||'').trim().replace(/\s+/g,'').replace(',','.');
+  if(t.replace('.','').length<3)return null;
+  if(t.indexOf('.')<0&&/^\d{3,4}$/.test(t))t=t.slice(0,-1)+'.'+t.slice(-1);
+  if(!/^\d{2,3}(\.\d)?$/.test(t))return null;
+  const v=Number(t);
+  return (v>=20&&v<=350)?Math.round(v*10)/10:null;
+}
+/* plasa de siguranță când AI-ul crede că vede un cod de eroare: încercăm citirea așa
+   cum e, apoi întoarsă cu 180° (afișaj fotografiat invers) */
+function weightFromDisplay(raw){
+  const d=readingToKg(raw);
+  if(d!=null)return {kg:d,flipped:false};
+  const f=readingToKg(segFlip(raw));
+  return (f!=null)?{kg:f,flipped:true}:null;
+}
+function flipWeightGuess(raw){const g=weightFromDisplay(raw);return g?g.kg:null;}
+function scalePrompt(){
+  const hist=(S.diet.weights[dietMid()]||[]).slice(-3).map(x=>String(x.w).replace('.',',')+' kg').join(', ');
+  return 'Ești un sistem OCR specializat în afișaje cu segmente (LED/LCD) de pe cântare de baie.\n'+
+  'Primești DOUĂ imagini cu ACELAȘI afișaj: prima e poza originală, a doua e aceeași poză rotită cu 180°. Una dintre ele are afișajul în poziția corectă.\n'+
+  'Oamenii fotografiază cântarul stând pe el și de multe ori urcă de pe partea opusă, așa că afișajul iese răsturnat. Citit invers, un afișaj cu segmente minte sistematic: 3 arată ca E, E arată ca 3, 6 arată ca 9, 9 arată ca 6, 2 și 5 și 8 și 0 rămân la fel, iar 1 rămâne 1 dar stă lipit de marginea STÂNGĂ a casetei în loc de dreapta.\n'+
+  'REGULA DECISIVĂ DE ORIENTARE: punctul zecimal al unui cântar stă întotdeauna JOS, pe linia de bază, între cifre. Dacă într-o imagine punctul apare SUS, acea imagine e răsturnată — citește din cealaltă.\n'+
+  'A DOUA REGULĂ: un cântar de baie afișează o greutate de 2-4 caractere, de obicei cu o zecimală (ex. 92.4, 112.3). Un șir care începe cu o literă dar continuă cu trei cifre (ex. „E211") NU e un cod de eroare — e aproape sigur o greutate citită răsturnat. Codurile de eroare reale sunt scurte (Err, E1, Lo, O-Ld, bAt) și nu conțin punct zecimal urmat de cifre.\n'+
+  (hist?('CONTEXT: ultimele cântăriri ale acestei persoane au fost '+hist+'. Folosește-le DOAR ca să alegi între două citiri la fel de plauzibile vizual — nu forța cifra spre istoric și nu inventa. Dacă afișajul arată clar altceva, raportează ce vezi.\n'):'')+
+  'PAȘII:\n'+
+  '1) Stabilește care imagine are orientarea corectă, după regula punctului zecimal și după forma cifrelor.\n'+
+  '2) Citește EXACT ce scrie în acea imagine, caracter cu caracter, inclusiv punctul zecimal. Nu completa cifre pe care nu le vezi. Atenție la confuziile 8/0/6, 1/7, 5/6.\n'+
+  '3) Decide ce este: o GREUTATE (număr plauzibil, de obicei între 20 și 350), un COD DE EROARE sau de stare (Err, E1, O-Ld, Lo, bAt, ---, 0.0) sau ceva NECITIBIL (afișaj tăiat, mișcat, ars de lumină).\n'+
+  '4) Unitatea: kg dacă scrie kg sau nu scrie nimic (cântarele europene sunt în kg), lb dacă scrie lb/LB, st pentru stone, jin pentru 斤.\n'+
+  '5) Dacă e cod de eroare, explică pe scurt, în română, ce înseamnă de obicei — și spune clar că e o interpretare probabilă, pentru că fiecare producător are alte coduri.\n'+
+  '6) „incredere" = mare doar dacă toate caracterele se văd clar și orientarea e sigură.\n'+
+  'Răspunde DOAR cu JSON valid, fără markdown: {"orientare":"normala|rasturnata","citire":"exact ce scrie, în orientarea corectă","tip":"greutate|eroare|necitibil","valoare":număr sau null,"unitate":"kg|lb|st|jin","kg":număr_convertit_în_kg sau null,"cod":"codul afișat, dacă e eroare","explicatie":"o frază scurtă, la persoana a doua","incredere":"mare|medie|mică"}';
+}
 function scalePhotoPicked(inp){const f=inp.files[0];if(!f)return;_scaleBlob=f;showScalePrev(URL.createObjectURL(f));if(S.settings.geminiKey)scaleAnalyze();else scaleNoKeyHint();}
 function showScalePrev(url){
   document.getElementById('scalePrev').innerHTML='<div class="photoprev"><img src="'+url+'" alt="poză cântar"><button class="aix" title="Șterge poza" onclick="clearScalePhoto()"><i data-lucide="x"></i></button></div>'+
@@ -3476,6 +3517,21 @@ function saveScaleManual(){
   if(!(v>=20&&v<=350))return toast('Scrie o greutate între 20 și 350 kg');
   applyScaleWeight(v,'scrisă de mână');
 }
+/* aceeași poză, rotită 180° — a doua părere pentru afișajele fotografiate invers */
+function imgRot180(o){
+  return new Promise((res,rej)=>{
+    const img=new Image();
+    img.onload=()=>{
+      const c=document.createElement('canvas');
+      c.width=img.naturalWidth||img.width;c.height=img.naturalHeight||img.height;
+      const x=c.getContext('2d');x.translate(c.width,c.height);x.rotate(Math.PI);x.drawImage(img,0,0);
+      let d='';try{d=c.toDataURL('image/jpeg',.85);}catch(e){return rej(e);}
+      res({mime:'image/jpeg',data:d.split(',')[1],url:d});
+    };
+    img.onerror=()=>rej(new Error('imagine invalidă'));
+    img.src=o.url;
+  });
+}
 async function scaleAnalyze(){
   const f=_scaleBlob;
   if(!f)return toast('Fă o poză cântarului sau alege una din galerie');
@@ -3483,7 +3539,10 @@ async function scaleAnalyze(){
   out.innerHTML=aiLoad('Citesc afișajul…');
   try{
     const o=await askShrink(f,1200);
-    const txt=await gemini([{inline_data:{mime_type:o.mime,data:o.data}},{text:SCALE_PROMPT}],{json:true,temp:0,seed:7,model:'gemini-2.5-flash'});
+    let parts=[{inline_data:{mime_type:o.mime,data:o.data}}];
+    try{const r=await imgRot180(o);parts.push({inline_data:{mime_type:r.mime,data:r.data}});}catch(e){}
+    parts.push({text:scalePrompt()});
+    const txt=await gemini(parts,{json:true,temp:0,seed:7,model:'gemini-2.5-flash'});
     _scaleJ=parseAIJson(txt);
     renderScaleResult();
   }catch(e){out.innerHTML=aiErr('Eroare: '+esc(e.message));}
@@ -3508,7 +3567,7 @@ function renderScaleResult(){
     aiShow('aiScaleOut',
       '<div class="scaleread"><span class="sr-ic"><i data-lucide="scale"></i></span><span class="sr-main">'+
       '<span class="sr-kg">'+String(kg).replace('.',',')+'<small>kg</small></span>'+
-      '<span class="sr-sub">'+(raw?('afișajul arată „'+esc(raw)+'"'):'citit de pe afișaj')+
+      '<span class="sr-sub">'+(raw?('afișajul arată „'+esc(raw)+'"'+(j.orientare==='rasturnata'?' · poza era răsturnată, am întors-o':'')):'citit de pe afișaj')+
       (diff!=null?(' · '+(diff===0?'la fel ca ultima cântărire':((diff>0?'+':'')+String(diff).replace('.',',')+' kg față de ultima'))):'')+'</span></span></div>'+
       (low?'<p class="muted" style="margin:0 0 8px;white-space:normal">Cifrele nu se văd foarte clar — verifică numărul înainte să-l salvezi.</p>':'')+
       (jump?'<p class="muted" style="margin:0 0 8px;white-space:normal">Diferență mare față de ultima cântărire ('+((diff>0?'+':'')+String(diff).replace('.',','))+' kg). Dacă nu e o greșeală de citire, salveaz-o liniștit.</p>':'')+
@@ -3516,9 +3575,18 @@ function renderScaleResult(){
       '<button class="btn" style="margin-top:10px;width:100%" onclick="saveScaleAI()"><i data-lucide="save"></i>Salvează cântărirea</button>');
     return;
   }
-  if(j.tip==='eroare'){
+  /* plasa de siguranță: dacă șirul citit, întors cu 180°, dă o greutate plauzibilă,
+     atunci afișajul era fotografiat invers, nu stricat */
+  const guess=weightFromDisplay(raw),flip=guess?guess.kg:null;
+  const flipBox=flip?('<div class="scaleread" style="margin-top:10px"><span class="sr-ic"><i data-lucide="'+(guess.flipped?'rotate-ccw':'scale')+'"></i></span><span class="sr-main"><span class="sr-kg">'+String(flip).replace('.',',')+'<small>kg</small></span><span class="sr-sub">'+(guess.flipped?('„'+esc(raw)+'" citit invers — 3 arată ca E, punctul zecimal urcă sus'):('„'+esc(raw)+'" cu zecimala pusă la locul ei'))+'</span></span></div><div class="row" style="gap:8px;align-items:flex-end;white-space:normal"><div style="flex:1;min-width:104px"><label>Greutate (kg)</label><input id="scaleKg" type="number" step="0.1" min="20" max="350" value="'+flip+'"></div><div style="flex:1;min-width:132px"><label>Ziua</label><input id="scaleDay" type="date" value="'+todayStr()+'" max="'+todayStr()+'"></div></div><button class="btn" style="margin-top:10px;width:100%" onclick="saveScaleAI()"><i data-lucide="save"></i>Salvează '+String(flip).replace('.',',')+' kg</button>'):'';
+  if(j.tip==='eroare'&&!flip){
     aiShow('aiScaleOut','Afișajul nu arată o greutate, ci <b>'+esc(j.cod||raw||'un cod')+'</b>. '+esc(j.explicatie||'Pe majoritatea cântarelor un cod ca ăsta apare când talerul n-a apucat să se calibreze la zero sau când greutatea nu s-a stabilizat.')+' Fiecare producător are alte coduri, așa că ia explicația ca pe o presupunere — manualul cântarului e sursa sigură.'+SCALE_TIPS,
       scaleManualHtml(lastW()||''));
+    return;
+  }
+  if(flip){
+    aiShow('aiScaleOut','Am citit <b>'+esc(raw)+'</b>, dar asta nu e un cod de eroare — e o greutate'+(guess.flipped?' fotografiată cu susul în jos. Se întâmplă când urci pe cântar de pe partea opusă afișajului.':' căreia i-a scăpat punctul zecimal.')+flipBox,
+      '<div class="row" style="margin-top:8px;white-space:normal"><button class="btn sec grow" onclick="scaleAnalyze()"><i data-lucide="refresh-cw"></i>Nu e asta — citește din nou</button></div>');
     return;
   }
   aiShow('aiScaleOut','N-am putut citi cifrele'+(raw?(' — tot ce am distins a fost „'+esc(raw)+'"'):'')+'. '+(kg>0&&!plaus?'Numărul ieșit ('+String(kg).replace('.',',')+' kg) nu e plauzibil pentru un cântar de baie, așa că nu-l salvez singur. ':'')+'Mai încearcă o poză, sau scrie kilogramele de mână.'+SCALE_TIPS,
