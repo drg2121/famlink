@@ -220,3 +220,55 @@ Setări → Sincronizare: token GitHub (scope `gist`) + parolă de criptare → 
 - `parseAIJson` repară acum răspunsurile tăiate la mijloc: taie la ultima virgulă completă și închide parantezele rămase deschise, ținând cont de ghilimelele escapate. Un răspuns întrerupt dă tot un plan folosibil, cu felurile care au apucat să iasă întregi.
 - Reparația se încearcă **înaintea** vechii căutări cu regex — altfel aceasta apuca prima pereche de paranteze din text și întorcea un fragment din mijlocul răspunsului.
 - Felurile recuperate pe jumătate (fără kcal) nu mai ajung în card ca rânduri de 0 kcal.
+
+---
+
+## v3.11.0 — cântărire din poză, repere de progres, calibrare după ceas (2026-09-22)
+
+Trei lucruri noi în modulul Sănătate, toate în jurul aceleiași idei: aplicația să afle singură cifrele reale, nu să le ceară scrise de mână, și să spună ce înseamnă ele.
+
+### 1. Cântărire din poză (Sănătate → Profil)
+
+Fotografiezi afișajul cântarului, AI-ul citește kilogramele și le trece în jurnal.
+
+- Zonă foto proprie („Fă o poză cântarului" + „Alege din galerie"). Modala de cameră e aceeași ca la mâncare, cu un mod nou: `openCamera('scale')` schimbă titlul și rutează captura către `scaleAnalyze()` în loc de `aiAnalyze()`.
+- `SCALE_PROMPT` e scris ca un OCR de afișaje cu segmente: citire caracter cu caracter, atenție la confuziile 8/0/6 și 1/7/5, fără „corectarea" cifrelor care nu se văd. Întoarce `{citire, tip, valoare, unitate, kg, cod, explicatie, incredere}`.
+- Trei rezultate posibile, fiecare cu propriul ecran:
+  - **greutate** — card cu cifra mare, diferența față de ultima cântărire, câmp de corecție și alegerea zilei; `lb`, `st` și `jin` se convertesc în kg. Avertisment separat când încrederea e mică sau când saltul față de ultima cântărire depășește 4 kg.
+  - **cod de eroare** (ex. afișajul care arată `E211`) — explicație marcată explicit ca presupunere, pentru că fiecare producător are alte coduri, plus patru pași de reîncercare (podea tare, așteaptă `0.0`, desculț și nemișcat, poză de sus).
+  - **necitibil** — spune ce a distins din afișaj și de ce n-a salvat nimic.
+- În toate cazurile rămâne o cale manuală de salvare. Plafon de plauzibilitate 20–350 kg: nimic din afara intervalului nu se salvează automat.
+- Poza se micșorează la 1200 px înainte de trimitere (`askShrink`), ca la atașamentele din asistent.
+
+### 2. Repere de progres (Sănătate → Progres)
+
+Un tab nou cu 37 de repere pe cinci grupe: **Greutate** (primul kilogram, 2,5 / 5 / 7,5 / 10 / 15 / 20 kg, 5% și 10% din greutatea de start, ținta atinsă), **Sănătate** (ieșirea din IMC 30 și 25, talia sub jumătate din înălțime, talia sub pragul OMS), **Constanță** (3/7/14/30/60/100 zile la rând cu cântărire, 7 și 30 de zile cu mesele notate, 7 zile cu apa bifată), **Mișcare** (1/10/25/50/100 de antrenamente, 150 min într-o săptămână — recomandarea OMS, 10.000 de pași într-o zi, 7 zile la rând peste 8.000 de pași) și **Fasting** (1/5/10/25/50 de posturi duse la capăt).
+
+- Fiecare reper are o valoare curentă și un prag, deci reperele neatinse arată progresul real, nu doar un lacăt.
+- Cardul „Urmează" alege reperul cel mai aproape de a fi atins și spune cât mai e până la el.
+- Reperele irelevante nu se afișează: cele de slăbit dispar dacă ținta e peste greutatea de start, cele de IMC apar doar dacă ai pornit din categoria respectivă, cele de pași doar după primul import din ceas.
+- **La prima rulare reperele deja atinse se însămânțează tăcut** (`bag._seed`), ca să nu primești un potop de sărbătoriri retroactive. De acolo încolo, fiecare reper nou apare o singură dată, într-un card de felicitare cu text scris pe grupă (mai multe repere deodată se strâng într-un singur card).
+- Verificarea se declanșează la cântărire, la adăugarea unui sport, la bifarea apei, la încheierea unui fasting și la importul din ceas. `checkMilestones()` e protejat de re-intrare, nu mai redesenează singur și e apelat înaintea randărilor care îl afișează.
+- În **Profil** a apărut o linie de încurajare care leagă cifrele între ele: cât ai dat jos și ce procent înseamnă, a câta zi la rând te cântărești, ritmul pe ultimele 6 săptămâni (regresie liniară) și **data estimată la care ajungi la țintă**, plus următorul reper. Când cifra a urcat, o spune direct, dar explică de ce ziua de azi contează mai puțin decât linia pe două săptămâni.
+
+### 3. Calibrare după aplicația de fitness (Sănătate → Ceas)
+
+Până acum consumul zilnic era o formulă (Mifflin-St Jeor × factor de activitate ales din patru opțiuni). Acum poate fi o măsurătoare.
+
+- Trimiți unul sau mai multe screenshot-uri (max 4 odată) din Apple Fitness/Health, Google Fit, Samsung Health, Fitbit, Garmin, Huawei Health, Mi Fitness sau Strava. Capturile din **aceeași zi se combină** într-o singură intrare — rezumatul și ecranul cu inele se completează unul pe altul.
+- Promptul distinge explicit lucrurile care se confundă ușor: „Move 510/800 CAL" sunt calorii **active**, în timp ce „TOTAL 2 885 CAL" de sub grafic e consumul **total** al zilei; „TOTAL 12H 48M" de sub Exercise e timp de mișcare, nu minute de exercițiu. Data de pe ecran („Monday, Sep 21, 2026") se convertește în `YYYY-MM-DD`. Ce nu se vede rămâne `null` — nimic nu se estimează.
+- Rezultatul vine ca formular editabil (calorii active și obiectiv, total, minute de exercițiu, ore în picioare, pași, distanță, etaje, minute de mers) înainte de salvare.
+- **Calibrarea**: media consumului total măsurat pe ultimele 28 de zile importate se împarte la BMR-ul tău → factorul de activitate real, limitat la 1,1–2,0. Cardul arată una lângă alta cifra măsurată, cifra calculată de aplicație, BMR-ul, factorul vechi și cel nou. Cu mai puțin de 3 zile spune cât mai are nevoie; sub 60 kcal diferență spune că nu e nimic de corectat. Butonul scrie factorul în profil, iar `pAct` primește o opțiune „Calibrat după ceas (×1,556)" — de unde te poți întoarce oricând la calculul standard.
+- **Bugetul zilei**: dacă ziua de azi are calorii active importate, acelea intră în buget în locul estimării MET a sesiunilor de sport (funcția nouă `burnToday()`, folosită în `rMeals()` și `askBudget()`). Sesiunile manuale rămân vizibile ca jurnal, dar dezactivate, cu explicația de ce — altfel aceeași mișcare s-ar număra de două ori. Comutatorul e pe cardul zilei de azi.
+- Asistentul primește în `askCtx()` datele din ceas pentru ziua curentă, kilogramele date jos, seria de cântăriri și următorul reper.
+
+### Date și sincronizare
+
+- Structuri noi: `diet.fitness[membru] = [{id, d, src, move, moveGoal, total, exMin, exGoal, moveMin, stand, standGoal, steps, km, floors, useMove, u}]` și `diet.badges[membru] = {cheie: {d, t}}`.
+- `mergeFitness()` merge pe `id` cu tombstones, ca mesele și sporturile. `mergeBadges()` păstrează **data cea mai veche** — un reper atins pe telefon rămâne atins și pe laptop, cu data reală.
+
+### Reparat pe drum
+
+- `.tabs2` (bara de taburi secundare, inclusiv cea din Calendar) rămăsese pe fundal bej și în tema întunecată, cu text gri abia lizibil.
+- Pe ecrane sub 480 px, bara de taburi din Sănătate ascunde iconițele, ca toate cele șase etichete să încapă fără scroll orizontal.
+- `logWeightKg(kg, zi)` acceptă acum și o zi anume, nu doar „azi" — cântăririle din poză se pot salva retroactiv.

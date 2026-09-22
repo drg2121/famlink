@@ -477,6 +477,89 @@ main{padding:12px;max-width:920px;margin:0 auto}
 #toast.show{opacity:1}
 
 /* PRINT — pagină întreagă, în tonul aplicației */
+
+/* ===== v3.11 — cântar foto, repere (milestones) și calibrare din aplicația de fitness ===== */
+.scaleread{display:flex;align-items:center;gap:13px;background:var(--soft2);border:1px solid var(--line);border-radius:18px;padding:14px 15px;margin:2px 0 10px;white-space:normal}
+.scaleread .sr-main{flex:1;min-width:0}
+.scaleread .sr-ic{width:46px;height:46px;border-radius:15px;background:linear-gradient(135deg,var(--pri),var(--acc));display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 6px 16px rgba(44,122,95,.28)}
+.scaleread .sr-ic svg.lucide{width:23px;height:23px;color:#fff}
+.scaleread .sr-kg{font-size:30px;font-weight:800;letter-spacing:-1px;line-height:1.05;display:block}
+.scaleread .sr-kg small{font-size:15px;font-weight:700;margin-left:3px;color:var(--muted)}
+.scaleread .sr-sub{font-size:12.5px;color:var(--muted);font-weight:600}
+.aibox .row,.aibox .g3,.aibox .compedit,.aibox .macros,.aibox .fitday{white-space:normal}
+.encour{display:flex;align-items:flex-start;gap:10px;background:linear-gradient(135deg,var(--soft),var(--soft2));border:1px solid var(--line);border-radius:18px;padding:13px 15px;margin:12px 0 2px;font-size:14px;line-height:1.5}
+.encour .eic{width:32px;height:32px;border-radius:11px;background:var(--card);display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 2px 8px rgba(34,49,43,.08)}
+.encour .eic svg.lucide{width:17px;height:17px;color:var(--pri)}
+.encour b{color:var(--pri2)}
+.msnext{border:1px solid var(--line);border-radius:18px;padding:14px 15px;background:var(--card);box-shadow:var(--sh);margin:10px 0 14px}
+.msnext .mh{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.msnext .mh .ic{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,var(--ai2),var(--ai));display:flex;align-items:center;justify-content:center;flex:none}
+.msnext .mh .ic svg.lucide{width:18px;height:18px;color:#fff}
+.msnext .mh b{font-size:15.5px;display:block;line-height:1.25}
+.msnext .mh span{font-size:12px;color:var(--muted);font-weight:600}
+.msnext .go{font-size:13px;color:var(--muted);margin-top:7px;line-height:1.45}
+.msnext .go b{color:var(--pri2)}
+.mscount{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#1c6a52,#2c7a5f);color:#fff;border-radius:20px;padding:15px 16px;margin-bottom:12px}
+.mscount .big{font-size:31px;font-weight:800;letter-spacing:-1px;line-height:1}
+.mscount .big small{font-size:16px;font-weight:700;opacity:.72}
+.mscount p{font-size:13px;line-height:1.45;opacity:.93}
+.msgroup{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);margin:14px 0 7px}
+.mstones{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
+.ms{background:var(--soft2);border:1px solid var(--line);border-radius:16px;padding:11px 8px 10px;text-align:center;opacity:.55;position:relative}
+.ms .ic{width:34px;height:34px;border-radius:12px;background:var(--line);display:inline-flex;align-items:center;justify-content:center;margin-bottom:6px}
+.ms .ic svg.lucide{width:17px;height:17px;color:var(--muted)}
+.ms b{display:block;font-size:12.5px;line-height:1.25;margin-bottom:2px}
+.ms span{font-size:10.5px;color:var(--muted);font-weight:600;line-height:1.3;display:block}
+.ms.on{opacity:1;background:var(--soft);border-color:var(--acc)}
+.ms.on .ic{background:linear-gradient(135deg,var(--pri),var(--acc));box-shadow:0 4px 12px rgba(44,122,95,.28)}
+.ms.on .ic svg.lucide{color:#fff}
+.ms.on .dt{font-size:10px;color:var(--pri2);font-weight:700;margin-top:3px;display:block}
+.ms .pb{height:5px;background:var(--line);border-radius:99px;margin-top:6px;overflow:hidden}
+.ms .pb i{display:block;height:100%;background:var(--acc);border-radius:99px}
+.celeb{position:fixed;inset:0;background:rgba(20,32,26,.55);display:none;align-items:center;justify-content:center;z-index:400;padding:20px;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.celeb.show{display:flex}
+.celebcard{background:var(--card);border-radius:26px;padding:26px 22px 22px;max-width:360px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:cpop .34s cubic-bezier(.2,1.3,.5,1)}
+@keyframes cpop{from{transform:scale(.82);opacity:0}to{transform:scale(1);opacity:1}}
+.celebcard .cic{width:74px;height:74px;border-radius:26px;background:linear-gradient(135deg,var(--pri),var(--acc));display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;box-shadow:0 12px 28px rgba(44,122,95,.36)}
+.celebcard .cic svg.lucide{width:36px;height:36px;color:#fff}
+.celebcard .ck{font-size:11.5px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:var(--pri);margin-bottom:5px}
+.celebcard h3{font-size:21px;letter-spacing:-.3px;margin-bottom:6px}
+.celebcard p{font-size:14px;line-height:1.55;color:var(--muted)}
+.celebcard .more{font-size:12.5px;color:var(--muted);margin-top:9px;font-weight:600}
+.fitday{border:1px solid var(--line);border-radius:18px;padding:13px 14px;background:var(--card);box-shadow:var(--sh);margin-bottom:10px}
+.fitday .fh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}
+.fitday .fh b{font-size:14.5px}
+.fitday .fh .src{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.fitgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(78px,1fr));gap:7px}
+.fitstat{background:var(--soft2);border-radius:13px;padding:9px 6px;text-align:center}
+.fitstat b{display:block;font-size:16px;line-height:1.2;letter-spacing:-.3px}
+.fitstat span{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.fitrings{display:flex;gap:7px;margin-bottom:9px;flex-wrap:wrap}
+.fitring{flex:1;min-width:86px;background:var(--soft2);border-radius:13px;padding:9px 9px}
+.fitring .rl{font-size:9.8px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;display:flex;align-items:center;gap:4px;margin-bottom:4px;white-space:nowrap}
+.fitring .rl svg.lucide{width:13px;height:13px}
+.fitring .rv{font-size:14.5px;font-weight:800;letter-spacing:-.2px;white-space:nowrap}
+.fitring .rv small{font-size:11px;font-weight:700;color:var(--muted)}
+.fitring .rb{height:5px;background:var(--line);border-radius:99px;margin-top:5px;overflow:hidden}
+.fitring .rb i{display:block;height:100%;border-radius:99px}
+.calibbox{border:1px solid #cfe2d6;background:linear-gradient(135deg,var(--soft),var(--soft2));border-radius:18px;padding:14px 15px;margin:12px 0}
+.calibbox h4{font-size:14.5px;display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.calibbox h4 svg.lucide{width:17px;height:17px;color:var(--pri)}
+.calibrow{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:5px 0;border-bottom:1px dashed var(--line)}
+.calibrow:last-of-type{border:none}
+.calibrow b{color:var(--pri2);white-space:nowrap}
+.calibnote{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:7px}
+.fituse{display:flex;align-items:center;gap:9px;background:var(--soft2);border:1px solid var(--line);border-radius:13px;padding:10px 12px;margin-top:9px;font-size:13px;font-weight:600;line-height:1.4}
+.fituse input{width:19px;height:19px;flex:none;accent-color:var(--pri)}
+@media(max-width:480px){#v-health .tabs2 button svg.lucide{display:none}#v-health .tabs2 button{padding:8px 6px;font-size:12.5px;gap:0}}
+html[data-theme="dark"] .mscount{background:linear-gradient(135deg,#17392e,#1d4c3c)}
+html[data-theme="dark"] .calibbox{border-color:#2b4a3c}
+html[data-theme="dark"] .ms:not(.on) .ic{background:#27332c}
+/* bara de taburi secundare rămăsese pe bej și în temă întunecată */
+html[data-theme="dark"] .tabs2{background:var(--soft2)}
+html[data-theme="dark"] .tabs2 button{color:var(--muted)}
+html[data-theme="dark"] .tabs2 button.on{background:var(--card);color:var(--acc)}
+html[data-theme="dark"] .celeb{background:rgba(0,0,0,.66)}
 /* ---------- Temă întunecată (auto după sistem sau manual din Setări) ---------- */
 html[data-theme="light"]{color-scheme:light}
 html[data-theme="dark"]{
@@ -734,6 +817,8 @@ header .ttl:active,header .logo:active{opacity:.75}
         <button data-dt="body" onclick="dTab('body')"><i data-lucide="ruler"></i>Corp</button>
         <button data-dt="fast" onclick="dTab('fast')"><i data-lucide="timer"></i>Fasting</button>
         <button data-dt="sport" onclick="dTab('sport')"><i data-lucide="dumbbell"></i>Sport</button>
+        <button data-dt="fit" onclick="dTab('fit')"><i data-lucide="watch"></i>Ceas</button>
+        <button data-dt="prog" onclick="dTab('prog')"><i data-lucide="trophy"></i>Progres</button>
       </div>
 
       <div id="dt-prof">
@@ -757,8 +842,25 @@ header .ttl:active,header .logo:active{opacity:.75}
           </div>
         </details>
         <div class="statgrid" id="pStats"></div>
+        <div id="pEncour"></div>
+
+        <h3><i data-lucide="scale"></i>Cântărire din poză</h3>
+        <p class="muted" style="margin:-4px 0 10px">Fotografiază afișajul cântarului — AI-ul citește kilogramele și le trece în jurnal. Ține telefonul deasupra afișajului, cu cifrele întregi în cadru.</p>
+        <button class="photozone" type="button" onclick="openCamera('scale')">
+          <span class="pz-ic"><i data-lucide="scale"></i></span>
+          <b>Fă o poză cântarului</b>
+          <span class="hint">AI-ul citește greutatea de pe afișaj și o salvează la cântăririle de azi</span>
+        </button>
+        <div class="row" style="margin-top:8px;justify-content:center">
+          <button class="btn ghost sm" onclick="document.getElementById('scalePhoto').click()"><i data-lucide="image"></i>Alege din galerie</button>
+          <input type="file" id="scalePhoto" accept="image/*" style="display:none" onchange="scalePhotoPicked(this)">
+        </div>
+        <div id="scalePrev"></div>
+        <div id="aiScaleOut"></div>
+
         <h3><i data-lucide="trending-down"></i>Evoluția greutății</h3>
         <div id="wChart" class="center muted">—</div>
+        <div id="wStreak"></div>
       </div>
 
       <div id="dt-body" style="display:none">
@@ -804,6 +906,30 @@ header .ttl:active,header .logo:active{opacity:.75}
         </div>
         <h3><i data-lucide="flame"></i>Săptămâna aceasta</h3>
         <div id="sportWeek" class="muted">—</div>
+      </div>
+
+      <div id="dt-fit" style="display:none">
+        <div class="aihero green">
+          <div class="hb"><i data-lucide="watch"></i></div>
+          <div><b>Calibrează aplicația după ceasul tău</b><p>Trimite un screenshot din Apple Fitness, Health, Google Fit, Samsung Health, Fitbit sau Garmin. AI-ul citește inelele, caloriile, minutele de mișcare și pașii, iar FamLink își ajustează după ele consumul zilnic estimat.</p></div>
+        </div>
+        <button class="photozone" type="button" style="margin-top:12px" onclick="document.getElementById('fitPhoto').click()">
+          <span class="pz-ic"><i data-lucide="image-plus"></i></span>
+          <b>Adaugă screenshot din aplicația de fitness</b>
+          <span class="hint">Poți trimite mai multe capturi din aceeași zi (rezumat + inele) — se completează una pe alta</span>
+        </button>
+        <input type="file" id="fitPhoto" accept="image/*" multiple style="display:none" onchange="fitPhotoPicked(this)">
+        <div id="fitPrev"></div>
+        <div id="aiFitOut"></div>
+        <div id="fitCalib"></div>
+        <h3><i data-lucide="history"></i>Zile importate</h3>
+        <div id="fitList" class="muted">—</div>
+      </div>
+
+      <div id="dt-prog" style="display:none">
+        <div id="progHero"></div>
+        <div id="progNext"></div>
+        <div id="progList"></div>
       </div>
 
     </div>
@@ -1154,9 +1280,21 @@ header .ttl:active,header .logo:active{opacity:.75}
 </div>
 
 <!-- Camera modal -->
+<!-- Reper atins -->
+<div class="celeb" id="celebBack" onclick="if(event.target===this)closeCeleb()">
+  <div class="celebcard">
+    <span class="cic"><i data-lucide="trophy" id="celebIc"></i></span>
+    <div class="ck" id="celebKicker">Reper atins</div>
+    <h3 id="celebTitle"></h3>
+    <p id="celebText"></p>
+    <div class="more" id="celebMore"></div>
+    <button class="btn" style="margin-top:16px;width:100%" onclick="closeCeleb()"><i data-lucide="check"></i>Mergem mai departe</button>
+  </div>
+</div>
+
 <div class="mback" id="camBack" onclick="if(event.target===this)closeCamera()">
   <div class="modal" style="max-width:480px">
-    <div class="mhead"><h2 style="margin:0"><i data-lucide="camera"></i>Fă o poză mesei</h2><button class="x" onclick="closeCamera()"><i data-lucide="x"></i></button></div>
+    <div class="mhead"><h2 style="margin:0"><i data-lucide="camera"></i><span id="camTitle">Fă o poză mesei</span></h2><button class="x" onclick="closeCamera()"><i data-lucide="x"></i></button></div>
     <video id="camVideo" playsinline autoplay muted style="width:100%;border-radius:14px;background:#000;max-height:58vh;object-fit:cover"></video>
     <div class="row" style="margin-top:12px;justify-content:center">
       <button class="btn" onclick="snapPhoto()" style="padding:12px 22px"><i data-lucide="aperture"></i>Capturează</button>
@@ -1192,7 +1330,7 @@ header .ttl:active,header .logo:active{opacity:.75}
 <script>
 /* ============ FamLink v1.0 — arhitectură ArhiLink (single-file, localStorage) ============ */
 const KEY='famlink_v1';
-const APP_VER='3.10.1';
+const APP_VER='3.11.0';
 /* prima literă mare (titluri de obiective, etichete de mementouri, titluri AI) */
 const capFirst=s=>{s=String(s||'').trim();return s?s.charAt(0).toLocaleUpperCase('ro-RO')+s.slice(1):s;};
 /* curăță titlul unui obiectiv: scoate din față formulările de COMANDĂ
@@ -1264,7 +1402,7 @@ function dedupeReminders(){
   if(changed)S.settings.reminders=order.map(k=>map[k]);
   return changed;
 }
-function defState(){return {members:[{id:'m1',name:'Eu',color:'#16a37f',email:''}],events:[],goals:[],mottos:{},tomb:{},diet:{profiles:{},weights:{},meals:[],sports:[],water:{},fasting:{active:false,start:null,hours:16,history:[]}},settings:{geminiKey:'',model:'gemini-2.5-flash',printSize:'A4',activeUser:'',reminders:[],aiMemory:[],voiceAutoSend:true}};}
+function defState(){return {members:[{id:'m1',name:'Eu',color:'#16a37f',email:''}],events:[],goals:[],mottos:{},tomb:{},diet:{profiles:{},weights:{},meals:[],sports:[],water:{},fitness:{},badges:{},fasting:{active:false,start:null,hours:16,history:[]}},settings:{geminiKey:'',model:'gemini-2.5-flash',printSize:'A4',activeUser:'',reminders:[],aiMemory:[],voiceAutoSend:true}};}
 function tombstone(id){S.tomb=S.tomb||{};S.tomb[id]=Date.now();}
 function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.members){const s=Object.assign(defState(),d);s.diet=Object.assign(defState().diet,d.diet||{});s.settings=Object.assign(defState().settings,d.settings||{});return s;}}catch(e){}return defState();}
 function save(){localStorage.setItem(KEY,JSON.stringify(S));if(typeof schedulePush==='function')schedulePush();}
@@ -2043,11 +2181,11 @@ function restore(inp){const f=inp.files[0];if(!f)return;const r=new FileReader()
 let dietTab='prof';
 const dietMid=()=>{const el=document.getElementById(VIEW==='meals'?'mealsWho':'dietWho');return (el&&el.value)||S.settings.activeUser||S.members[0].id;};
 function clearAI(id){const el=document.getElementById(id);if(el)el.innerHTML='';}
-function clearAIOuts(){['aiProfOut','aiBodyOut','aiMenuOut','aiPhotoOut'].forEach(clearAI);}
+function clearAIOuts(){['aiProfOut','aiBodyOut','aiMenuOut','aiPhotoOut','aiScaleOut','aiFitOut'].forEach(clearAI);}
 function aiShow(id,html,extra){const el=document.getElementById(id);if(!el)return;el.innerHTML='<div class="aibox"><button class="aix" title="Închide" onclick="clearAI(\''+id+'\')"><i data-lucide="x"></i></button><div class="aihead"><span class="badge"><i data-lucide="sparkles"></i></span><b>Asistent AI</b></div>'+html+'</div>'+(extra||'');LI();}
 function aiLoad(t){return '<div class="aibox load"><span class="typing"><i></i><i></i><i></i></span>'+t+'</div>';}
 function aiErr(t){return '<div class="aibox err">'+t+'</div>';}
-function dTab(t){dietTab=t;clearAIOuts();document.querySelectorAll('[data-dt]').forEach(b=>b.classList.toggle('on',b.dataset.dt===t));['prof','body','fast','sport'].forEach(x=>document.getElementById('dt-'+x).style.display=x===t?'':'none');rDiet();}
+function dTab(t){dietTab=t;clearAIOuts();document.querySelectorAll('[data-dt]').forEach(b=>b.classList.toggle('on',b.dataset.dt===t));['prof','body','fast','sport','fit','prog'].forEach(x=>document.getElementById('dt-'+x).style.display=x===t?'':'none');rDiet();}
 function fillWhoSel(sel){
   const cur=sel.value;
   sel.innerHTML=S.members.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('');
@@ -2056,7 +2194,7 @@ function fillWhoSel(sel){
 }
 function rDiet(){
   fillWhoSel(document.getElementById('dietWho'));
-  if(dietTab==='prof')rProf();else if(dietTab==='body')rBody();else if(dietTab==='fast')fastPaint(true);else if(dietTab==='sport')rSport();
+  if(dietTab==='prof')rProf();else if(dietTab==='body')rBody();else if(dietTab==='fast')fastPaint(true);else if(dietTab==='sport')rSport();else if(dietTab==='fit')rFit();else if(dietTab==='prog')rProg();
 }
 /* ---- vedere Mese (bara principală) ---- */
 let _mlType=null;
@@ -2086,12 +2224,12 @@ function rProf(){
   document.getElementById('pH').value=p.h||'';
   document.getElementById('pW').value=lastW()||p.w||'';
   document.getElementById('pT').value=p.target||'';
-  document.getElementById('pAct').value=p.activity||'1.375';
+  setActSelect(p.activity||'1.375');
   document.getElementById('pWater').value=p.waterGoal||'';
   document.getElementById('pKcal').value=p.kcalGoal||'';
   /* recalcul live când modifici orice câmp de profil (mai ales ținta de kg) */
   ['pSex','pAge','pH','pW','pT','pAct','pKcal'].forEach(id=>{const el=document.getElementById(id);if(el&&!el._pv){el._pv=1;el.addEventListener('input',previewProfile);el.addEventListener('change',previewProfile);}});
-  paintStats();paintChart();
+  paintStats();paintChart();paintEncour();
 }
 function waterGoal(){return Number(getProf().waterGoal)||2000;}
 /* ținta zilnică de kcal: valoarea custom a utilizatorului sau calculul automat */
@@ -2150,10 +2288,14 @@ function paintStats(pp,ww){
    împrospătează TOT ce depinde de ea: statisticile, graficul greutății, Mese (ținta kcal,
    apa, graficul pe 7 zile, rețetele), analiza corporală și sportul. */
 function rHealthAll(){
+  if(typeof checkMilestones==='function')checkMilestones();
   paintStats();paintChart();
+  if(typeof paintEncour==='function')paintEncour();
   if(typeof rMeals==='function')rMeals();
   if(typeof paintBody==='function')paintBody();
   if(typeof rSport==='function')rSport();
+  if(typeof rFit==='function'&&dietTab==='fit')rFit();
+  if(typeof rProg==='function'&&dietTab==='prog')rProg();
 }
 /* recalcul LIVE al cifrelor (IMC, TDEE, țintă kcal) când schimbi un câmp din
    profil — inclusiv ținta de kg — fără să fie nevoie să salvezi întâi */
@@ -2177,7 +2319,7 @@ function saveProfile(){
   S.diet.profiles[mid]=Object.assign(getProf(),p);
   const w=Number(document.getElementById('pW').value);
   if(w){S.diet.weights[mid]=S.diet.weights[mid]||[];const ws=S.diet.weights[mid];const t=todayStr();const ex=ws.find(x=>x.d===t);if(ex)ex.w=w;else ws.push({d:t,w});ws.sort((a,b)=>a.d<b.d?-1:1);}
-  save();rHealthAll();toast('Profil salvat'); // v3.8.2: recalculează tot, nu doar statisticile + graficul
+  save();rHealthAll();toast('Profil salvat'); // v3.8.2: recalculează tot, nu doar statisticile + graficul; v3.11: + verificarea reperelor
 }
 function paintChart(){
   const ws=S.diet.weights[dietMid()]||[];
@@ -2267,6 +2409,7 @@ function fastToggle(){
     const el=(Date.now()-new Date(f.start))/36e5;
     f.history.unshift({start:f.start,end:new Date().toISOString(),h:+el.toFixed(1),goal:f.hours});
     f.history=f.history.slice(0,30);f.active=false;f.start=null;f.pushed=false;
+    if(typeof checkMilestones==='function')checkMilestones();
     toast('Fasting oprit la '+el.toFixed(1)+' h');
     if(typeof pushReady==='function'&&pushReady())pushQueue({action:'schedule',groups:[{prefix:'fast_'+DID,items:[]}]});
   }else{
@@ -2363,7 +2506,7 @@ function addSport(){
 function logSport(name,min,cal){
   S.diet.sports=S.diet.sports||[];
   S.diet.sports.push({id:uid(),mid:dietMid(),date:todayStr(),name:name||'Sport',minutes:Number(min)||0,kcal:Number(cal)||sportKcal(name,min)});
-  save();if(dietTab==='sport')rSport();toast('Sport adăugat: '+name+' '+min+' min');
+  save();if(typeof checkMilestones==='function')checkMilestones();if(dietTab==='sport')rSport();toast('Sport adăugat: '+name+' '+min+' min');
 }
 function delSport(id){S.diet.sports=(S.diet.sports||[]).filter(s=>s.id!==id);tombstone(id);save();rSport();}
 function rSport(){
@@ -2383,7 +2526,7 @@ function logWater(ml){
   const mid=dietMid(),t=todayStr();
   S.diet.water=S.diet.water||{};S.diet.water[mid]=S.diet.water[mid]||{};
   S.diet.water[mid][t]=(S.diet.water[mid][t]||0)+(Number(ml)||250);
-  save();rMeals();
+  save();if(typeof checkMilestones==='function')checkMilestones();rMeals();
 }
 function waterToday(){const mid=dietMid();return (S.diet.water&&S.diet.water[mid]&&S.diet.water[mid][todayStr()])||0;}
 function todayMeals(){return S.diet.meals.filter(m=>m.mid===dietMid()&&m.date===todayStr());}
@@ -2391,19 +2534,21 @@ function rMeals(){
   const ms=todayMeals(),tot=ms.reduce((a,b)=>a+(b.cal||0),0);
   const c=calc(getProf(),lastW());
   const baseTgt=kcalTarget(c);
-  const burned=sportKcalToday();          // calorii arse la sport (doar sesiunile bifate)
-  const tgt=baseTgt+burned;               // sportul mărește bugetul zilei
+  const _bn=burnToday();                  // v3.11: sportul bifat SAU caloriile active citite din ceas
+  const burned=_bn.kcal;
+  const tgt=baseTgt+burned;               // mișcarea mărește bugetul zilei
   const rest=tgt-tot;
   const put=(id,txt)=>{const el=document.getElementById(id);if(el)el.textContent=txt;};
   put('mhKcal',tot);put('mhTgt',tgt);
   put('mhLeft',rest>=0?('îți mai rămân ~'+rest+' kcal'):('ai depășit cu '+(-rest)+' kcal'));
   // linia „sport azi" din hero (albastru, distinct) — arată bonusul adăugat la buget
   const msEl=document.getElementById('mhSport');
-  if(msEl){if(burned>0){msEl.style.display='';msEl.innerHTML=`<i data-lucide="dumbbell"></i> Sport azi: <b style="margin:0 3px">${burned}</b> kcal arse <span class="muted" style="font-weight:500">(+${burned} la buget → ${tgt} kcal)</span>`;}else{msEl.style.display='none';msEl.innerHTML='';}}
+  if(msEl){if(burned>0){msEl.style.display='';msEl.innerHTML=`<i data-lucide="${_bn.src==='fit'?'watch':'dumbbell'}"></i> ${_bn.label}: <b style="margin:0 3px">${burned}</b> kcal arse <span class="muted" style="font-weight:500">(+${burned} la buget → ${tgt} kcal)</span>`;}else{msEl.style.display='none';msEl.innerHTML='';}}
   // lista sesiunilor de sport cu bifă (le incluzi/excluzi din buget)
   const spEl=document.getElementById('sportLine');
   if(spEl){const ss=todaySports();
-    spEl.innerHTML=ss.length?('<div class="sportbudget">'+ss.map(s=>`<label class="sportchk${s.off?' off':''}"><input type="checkbox" ${s.off?'':'checked'} onchange="toggleSportOff('${s.id}')"><i data-lucide="dumbbell"></i><span class="grow"><b>${esc(s.name)}</b> · ${s.minutes} min</span><span class="k">+${s.kcal} kcal</span></label>`).join('')+'</div>'):'';
+    const _fw=(_bn.src==='fit')?'<p class="muted" style="font-size:11.5px;margin:6px 0 0">Bugetul de azi vine din ceas ('+_bn.kcal+' kcal active) — sesiunile de mai jos rămân doar ca jurnal, ca să nu numeri de două ori.</p>':'';
+    spEl.innerHTML=ss.length?('<div class="sportbudget">'+ss.map(s=>`<label class="sportchk${(s.off||_bn.src==='fit')?' off':''}"><input type="checkbox" ${(s.off||_bn.src==='fit')?'':'checked'} ${_bn.src==='fit'?'disabled':''} onchange="toggleSportOff('${s.id}')"><i data-lucide="dumbbell"></i><span class="grow"><b>${esc(s.name)}</b> · ${s.minutes} min</span><span class="k">+${s.kcal} kcal</span></label>`).join('')+'</div>'+_fw):(_fw);
   }
   const bar=document.getElementById('calBar');if(bar)bar.style.width=Math.min(100,tot/tgt*100)+'%';
   const pill=document.getElementById('calPill');
@@ -3037,6 +3182,538 @@ async function fcmRegister(force){
 }
 </script>
 <script>
+/* ============ v3.11 — CÂNTAR FOTO, REPERE ȘI CALIBRARE DUPĂ CEAS ============ */
+
+/* ---------- date de fitness importate din ceas / telefon ---------- */
+function fitAll(){S.diet.fitness=S.diet.fitness||{};return S.diet.fitness[dietMid()]||[];}
+function fitForDay(ds){return fitAll().find(x=>x.d===ds)||null;}
+/* bugetul zilei: dacă ziua de azi vine din ceas, caloriile active de acolo înlocuiesc
+   estimarea MET a sesiunilor de sport — altfel aceeași mișcare s-ar număra de două ori */
+function burnToday(){
+  const f=fitForDay(todayStr());
+  if(f&&f.useMove&&Number(f.move)>0)return {kcal:Math.round(Number(f.move)),src:'fit',label:'Mișcare azi (din ceas)'};
+  return {kcal:sportKcalToday(),src:'sport',label:'Sport azi'};
+}
+function mergeFitness(a,b,tomb){
+  const out={},mids=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);
+  mids.forEach(mid=>{out[mid]=applyTomb(mergeById((a||{})[mid]||[],(b||{})[mid]||[]),tomb).sort((x,y)=>x.d<y.d?-1:1);});
+  return out;
+}
+/* un reper atins rămâne atins: la sincronizare câștigă data cea mai VECHE */
+function mergeBadges(a,b){
+  const out={},mids=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);
+  mids.forEach(mid=>{
+    const m=Object.assign({},(b||{})[mid]||{}),la=(a||{})[mid]||{};
+    for(const k in la){const e=m[k];if(!e||(la[k].t||0)<(e.t||0))m[k]=la[k];}
+    out[mid]=m;
+  });
+  return out;
+}
+
+/* ---------- serii de zile (cântăriri, mese, apă) ---------- */
+function daysStreak(set){
+  if(!set.size)return 0;
+  const n=new Date();let d=new Date(n.getFullYear(),n.getMonth(),n.getDate());
+  if(!set.has(dstr(d)))d.setDate(d.getDate()-1);      // seria e vie și dacă azi n-ai apucat încă
+  if(!set.has(dstr(d)))return 0;
+  let k=0;while(set.has(dstr(d))){k++;d.setDate(d.getDate()-1);}
+  return k;
+}
+/* panta greutății (kg/zi) pe ultimele ~42 de zile, prin regresie liniară */
+function weightSlope(ws){
+  const lim=Date.now()-42*864e5;
+  const pts=ws.filter(x=>fromStr(x.d).getTime()>=lim);
+  if(pts.length<3)return null;
+  const t0=fromStr(pts[0].d).getTime();
+  const xs=pts.map(x=>(fromStr(x.d).getTime()-t0)/864e5),ys=pts.map(x=>Number(x.w));
+  const n=xs.length,mx=xs.reduce((a,b)=>a+b,0)/n,my=ys.reduce((a,b)=>a+b,0)/n;
+  let num=0,den=0;for(let i=0;i<n;i++){num+=(xs[i]-mx)*(ys[i]-my);den+=(xs[i]-mx)**2;}
+  return den?num/den:null;
+}
+
+/* ---------- contextul pe care se judecă reperele ---------- */
+function msCtx(){
+  const mid=dietMid(),p=S.diet.profiles[mid]||{},ws=(S.diet.weights[mid]||[]);
+  const start=ws.length?Number(ws[0].w):null,cur=ws.length?Number(ws[ws.length-1].w):null;
+  const lost=(start!=null&&cur!=null)?+(start-cur).toFixed(1):0;
+  const pct=(start&&lost>0)?+(lost/start*100).toFixed(1):0;
+  const h=Number(p.h)||0;
+  const bmi=(h&&cur)?+(cur/((h/100)**2)).toFixed(1):null;
+  const bmi0=(h&&start)?+(start/((h/100)**2)).toFixed(1):null;
+  const tgt=Number(p.target)||0;
+  const mode=(!tgt||start==null)?'lose':(tgt<start-0.5?'lose':(tgt>start+0.5?'gain':'keep'));
+  const b=(typeof bodyCalc==='function')?bodyCalc():null;
+  const fastOk=((S.diet.fasting&&S.diet.fasting.history)||[]).filter(x=>Number(x.h)>=Number(x.goal)).length;
+  const sports=(S.diet.sports||[]).filter(x=>x.mid===mid&&!x.off);
+  const now=Date.now();
+  const fit=fitAll();
+  const wkSportMin=sports.filter(s=>(now-fromStr(s.date).getTime())/864e5<7).reduce((a,s)=>a+(Number(s.minutes)||0),0)
+    +fit.filter(f=>(now-fromStr(f.d).getTime())/864e5<7).reduce((a,f)=>a+(Number(f.exMin)||0),0);
+  const wStreak=daysStreak(new Set(ws.map(x=>x.d)));
+  const mStreak=daysStreak(new Set((S.diet.meals||[]).filter(m=>m.mid===mid).map(m=>m.date)));
+  const wg=(typeof waterGoal==='function')?waterGoal():2000;
+  const wat=(S.diet.water||{})[mid]||{};
+  const waterDays=Object.keys(wat).filter(d=>Number(wat[d])>=wg);
+  const waterStreak=daysStreak(new Set(waterDays));
+  const stepsBest=fit.reduce((a,f)=>Math.max(a,Number(f.steps)||0),0);
+  const stepStreak=daysStreak(new Set(fit.filter(f=>(Number(f.steps)||0)>=8000).map(f=>f.d)));
+  const waistMax=p.sex==='F'?80:94;
+  return {mid,p,ws,start,cur,lost,pct,bmi,bmi0,tgt,mode,b,fastOk,sportN:sports.length,wkSportMin,
+    wn:ws.length,wStreak,mStreak,waterStreak,stepsBest,stepStreak,waistMax,fitN:fit.length,
+    slope:weightSlope(ws)};
+}
+
+/* ---------- lista de repere ---------- */
+const MILES=[
+ {k:'w-first',g:'Greutate',ic:'scale',t:'Primul pas',d:'Ai notat prima cântărire',n:1,v:c=>c.wn?1:0,u:''},
+ {k:'w-1',   g:'Greutate',ic:'trending-down',t:'Primul kilogram',d:'1 kg mai puțin ca la start',n:1,u:' kg',v:c=>Math.max(0,c.lost),rel:c=>c.mode!=='gain'},
+ {k:'w-2.5', g:'Greutate',ic:'trending-down',t:'2,5 kg',d:'2,5 kg date jos',n:2.5,u:' kg',v:c=>Math.max(0,c.lost),rel:c=>c.mode!=='gain'},
+ {k:'w-5',   g:'Greutate',ic:'trending-down',t:'5 kg',d:'5 kg date jos',n:5,u:' kg',v:c=>Math.max(0,c.lost),rel:c=>c.mode!=='gain'},
+ {k:'w-7.5', g:'Greutate',ic:'trending-down',t:'7,5 kg',d:'7,5 kg date jos',n:7.5,u:' kg',v:c=>Math.max(0,c.lost),rel:c=>c.mode!=='gain'},
+ {k:'w-10',  g:'Greutate',ic:'trending-down',t:'10 kg',d:'10 kg date jos',n:10,u:' kg',v:c=>Math.max(0,c.lost),rel:c=>c.mode!=='gain'},
+ {k:'w-15',  g:'Greutate',ic:'trending-down',t:'15 kg',d:'15 kg date jos',n:15,u:' kg',v:c=>Math.max(0,c.lost),rel:c=>c.mode!=='gain'},
+ {k:'w-20',  g:'Greutate',ic:'trending-down',t:'20 kg',d:'20 kg date jos',n:20,u:' kg',v:c=>Math.max(0,c.lost),rel:c=>c.mode!=='gain'},
+ {k:'w-p5',  g:'Greutate',ic:'percent',t:'5% din tine',d:'5% din greutatea de start — pragul de la care tensiunea și glicemia se mișcă vizibil',n:5,u:'%',v:c=>Math.max(0,c.pct),rel:c=>c.mode!=='gain'},
+ {k:'w-p10', g:'Greutate',ic:'percent',t:'10% din tine',d:'10% din greutatea de start',n:10,u:'%',v:c=>Math.max(0,c.pct),rel:c=>c.mode!=='gain'},
+ {k:'w-tgt', g:'Greutate',ic:'target',t:'Ținta atinsă',d:'Ai ajuns la greutatea pe care ți-ai propus-o',n:1,u:'',v:c=>(c.tgt&&c.cur!=null&&((c.mode==='gain'&&c.cur>=c.tgt)||(c.mode!=='gain'&&c.cur<=c.tgt)))?1:0,rel:c=>!!c.tgt},
+
+ {k:'b-30',  g:'Sănătate',ic:'heart-pulse',t:'Sub IMC 30',d:'Ai ieșit din zona de obezitate',n:1,u:'',v:c=>(c.bmi!=null&&c.bmi<30)?1:0,rel:c=>c.bmi0!=null&&c.bmi0>=30},
+ {k:'b-25',  g:'Sănătate',ic:'heart-pulse',t:'Sub IMC 25',d:'IMC în intervalul normal',n:1,u:'',v:c=>(c.bmi!=null&&c.bmi<25)?1:0,rel:c=>c.bmi0!=null&&c.bmi0>=25},
+ {k:'b-whtr',g:'Sănătate',ic:'ruler',t:'Talie sub jumătate',d:'Talia sub jumătate din înălțime (regula OMS)',n:1,u:'',v:c=>(c.b&&c.b.whtr<=0.5)?1:0,rel:c=>!!c.b},
+ {k:'b-waist',g:'Sănătate',ic:'ruler',t:'Talie în siguranță',d:'Talia sub pragul OMS de risc',n:1,u:'',v:c=>(Number(c.p.waist)&&Number(c.p.waist)<=c.waistMax)?1:0,rel:c=>!!Number(c.p.waist)},
+
+ {k:'s-3',   g:'Constanță',ic:'calendar-check',t:'3 zile la rând',d:'Te-ai cântărit 3 zile consecutiv',n:3,u:' zile',v:c=>c.wStreak},
+ {k:'s-7',   g:'Constanță',ic:'calendar-check',t:'O săptămână',d:'7 zile la rând cu cântărire',n:7,u:' zile',v:c=>c.wStreak},
+ {k:'s-14',  g:'Constanță',ic:'calendar-check',t:'Două săptămâni',d:'14 zile la rând cu cântărire',n:14,u:' zile',v:c=>c.wStreak},
+ {k:'s-30',  g:'Constanță',ic:'calendar-check',t:'O lună întreagă',d:'30 de zile la rând cu cântărire',n:30,u:' zile',v:c=>c.wStreak},
+ {k:'s-60',  g:'Constanță',ic:'badge-check',t:'60 de zile',d:'60 de zile la rând cu cântărire',n:60,u:' zile',v:c=>c.wStreak},
+ {k:'s-100', g:'Constanță',ic:'badge-check',t:'100 de zile',d:'100 de zile la rând cu cântărire',n:100,u:' zile',v:c=>c.wStreak},
+ {k:'m-7',   g:'Constanță',ic:'utensils',t:'Mesele notate 7 zile',d:'O săptămână în care ai scris ce ai mâncat',n:7,u:' zile',v:c=>c.mStreak},
+ {k:'m-30',  g:'Constanță',ic:'utensils',t:'Mesele notate 30 de zile',d:'O lună de jurnal alimentar',n:30,u:' zile',v:c=>c.mStreak},
+ {k:'aq-7',  g:'Constanță',ic:'droplets',t:'Apa, 7 zile',d:'7 zile la rând cu obiectivul de apă atins',n:7,u:' zile',v:c=>c.waterStreak},
+
+ {k:'sp-1',  g:'Mișcare',ic:'dumbbell',t:'Prima mișcare',d:'Prima activitate sportivă notată',n:1,u:'',v:c=>c.sportN},
+ {k:'sp-10', g:'Mișcare',ic:'dumbbell',t:'10 antrenamente',d:'10 sesiuni de sport notate',n:10,u:'',v:c=>c.sportN},
+ {k:'sp-25', g:'Mișcare',ic:'dumbbell',t:'25 de antrenamente',d:'25 de sesiuni de sport',n:25,u:'',v:c=>c.sportN},
+ {k:'sp-50', g:'Mișcare',ic:'flame',t:'50 de antrenamente',d:'50 de sesiuni de sport',n:50,u:'',v:c=>c.sportN},
+ {k:'sp-100',g:'Mișcare',ic:'flame',t:'100 de antrenamente',d:'100 de sesiuni de sport',n:100,u:'',v:c=>c.sportN},
+ {k:'sp-150',g:'Mișcare',ic:'activity',t:'150 min într-o săptămână',d:'Recomandarea OMS de mișcare moderată, bifată',n:150,u:' min',v:c=>c.wkSportMin},
+ {k:'st-10k',g:'Mișcare',ic:'footprints',t:'10.000 de pași',d:'O zi cu 10.000 de pași, citită din ceas',n:10000,u:' pași',v:c=>c.stepsBest,rel:c=>c.fitN>0},
+ {k:'st-7',  g:'Mișcare',ic:'footprints',t:'7 zile active',d:'7 zile la rând cu peste 8.000 de pași',n:7,u:' zile',v:c=>c.stepStreak,rel:c=>c.fitN>0},
+
+ {k:'f-1',   g:'Fasting',ic:'timer',t:'Primul fasting',d:'Ai dus la capăt primul post intermitent',n:1,u:'',v:c=>c.fastOk},
+ {k:'f-5',   g:'Fasting',ic:'timer',t:'5 fasting-uri',d:'5 posturi duse la capăt',n:5,u:'',v:c=>c.fastOk},
+ {k:'f-10',  g:'Fasting',ic:'timer',t:'10 fasting-uri',d:'10 posturi duse la capăt',n:10,u:'',v:c=>c.fastOk},
+ {k:'f-25',  g:'Fasting',ic:'sunrise',t:'25 de fasting-uri',d:'25 de posturi duse la capăt',n:25,u:'',v:c=>c.fastOk},
+ {k:'f-50',  g:'Fasting',ic:'sunrise',t:'50 de fasting-uri',d:'50 de posturi duse la capăt',n:50,u:'',v:c=>c.fastOk}
+];
+const MS_GROUPS=['Greutate','Sănătate','Constanță','Mișcare','Fasting'];
+function msVal(m,c){const v=Number(m.v(c));return isFinite(v)?v:0;}
+function msDone(m,c){return msVal(m,c)>=m.n;}
+function msFmt(m,v){
+  const x=m.n>=1000?Math.round(v).toLocaleString('ro-RO'):(Math.round(v*10)/10).toString().replace('.',',');
+  const nn=m.n>=1000?m.n.toLocaleString('ro-RO'):String(m.n).replace('.',',');
+  return m.u?(x+' / '+nn+m.u):(x+' / '+nn);
+}
+function msBag(){S.diet.badges=S.diet.badges||{};return S.diet.badges[dietMid()]=S.diet.badges[dietMid()]||{};}
+function msEarned(){const b=msBag();return MILES.filter(m=>b[m.k]);}
+
+/* verifică reperele; prima rulare le „însămânțează" tăcut, ca să nu sărbătorim retroactiv */
+let _msBusy=false;
+function checkMilestones(silent){
+  if(_msBusy)return [];
+  _msBusy=true;
+  try{return _checkMilestones(silent);}finally{_msBusy=false;}
+}
+function _checkMilestones(silent){
+  const bag=msBag(),c=msCtx(),t=todayStr(),now=Date.now();
+  const seeding=!bag._seed;
+  const fresh=[];
+  MILES.forEach(m=>{
+    if(bag[m.k])return;
+    if(m.rel&&!m.rel(c))return;
+    if(msDone(m,c)){bag[m.k]={d:t,t:now};if(!seeding)fresh.push(m);}
+  });
+  if(seeding)bag._seed={d:t,t:now};
+  if(fresh.length||seeding)save();
+  if(fresh.length&&!silent)celebrate(fresh,c);
+  return fresh;
+}
+
+/* ---------- sărbătorirea ---------- */
+function celebLine(m,c){
+  switch(m.g){
+    case 'Greutate':return m.k==='w-tgt'
+      ? 'Ai ajuns exact unde ți-ai propus. De aici începe partea care contează cu adevărat: să rămâi aici, fără să te mai gândești la asta zilnic.'
+      : 'Sunt '+String(c.lost).replace('.',',')+' kg pe care nu le mai cari cu tine la fiecare pas, la fiecare scară, în fiecare noapte.';
+    case 'Sănătate':return 'Cifra asta nu e despre cum arăți, ci despre ce se întâmplă în interior — inima și vasele lucrează deja mai ușor.';
+    case 'Constanță':return 'Constanța e partea grea, nu efortul. Tu o ai deja.';
+    case 'Mișcare':return 'Corpul ține minte fiecare sesiune, chiar și pe cele în care n-aveai chef.';
+    case 'Fasting':return 'Ai învățat să stai cu foamea fără să te sperii de ea — asta e tot secretul.';
+  }
+  return 'Un pas mic, pus lângă celelalte.';
+}
+function celebrate(list,c){
+  const m=list[0];
+  document.getElementById('celebIc').setAttribute('data-lucide',list.length>1?'trophy':(m.ic||'trophy'));
+  document.getElementById('celebKicker').textContent=list.length>1?(list.length+' repere atinse'):'Reper atins';
+  document.getElementById('celebTitle').textContent=list.length>1?('Ai bifat '+list.length+' repere deodată'):m.t;
+  document.getElementById('celebText').textContent=list.length>1
+    ?(list.map(x=>x.t).join(', ')+'. '+celebLine(m,c))
+    :(m.d+'. '+celebLine(m,c));
+  const b=msBag(),tot=MILES.filter(x=>!x.rel||x.rel(c)).length,got=MILES.filter(x=>b[x.k]).length;
+  document.getElementById('celebMore').textContent=got+' din '+tot+' repere · vezi-le în Sănătate → Progres';
+  document.getElementById('celebBack').classList.add('show');LI();
+}
+function closeCeleb(){document.getElementById('celebBack').classList.remove('show');}
+
+/* ---------- tabul Progres ---------- */
+function msNext(c){
+  const b=msBag();
+  const open=MILES.filter(m=>!b[m.k]&&(!m.rel||m.rel(c))).map(m=>({m,p:Math.min(1,msVal(m,c)/m.n)}));
+  if(!open.length)return null;
+  open.sort((x,y)=>y.p-x.p);
+  return open[0];
+}
+function rProg(){
+  checkMilestones();
+  const c=msCtx(),b=msBag();
+  const rel=MILES.filter(m=>!m.rel||m.rel(c));
+  const got=rel.filter(m=>b[m.k]).length;
+  const hero=document.getElementById('progHero');
+  if(hero)hero.innerHTML='<div class="mscount"><div><span class="big">'+got+'<small>/'+rel.length+'</small></span></div>'+
+    '<p>'+(got===0?'Niciun reper încă — primul vine la prima cântărire. De acolo, aplicația ține singură socoteala.'
+      :(got===rel.length?'Le-ai bifat pe toate cele care ți se potrivesc acum. Când apar date noi (talie, pași din ceas, o țintă nouă), apar și repere noi.'
+      :'Repere atinse până acum. Următorul e la o distanță mai mică decât pare.'))+'</p></div>';
+  const nx=msNext(c),el=document.getElementById('progNext');
+  if(el){
+    if(!nx)el.innerHTML='';
+    else{
+      const m=nx.m,v=msVal(m,c),rest=Math.max(0,m.n-v);
+      const restTxt=m.n>=1000?Math.round(rest).toLocaleString('ro-RO'):(Math.round(rest*10)/10).toString().replace('.',',');
+      el.innerHTML='<div class="msnext"><div class="mh"><span class="ic"><i data-lucide="'+m.ic+'"></i></span><span><b>Urmează: '+esc(m.t)+'</b><span>'+esc(m.d)+'</span></span></div>'+
+        '<div class="pbar"><i style="width:'+Math.round(nx.p*100)+'%"></i></div>'+
+        '<div class="go">Ești la <b>'+msFmt(m,v)+'</b> — mai ai <b>'+restTxt+(m.u||'')+'</b>.</div></div>';
+    }
+  }
+  const list=document.getElementById('progList');
+  if(list){
+    list.innerHTML=MS_GROUPS.map(g=>{
+      const items=rel.filter(m=>m.g===g);
+      if(!items.length)return '';
+      return '<div class="msgroup">'+g+'</div><div class="mstones">'+items.map(m=>{
+        const on=!!b[m.k],v=msVal(m,c),p=Math.min(1,v/m.n);
+        return '<div class="ms'+(on?' on':'')+'" title="'+esc(m.d)+'"><span class="ic"><i data-lucide="'+m.ic+'"></i></span><b>'+esc(m.t)+'</b>'+
+          (on?('<span class="dt">'+remDateLabel(b[m.k].d)+'</span>')
+             :('<span>'+msFmt(m,v)+'</span><span class="pb"><i style="width:'+Math.round(p*100)+'%"></i></span>'))+'</div>';
+      }).join('')+'</div>';
+    }).join('');
+  }
+  LI();
+}
+
+/* ---------- linia de încurajare din Profil ---------- */
+function paintEncour(){
+  const el=document.getElementById('pEncour');if(!el)return;
+  const c=msCtx();
+  const box=(ic,html)=>'<div class="encour"><span class="eic"><i data-lucide="'+ic+'"></i></span><span>'+html+'</span></div>';
+  if(!c.wn){el.innerHTML=box('scale','Nu am încă nicio cântărire pentru tine. Pune una — din poza cântarului sau scrisă de mână — și de acolo încolo ține aplicația socoteala: evoluție, ritm, repere.');LI();return;}
+  const parts=[];
+  if(c.lost>=0.1)parts.push('Ești cu <b>'+String(c.lost).replace('.',',')+' kg</b> sub greutatea de la care ai pornit'+(c.pct>=1?(' — '+String(c.pct).replace('.',',')+'% din tine').replace('.',','):'')+'.');
+  else if(c.lost<=-0.1)parts.push('Cifra a urcat cu <b>'+String(Math.abs(c.lost)).replace('.',',')+' kg</b> față de start. Apa, sarea și somnul mișcă cântarul mai mult decât grăsimea, așa că uită-te la linia pe două săptămâni, nu la ziua de azi.');
+  else parts.push('Ești la greutatea de la care ai pornit.');
+  if(c.wStreak>=2)parts.push('Te cântărești a <b>'+c.wStreak+'-a zi</b> la rând.');
+  if(c.slope!=null&&c.tgt&&c.cur!=null){
+    const need=c.cur-c.tgt;
+    if(need>0.2&&c.slope<-0.005){
+      const days=Math.ceil(need/(-c.slope));
+      if(days>0&&days<900){
+        const d=new Date();d.setDate(d.getDate()+days);
+        parts.push('În ritmul ultimelor săptămâni (<b>'+String(Math.abs(+(c.slope*7).toFixed(2))).replace('.',',')+' kg/săptămână</b>) ajungi la '+String(c.tgt).replace('.',',')+' kg pe la <b>'+d.toLocaleDateString('ro-RO',{day:'numeric',month:'long',year:'numeric'})+'</b>.');
+      }
+    }else if(need<=0.2)parts.push('Ești la țintă — de aici e doar menținere.');
+  }
+  const nx=msNext(c);
+  if(nx){const m=nx.m,rest=Math.max(0,m.n-msVal(m,c));
+    const r=m.n>=1000?Math.round(rest).toLocaleString('ro-RO'):(Math.round(rest*10)/10).toString().replace('.',',');
+    parts.push('Mai ai <b>'+r+(m.u||'')+'</b> până la reperul „'+esc(m.t)+'".');}
+  el.innerHTML=box('sparkles',parts.join(' '));
+  const st=document.getElementById('wStreak');
+  if(st){
+    const b7=c.ws.filter(x=>(Date.now()-fromStr(x.d).getTime())/864e5<=7);
+    const d7=(b7.length>=2)?+(Number(b7[b7.length-1].w)-Number(b7[0].w)).toFixed(1):null;
+    st.innerHTML='<p class="muted" style="text-align:center;font-size:12px;margin:6px 0 0">'+
+      c.wn+' cântăriri notate'+(d7!=null?(' · ultimele 7 zile: '+(d7>0?'+':'')+String(d7).replace('.',',')+' kg'):'')+
+      (c.start!=null?(' · start '+String(c.start).replace('.',',')+' kg'):'')+'</p>';
+  }
+  LI();
+}
+</script>
+
+<script>
+/* ============ v3.11 — CITIREA CÂNTARULUI DIN POZĂ ============ */
+let _scaleBlob=null,_scaleJ=null;
+const SCALE_PROMPT='Ești un sistem OCR specializat în afișaje cu segmente (LED/LCD) de pe cântare de baie. În poză e afișajul unui cântar, fotografiat de sus, adesea oblic și cu picioarele utilizatorului în cadru.\n'+
+'1) Citește EXACT ce scrie pe afișaj, caracter cu caracter, inclusiv punctul zecimal și eventualele litere. Nu completa și nu „corecta" cifre pe care nu le vezi clar. Atenție la confuziile tipice de segmente: 8 vs 0 vs 6, 1 vs 7, 5 vs 6, E vs 8.\n'+
+'2) Decide ce este: o GREUTATE (un număr plauzibil, de obicei între 20 și 350, cu una sau două zecimale), un COD DE EROARE sau de stare (ex. Err, E urmat de cifre, O-Ld, Lo, bAt, ---, 0.0) sau ceva NECITIBIL (afișaj tăiat, mișcat, prea luminos).\n'+
+'3) Dacă e greutate, spune și unitatea: kg dacă scrie kg sau nu scrie nimic (cântarele europene sunt în kg), lb dacă scrie lb/LB, st dacă e în stone, jin dacă scrie 斤.\n'+
+'4) Dacă e cod de eroare sau de stare, explică pe scurt, în română, ce înseamnă de obicei pe cântarele de baie — și spune clar că e o interpretare probabilă, nu o certitudine, pentru că fiecare producător are alte coduri.\n'+
+'5) „incredere" = mare doar dacă toate caracterele se văd clar și neambiguu.\n'+
+'Răspunde DOAR cu JSON valid, fără markdown: {"citire":"exact ce scrie pe afișaj","tip":"greutate|eroare|necitibil","valoare":număr sau null,"unitate":"kg|lb|st|jin","kg":număr_convertit_în_kg sau null,"cod":"codul afișat, dacă e eroare","explicatie":"o frază scurtă, la persoana a doua","incredere":"mare|medie|mică"}';
+function scalePhotoPicked(inp){const f=inp.files[0];if(!f)return;_scaleBlob=f;showScalePrev(URL.createObjectURL(f));if(S.settings.geminiKey)scaleAnalyze();else scaleNoKeyHint();}
+function showScalePrev(url){
+  document.getElementById('scalePrev').innerHTML='<div class="photoprev"><img src="'+url+'" alt="poză cântar"><button class="aix" title="Șterge poza" onclick="clearScalePhoto()"><i data-lucide="x"></i></button></div>'+
+    (S.settings.geminiKey?'<div class="row" style="margin-top:6px;justify-content:center"><button class="btn sm sec" onclick="scaleAnalyze()"><i data-lucide="sparkles"></i>Citește din nou</button></div>':'');
+  LI();
+}
+function clearScalePhoto(){_scaleBlob=null;_scaleJ=null;document.getElementById('scalePrev').innerHTML='';clearAI('aiScaleOut');const i=document.getElementById('scalePhoto');if(i)i.value='';}
+function scaleNoKeyHint(){aiShow('aiScaleOut','Am poza, dar fără o cheie Gemini nu pot citi afișajul. Scrie kilogramele de mână mai jos, sau adaugă cheia din Setări → Gemini AI și încerc eu.',scaleManualHtml(lastW()||''));}
+function scaleManualHtml(v){
+  return '<div class="row" style="margin-top:8px;gap:8px;align-items:flex-end;white-space:normal"><div style="width:120px"><label>Greutate (kg)</label><input id="scaleManual" type="number" step="0.1" min="20" max="350" value="'+(v||'')+'"></div><button class="btn grow" onclick="saveScaleManual()"><i data-lucide="save"></i>Salvează cântărirea</button></div>';
+}
+function saveScaleManual(){
+  const v=Number((document.getElementById('scaleManual')||{}).value);
+  if(!(v>=20&&v<=350))return toast('Scrie o greutate între 20 și 350 kg');
+  applyScaleWeight(v,'scrisă de mână');
+}
+async function scaleAnalyze(){
+  const f=_scaleBlob;
+  if(!f)return toast('Fă o poză cântarului sau alege una din galerie');
+  const out=document.getElementById('aiScaleOut');
+  out.innerHTML=aiLoad('Citesc afișajul…');
+  try{
+    const o=await askShrink(f,1200);
+    const txt=await gemini([{inline_data:{mime_type:o.mime,data:o.data}},{text:SCALE_PROMPT}],{json:true,temp:0,seed:7,model:'gemini-2.5-flash'});
+    _scaleJ=parseAIJson(txt);
+    renderScaleResult();
+  }catch(e){out.innerHTML=aiErr('Eroare: '+esc(e.message));}
+}
+const SCALE_TIPS='<ul class="steps" style="margin:8px 0 0"><li>Pune cântarul pe podea tare și dreaptă, nu pe covor sau parchet flotant cu pernă.</li><li>Atinge-l scurt cu piciorul și așteaptă să arate <b>0.0</b> înainte să urci.</li><li>Urcă desculț, cu greutatea egal pe ambele picioare, și stai nemișcat până se oprește cifra.</li><li>Fotografiază de sus, cât mai drept deasupra afișajului, fără umbră peste cifre.</li></ul>';
+function renderScaleResult(){
+  const j=_scaleJ||{};
+  const raw=String(j.citire||'').trim();
+  let kg=Number(j.kg);
+  if(!(kg>0)&&Number(j.valoare)>0){
+    const u=String(j.unitate||'kg').toLowerCase();
+    const v=Number(j.valoare);
+    kg=u==='lb'?v*0.45359237:(u==='st'?v*6.35029318:(u==='jin'?v*0.5:v));
+  }
+  kg=kg>0?Math.round(kg*10)/10:0;
+  const plaus=kg>=20&&kg<=350;
+  if(j.tip==='greutate'&&plaus){
+    const w0=lastW();
+    const diff=(w0!=null)?Math.round((kg-w0)*10)/10:null;
+    const jump=(diff!=null&&Math.abs(diff)>=4);
+    const low=j.incredere==='mică';
+    aiShow('aiScaleOut',
+      '<div class="scaleread"><span class="sr-ic"><i data-lucide="scale"></i></span><span class="sr-main">'+
+      '<span class="sr-kg">'+String(kg).replace('.',',')+'<small>kg</small></span>'+
+      '<span class="sr-sub">'+(raw?('afișajul arată „'+esc(raw)+'"'):'citit de pe afișaj')+
+      (diff!=null?(' · '+(diff===0?'la fel ca ultima cântărire':((diff>0?'+':'')+String(diff).replace('.',',')+' kg față de ultima'))):'')+'</span></span></div>'+
+      (low?'<p class="muted" style="margin:0 0 8px;white-space:normal">Cifrele nu se văd foarte clar — verifică numărul înainte să-l salvezi.</p>':'')+
+      (jump?'<p class="muted" style="margin:0 0 8px;white-space:normal">Diferență mare față de ultima cântărire ('+((diff>0?'+':'')+String(diff).replace('.',','))+' kg). Dacă nu e o greșeală de citire, salveaz-o liniștit.</p>':'')+
+      '<div class="row" style="gap:8px;align-items:flex-end"><div style="flex:1;min-width:104px"><label>Corectează (kg)</label><input id="scaleKg" type="number" step="0.1" min="20" max="350" value="'+kg+'"></div><div style="flex:1;min-width:132px"><label>Ziua</label><input id="scaleDay" type="date" value="'+todayStr()+'" max="'+todayStr()+'"></div></div>',
+      '<button class="btn" style="margin-top:10px;width:100%" onclick="saveScaleAI()"><i data-lucide="save"></i>Salvează cântărirea</button>');
+    return;
+  }
+  if(j.tip==='eroare'){
+    aiShow('aiScaleOut','Afișajul nu arată o greutate, ci <b>'+esc(j.cod||raw||'un cod')+'</b>. '+esc(j.explicatie||'Pe majoritatea cântarelor un cod ca ăsta apare când talerul n-a apucat să se calibreze la zero sau când greutatea nu s-a stabilizat.')+' Fiecare producător are alte coduri, așa că ia explicația ca pe o presupunere — manualul cântarului e sursa sigură.'+SCALE_TIPS,
+      scaleManualHtml(lastW()||''));
+    return;
+  }
+  aiShow('aiScaleOut','N-am putut citi cifrele'+(raw?(' — tot ce am distins a fost „'+esc(raw)+'"'):'')+'. '+(kg>0&&!plaus?'Numărul ieșit ('+String(kg).replace('.',',')+' kg) nu e plauzibil pentru un cântar de baie, așa că nu-l salvez singur. ':'')+'Mai încearcă o poză, sau scrie kilogramele de mână.'+SCALE_TIPS,
+    scaleManualHtml(lastW()||''));
+}
+function saveScaleAI(){
+  const v=Number((document.getElementById('scaleKg')||{}).value);
+  const d=(document.getElementById('scaleDay')||{}).value||todayStr();
+  if(!(v>=20&&v<=350))return toast('Greutatea trebuie să fie între 20 și 350 kg');
+  applyScaleWeight(v,'citită din poză',d);
+}
+function applyScaleWeight(kg,how,day){
+  kg=Math.round(kg*10)/10;
+  const prev=lastW();
+  logWeightKg(kg,day);
+  const pw=document.getElementById('pW');if(pw)pw.value=kg;
+  clearScalePhoto();
+  rHealthAll();
+  const d=(prev!=null)?Math.round((kg-prev)*10)/10:null;
+  toast(String(kg).replace('.',',')+' kg salvat ('+how+')'+(d?(' · '+(d>0?'+':'')+String(d).replace('.',',')+' kg'):''));
+}
+
+/* ============ v3.11 — CALIBRARE DIN APLICAȚIA DE FITNESS ============ */
+let _fitFiles=[],_fitJ=null;
+function fitPrompt(){
+  const n=new Date();
+  return 'Ești un sistem care citește capturi de ecran din aplicații de fitness și sănătate (Apple Fitness/Health, Google Fit, Samsung Health, Fitbit, Garmin, Huawei Health, Mi Fitness, Strava).\n'+
+  'Azi este '+todayStr()+' ('+DAYS[n.getDay()]+'). Utilizatorul îți trimite una sau mai multe capturi — pot fi din ACEEAȘI zi, derulată în locuri diferite. Combină-le într-o singură intrare pe zi.\n'+
+  'Citește EXACT cifrele scrise, nu le estima. Atenție:\n'+
+  '- „Move"/„Mișcare" = calorii ACTIVE (ex. „510/800 CAL" înseamnă 510 active din obiectivul 800). Pune 510 la move_kcal și 800 la move_goal.\n'+
+  '- „TOTAL … CAL" scris sub graficul de Move = consumul TOTAL al zilei (repaus + activ). Pune-l la total_kcal. Nu-l confunda cu caloriile active.\n'+
+  '- „Exercise"/„Exercițiu" = minute (ex. „7/45MIN" → 7 și 45). „TOTAL 12H 48M" de sub el e timp de mers/mișcare, pune-l la miscare_min convertit în minute (12h48m = 768).\n'+
+  '- „Stand"/„În picioare" = ore (ex. „16/12HRS" → 16 și 12).\n'+
+  '- Steps/Pași, Distance/Distanță (convertește în km), Flights Climbed/Etaje urcate.\n'+
+  '- Dacă vezi antrenamente separate (alergare, sală, plimbare) cu durată sau calorii, pune-le în „antrenamente".\n'+
+  'DATA: convertește data scrisă pe ecran în format YYYY-MM-DD (ex. „Monday, Sep 21, 2026" → 2026-09-21). Dacă pe captură nu se vede nicio dată, folosește '+todayStr()+'.\n'+
+  'Orice câmp pe care NU îl vezi în capturi îl pui null. Nu inventa și nu calcula valori lipsă.\n'+
+  'Răspunde DOAR cu JSON valid, fără markdown: {"zile":[{"data":"YYYY-MM-DD","sursa":"numele aplicației","move_kcal":număr|null,"move_goal":număr|null,"total_kcal":număr|null,"exercitiu_min":număr|null,"exercitiu_goal":număr|null,"miscare_min":număr|null,"stand_ore":număr|null,"stand_goal":număr|null,"pasi":număr|null,"distanta_km":număr|null,"etaje":număr|null,"antrenamente":[{"nume":"","minute":număr,"kcal":număr}]}],"nota":"o frază despre ce ai văzut, la persoana a doua"}';
+}
+async function fitPhotoPicked(inp){
+  const fs=Array.from(inp.files||[]).slice(0,4);inp.value='';
+  if(!fs.length)return;
+  if(!S.settings.geminiKey)return toast('Adaugă întâi cheia Gemini în Setări ca să pot citi capturile');
+  const out=document.getElementById('aiFitOut');
+  out.innerHTML=aiLoad('Citesc capturile…');
+  _fitFiles=[];
+  try{
+    for(const f of fs){const o=await askShrink(f,1400);_fitFiles.push(o);}
+    document.getElementById('fitPrev').innerHTML='<div style="display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 0">'+_fitFiles.map(o=>'<div class="attthumb" style="width:64px;height:96px"><img src="'+o.url+'" alt="captură fitness"></div>').join('')+'</div>';
+    LI();
+    const parts=_fitFiles.map(o=>({inline_data:{mime_type:o.mime,data:o.data}}));
+    parts.push({text:fitPrompt()});
+    const raw=await gemini(parts,{json:true,temp:0,seed:7,model:'gemini-2.5-flash'});
+    _fitJ=parseAIJson(raw);
+    renderFitResult();
+  }catch(e){out.innerHTML=aiErr('Eroare: '+esc(e.message));}
+}
+function fitNum(v){const n=Number(v);return (isFinite(n)&&n>0)?n:null;}
+function renderFitResult(){
+  const zile=(_fitJ&&Array.isArray(_fitJ.zile))?_fitJ.zile.filter(z=>z&&/^\d{4}-\d{2}-\d{2}$/.test(String(z.data||''))):[];
+  if(!zile.length){document.getElementById('aiFitOut').innerHTML=aiErr('N-am găsit cifre de fitness în capturi. Trimite ecranul de rezumat al zilei (inelele, caloriile, minutele, pașii).');return;}
+  _fitJ.zile=zile;
+  const rows=zile.map((z,i)=>{
+    const f=(lbl,key,unit,step)=>'<div><label>'+lbl+(unit?(' ('+unit+')'):'')+'</label><input type="number" step="'+(step||1)+'" min="0" value="'+(fitNum(z[key])!=null?z[key]:'')+'" oninput="_fitJ.zile['+i+'].'+key+'=this.value===\'\'?null:Number(this.value)"></div>';
+    return '<div class="fitday"><div class="fh"><b>'+remDateLabel(z.data)+'</b><span class="src">'+esc(z.sursa||'fitness')+'</span></div>'+
+      '<div class="g3">'+f('Active','move_kcal','kcal')+f('Obiectiv','move_goal','kcal')+f('Total zi','total_kcal','kcal')+'</div>'+
+      '<div class="g3">'+f('Exercițiu','exercitiu_min','min')+f('În picioare','stand_ore','h')+f('Pași','pasi','')+'</div>'+
+      '<div class="g3">'+f('Distanță','distanta_km','km','0.01')+f('Etaje','etaje','')+f('Mers','miscare_min','min')+'</div>'+
+      '</div>';
+  }).join('');
+  aiShow('aiFitOut',esc(_fitJ.nota||'Am citit capturile. Verifică cifrele și salvează.')+'\n\n'+rows,
+    '<button class="btn" style="margin-top:8px;width:100%" onclick="saveFitDays()"><i data-lucide="save"></i>Salvează '+(zile.length>1?('cele '+zile.length+' zile'):'ziua')+' și calibrează</button>');
+}
+function saveFitDays(){
+  const mid=dietMid();
+  S.diet.fitness=S.diet.fitness||{};
+  const arr=S.diet.fitness[mid]=S.diet.fitness[mid]||[];
+  let n=0;
+  ((_fitJ&&_fitJ.zile)||[]).forEach(z=>{
+    const rec={d:z.data,src:String(z.sursa||'fitness').slice(0,40),
+      move:fitNum(z.move_kcal),moveGoal:fitNum(z.move_goal),total:fitNum(z.total_kcal),
+      exMin:fitNum(z.exercitiu_min),exGoal:fitNum(z.exercitiu_goal),moveMin:fitNum(z.miscare_min),
+      stand:fitNum(z.stand_ore),standGoal:fitNum(z.stand_goal),
+      steps:fitNum(z.pasi),km:fitNum(z.distanta_km),floors:fitNum(z.etaje)};
+    const ex=arr.find(x=>x.d===rec.d);
+    if(ex){for(const k in rec){if(rec[k]!=null&&rec[k]!=='')ex[k]=rec[k];}ex.u=Date.now();if(ex.useMove==null)ex.useMove=true;}
+    else arr.push(Object.assign({id:uid(),u:Date.now(),useMove:true},rec));
+    n++;
+  });
+  arr.sort((a,b)=>a.d<b.d?-1:1);
+  save();
+  _fitJ=null;_fitFiles=[];
+  document.getElementById('fitPrev').innerHTML='';clearAI('aiFitOut');
+  rFit();rMeals();checkMilestones();
+  toast(n>1?(n+' zile salvate din ceas'):'Ziua salvată din ceas');
+}
+function delFitDay(id){
+  const mid=dietMid();
+  S.diet.fitness[mid]=(S.diet.fitness[mid]||[]).filter(x=>x.id!==id);
+  tombstone(id);save();rFit();rMeals();toast('Zi ștearsă');
+}
+function toggleFitUse(id){
+  const f=(S.diet.fitness[dietMid()]||[]).find(x=>x.id===id);
+  if(!f)return;
+  f.useMove=!f.useMove;f.u=Date.now();save();rFit();rMeals();
+}
+/* ---------- calibrarea consumului zilnic ---------- */
+function fitCalib(){
+  const p=getProf(),w=lastW();
+  if(!p.h||!p.age||!w)return null;
+  const days=fitAll().filter(x=>Number(x.total)>0);
+  if(!days.length)return null;
+  const bmr=Math.round(10*w+6.25*p.h-5*p.age+(p.sex==='F'?-161:5));
+  const use=days.slice(-28);
+  const avg=Math.round(use.reduce((a,x)=>a+Number(x.total),0)/use.length);
+  const raw=avg/bmr;
+  const factor=Math.min(2.0,Math.max(1.1,+raw.toFixed(3)));
+  const cur=Number(p.activity||1.375);
+  const appTdee=Math.round(bmr*cur);
+  const actAvg=use.filter(x=>Number(x.move)>0);
+  const moveAvg=actAvg.length?Math.round(actAvg.reduce((a,x)=>a+Number(x.move),0)/actAvg.length):null;
+  return {n:use.length,avg,bmr,factor,cur,appTdee,diff:avg-appTdee,moveAvg,solid:use.length>=3};
+}
+function applyFitCalib(){
+  const c=fitCalib();if(!c)return;
+  const mid=dietMid();
+  const p=S.diet.profiles[mid]=S.diet.profiles[mid]||{};
+  p.activity=String(c.factor);p.actCalib={on:true,d:todayStr(),n:c.n,tdee:c.avg};
+  save();rHealthAll();
+  if(dietTab==='fit')rFit();
+  toast('Calibrat după ceas: factor ×'+String(c.factor).replace('.',',')+' → '+Math.round(c.bmr*c.factor)+' kcal/zi');
+}
+function resetFitCalib(){
+  const p=S.diet.profiles[dietMid()];if(!p)return;
+  p.activity='1.375';delete p.actCalib;save();rHealthAll();if(dietTab==='fit')rFit();
+  toast('Factor de activitate revenit la calculul standard');
+}
+/* select-ul de activitate primește și valoarea calibrată, care nu e în lista fixă */
+function setActSelect(v){
+  const sel=document.getElementById('pAct');if(!sel)return;
+  v=String(v||'1.375');
+  if(!Array.from(sel.options).some(o=>o.value===v)){
+    Array.from(sel.options).filter(o=>o.dataset.calib).forEach(o=>o.remove());
+    const o=document.createElement('option');
+    o.value=v;o.dataset.calib='1';o.textContent='Calibrat după ceas (×'+v.replace('.',',')+')';
+    sel.appendChild(o);
+  }
+  sel.value=v;
+}
+function rFit(){
+  const list=document.getElementById('fitList'),days=fitAll().slice().reverse();
+  if(list){
+    list.innerHTML=days.length?days.slice(0,14).map(f=>{
+      const ring=(lbl,ic,col,v,goal,unit)=>{
+        if(v==null)return '';
+        const pc=goal?Math.min(100,Math.round(v/goal*100)):0;
+        return '<div class="fitring"><div class="rl" style="color:'+col+'"><i data-lucide="'+ic+'"></i>'+lbl+(unit?(' · '+unit):'')+'</div><div class="rv">'+Math.round(v).toLocaleString('ro-RO')+(goal?'<small> / '+Math.round(goal).toLocaleString('ro-RO')+'</small>':'')+'</div>'+(goal?('<div class="rb"><i style="width:'+pc+'%;background:'+col+'"></i></div>'):'')+'</div>';
+      };
+      const st=(v,lbl,fmt)=>v==null?'':'<div class="fitstat"><b>'+(fmt?fmt(v):Math.round(v).toLocaleString('ro-RO'))+'</b><span>'+lbl+'</span></div>';
+      const today=f.d===todayStr();
+      return '<div class="fitday"><div class="fh"><b>'+remDateLabel(f.d)+(today?' · azi':'')+'</b><span class="row" style="gap:6px"><span class="src">'+esc(f.src||'fitness')+'</span><button class="btn sm warn" onclick="delFitDay(\''+f.id+'\')" title="Șterge ziua">✕</button></span></div>'+
+        '<div class="fitrings">'+ring('Active','flame','#c94258',f.move,f.moveGoal,'kcal')+ring('Mișcare','activity','#5fa832',f.exMin,f.exGoal,'min')+ring('Picioare','arrow-up','#1b9fb3',f.stand,f.standGoal,'h')+'</div>'+
+        '<div class="fitgrid">'+st(f.total,'total kcal')+st(f.steps,'pași')+st(f.km,'km',v=>String(Math.round(v*100)/100).replace('.',','))+st(f.floors,'etaje')+st(f.moveMin,'min mers')+'</div>'+
+        (today&&Number(f.move)>0?('<label class="fituse"><input type="checkbox" '+(f.useMove?'checked':'')+' onchange="toggleFitUse(\''+f.id+'\')"><span>Folosește cele '+Math.round(f.move)+' kcal active la bugetul zilei (în locul estimării din sesiunile de sport)</span></label>'):'')+
+        '</div>';
+    }).join(''):'<div class="empty">Nicio zi importată încă. Trimite un screenshot cu rezumatul zilei din aplicația ta de fitness.</div>';
+  }
+  const box=document.getElementById('fitCalib');
+  if(box){
+    const c=fitCalib();
+    if(!c)box.innerHTML=fitAll().length?'<p class="muted" style="margin-top:10px">Ca să pot calibra, completează profilul (vârstă, înălțime, greutate) și trimite o captură care conține și <b>totalul de calorii al zilei</b>, nu doar caloriile active.</p>':'';
+    else{
+      const p=getProf(),calibrated=!!(p.actCalib&&p.actCalib.on);
+      const pctOff=c.appTdee?Math.round(Math.abs(c.diff)/c.appTdee*100):0;
+      box.innerHTML='<div class="calibbox"><h4><i data-lucide="sliders-horizontal"></i>Calibrare după ceas</h4>'+
+        '<div class="calibrow"><span>Consum real, media pe '+c.n+' '+(c.n===1?'zi':'zile')+'</span><b>'+c.avg.toLocaleString('ro-RO')+' kcal/zi</b></div>'+
+        '<div class="calibrow"><span>Cât estimează FamLink acum</span><b>'+c.appTdee.toLocaleString('ro-RO')+' kcal/zi</b></div>'+
+        '<div class="calibrow"><span>Metabolism de repaus (BMR)</span><b>'+c.bmr.toLocaleString('ro-RO')+' kcal/zi</b></div>'+
+        '<div class="calibrow"><span>Factor de activitate</span><b>×'+String(c.cur).replace('.',',')+' → ×'+String(c.factor).replace('.',',')+'</b></div>'+
+        (c.moveAvg?('<div class="calibrow"><span>Calorii active, media</span><b>'+c.moveAvg.toLocaleString('ro-RO')+' kcal/zi</b></div>'):'')+
+        '<p class="calibnote">'+(
+          !c.solid?('Am o singură lectură'+(c.n>1?'e ('+c.n+')':'')+', prea puțin ca să schimb ceva pe bune. Mai adaugă '+(3-c.n)+' '+((3-c.n)===1?'zi':'zile')+' și calibrez cu cap.')
+          :(Math.abs(c.diff)<60?'Estimarea aplicației și ce măsoară ceasul tău sunt practic la fel — nu e nimic de corectat.'
+            :('Ceasul tău arată cu <b>'+Math.abs(c.diff).toLocaleString('ro-RO')+' kcal/zi</b> '+(c.diff>0?'mai mult':'mai puțin')+' decât calculează FamLink din formulă ('+pctOff+'%). Dacă aplici calibrarea, ținta ta zilnică de calorii și bugetul de la Mese se recalculează după cifra măsurată, nu după media statistică.'))
+        )+'</p>'+
+        (c.solid&&Math.abs(c.diff)>=60?'<button class="btn" style="width:100%;margin-top:9px" onclick="applyFitCalib()"><i data-lucide="wand-2"></i>Calibrează profilul (×'+String(c.factor).replace('.',',')+')</button>':'')+
+        (calibrated?('<p class="calibnote">Profilul e calibrat din '+remDateLabel(p.actCalib.d)+'. <a href="#" onclick="event.preventDefault();resetFitCalib()" style="color:var(--pri2);font-weight:700">Revino la calculul standard</a></p>'):'')+
+        '</div>';
+    }
+  }
+  LI();
+}
+</script>
+
+<script>
 /* ============ GEMINI AI ============ */
 /* lanț de rezervă: dacă modelul ales atinge limita (429) sau nu e disponibil, încearcă automat următorul gratuit */
 const GEM_FALLBACK=['gemini-3.1-flash-lite','gemini-2.5-flash-lite','gemini-2.0-flash','gemini-2.5-flash','gemini-3-flash'];
@@ -3516,9 +4193,15 @@ function aiAddConfirm(yes){
 }
 
 /* ---------- Cameră foto ---------- */
-let _camStream=null,_photoBlob=null;
-async function openCamera(){
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return toast('Camera nu e disponibilă aici. Folosește „Din galerie".');
+let _camStream=null,_photoBlob=null,_camMode='food';
+/* v3.11: aceeași cameră servește și farfuria, și afișajul cântarului — mode: 'food' | 'scale' */
+async function openCamera(mode){
+  _camMode=(mode==='scale')?'scale':'food';
+  const tt=document.getElementById('camTitle');if(tt)tt.textContent=_camMode==='scale'?'Fă o poză cântarului':'Fă o poză mesei';
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    if(_camMode==='scale'){const i=document.getElementById('scalePhoto');if(i)i.click();return;}
+    return toast('Camera nu e disponibilă aici. Folosește „Din galerie".');
+  }
   try{
     _camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
     const v=document.getElementById('camVideo');v.srcObject=_camStream;try{await v.play();}catch(e){}
@@ -3535,7 +4218,12 @@ function snapPhoto(){
   if(!v||!v.videoWidth)return toast('Camera nu e gata încă');
   const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;
   c.getContext('2d').drawImage(v,0,0);
-  c.toBlob(b=>{if(!b)return toast('Captură eșuată');b.name='poza.jpg';_photoBlob=b;showPhotoPrev(URL.createObjectURL(b));closeCamera();if(S.settings.geminiKey)aiAnalyze();else photoNoKeyHint();},'image/jpeg',0.9);
+  c.toBlob(b=>{
+    if(!b)return toast('Captură eșuată');
+    b.name='poza.jpg';
+    if(_camMode==='scale'){_scaleBlob=b;showScalePrev(URL.createObjectURL(b));closeCamera();if(S.settings.geminiKey)scaleAnalyze();else scaleNoKeyHint();return;}
+    _photoBlob=b;showPhotoPrev(URL.createObjectURL(b));closeCamera();if(S.settings.geminiKey)aiAnalyze();else photoNoKeyHint();
+  },'image/jpeg',0.9);
 }
 function photoPicked(inp){const f=inp.files[0];if(!f)return;_photoBlob=f;showPhotoPrev(URL.createObjectURL(f));if(S.settings.geminiKey)aiAnalyze();else photoNoKeyHint();}
 function showPhotoPrev(url){document.getElementById('photoPrev').innerHTML='<div class="photoprev"><img src="'+url+'" alt="poză masă"><button class="aix" title="Șterge poza" onclick="clearPhoto()"><i data-lucide="x"></i></button></div>'+(S.settings.geminiKey?'<div class="row" style="margin-top:6px;justify-content:center"><button class="btn sm sec" onclick="aiAnalyze()"><i data-lucide="sparkles"></i>Analizează din nou</button></div>':'');LI();}
@@ -3688,6 +4376,8 @@ function mergeState(local,remote){
   m.diet.weights=mergeWeights(local.diet.weights,R.diet.weights);
   m.diet.profiles=Object.assign({},R.diet.profiles||{},local.diet.profiles||{});
   m.diet.water=mergeWater(local.diet.water,R.diet.water);
+  m.diet.fitness=mergeFitness(local.diet.fitness,R.diet.fitness,m.tomb); // v3.11: zilele importate din ceas
+  m.diet.badges=mergeBadges(local.diet.badges,R.diet.badges);            // v3.11: reperele atinse (câștigă data cea mai veche)
   m.diet.fasting=local.diet.fasting; // cronometru specific dispozitivului
   // setări: rămân locale, DAR cheia Gemini și modelul se propagă între dispozitive dacă lipsesc
   m.settings=Object.assign({},local.settings);
@@ -3881,7 +4571,7 @@ function appendAsk(who,txt){
   }
   log.scrollTop=log.scrollHeight;return bubble;
 }
-function logWeightKg(kg){const mid=dietMid();S.diet.weights[mid]=S.diet.weights[mid]||[];const ws=S.diet.weights[mid],t=todayStr();const ex=ws.find(x=>x.d===t);if(ex)ex.w=kg;else ws.push({d:t,w:kg});ws.sort((a,b)=>a.d<b.d?-1:1);save();if(VIEW==='health')rDiet();}
+function logWeightKg(kg,day){const mid=dietMid();S.diet.weights[mid]=S.diet.weights[mid]||[];const ws=S.diet.weights[mid],t=day||todayStr();const ex=ws.find(x=>x.d===t);if(ex)ex.w=kg;else ws.push({d:t,w:kg});ws.sort((a,b)=>a.d<b.d?-1:1);save();if(typeof checkMilestones==='function')checkMilestones();if(VIEW==='health')rDiet();}
 function setMottoCore(text){S.mottos[curYm()]=String(text||'').trim();save();rMotto();}
 function addGoalCore(title,scope,who,ctx){const n=new Date();const k=(/an|year/i.test(scope||''))?String(n.getFullYear()):(n.getFullYear()+'-'+pad(n.getMonth()+1));
   const memberId=who==='all'?null:(memById(who)?who:(S.settings.activeUser||null));
@@ -3936,7 +4626,7 @@ let _askHist=[],_lastAskText='';
 /* bugetul caloric al zilei, exact cum îl arată ecranul Mese: țintă + sportul bifat − ce a mâncat */
 function askBudget(){
   const c=calc(getProf(),lastW());
-  const tgt=kcalTarget(c),burned=sportKcalToday(),ms=todayMeals();
+  const tgt=kcalTarget(c),burned=burnToday().kcal,ms=todayMeals();
   const eaten=ms.reduce((a,m)=>a+(Number(m.cal)||0),0);
   const mac=ms.reduce((a,m)=>({p:a.p+(Number(m.p)||0),c:a.c+(Number(m.c)||0),f:a.f+(Number(m.f)||0)}),{p:0,c:0,f:0});
   return {tgt,burned,budget:tgt+burned,eaten,left:tgt+burned-eaten,mac,meals:ms};
@@ -3953,7 +4643,7 @@ function askCtx(){
   const goals=S.goals.filter(g=>!g.done).slice(-5).map(g=>g.title+(g.memberId&&memById(g.memberId)?' (al lui '+memById(g.memberId).name+')':' (al familiei)')).join('; ')||'niciunul';
   const me=(memById(S.settings.activeUser||S.members[0].id)||{}).name||'utilizator';
   const ws=(S.diet.weights[dietMid()]||[]).slice(-5).map(x=>x.d+': '+x.w+' kg').join(', ');
-  return `Utilizator: ${me}. Profil: ${p.sex==='F'?'femeie':'bărbat'}, ${p.age||'?'} ani, ${p.h||'?'} cm, ${w||'?'} kg, țintă ${p.target||'?'} kg, necesar zilnic ${b.tgt} kcal${c?(' (TDEE '+c.tdee+')'):''}.${ws?(' Ultimele cântăriri: '+ws+'.'):''} BUGETUL DE AZI: țintă ${b.tgt} kcal${b.burned?(' + '+b.burned+' kcal arse la sport = buget '+b.budget+' kcal'):''}; a mâncat ${b.eaten} kcal; ${b.left>=0?('ÎI MAI RĂMÂN '+b.left+' kcal până diseară'):('a DEPĂȘIT bugetul cu '+(-b.left)+' kcal')}. Macro consumate azi: ${b.mac.p} g proteine, ${b.mac.c} g carbohidrați, ${b.mac.f} g grăsimi. Azi a mâncat: ${mtxt} — total ${kcal} kcal. Apă azi: ${waterToday()} ml. Fasting activ: ${S.diet.fasting.active?'da':'nu'} (schemă ${S.diet.fasting.hours||16}:${24-(S.diet.fasting.hours||16)}). Următoarele activități din calendar: ${evs}. Obiective active: ${goals}.`;
+  return `Utilizator: ${me}. Profil: ${p.sex==='F'?'femeie':'bărbat'}, ${p.age||'?'} ani, ${p.h||'?'} cm, ${w||'?'} kg, țintă ${p.target||'?'} kg, necesar zilnic ${b.tgt} kcal${c?(' (TDEE '+c.tdee+')'):''}.${ws?(' Ultimele cântăriri: '+ws+'.'):''} BUGETUL DE AZI: țintă ${b.tgt} kcal${b.burned?(' + '+b.burned+' kcal arse la sport = buget '+b.budget+' kcal'):''}; a mâncat ${b.eaten} kcal; ${b.left>=0?('ÎI MAI RĂMÂN '+b.left+' kcal până diseară'):('a DEPĂȘIT bugetul cu '+(-b.left)+' kcal')}. Macro consumate azi: ${b.mac.p} g proteine, ${b.mac.c} g carbohidrați, ${b.mac.f} g grăsimi. Azi a mâncat: ${mtxt} — total ${kcal} kcal. Apă azi: ${waterToday()} ml. ${(function(){try{const f=fitForDay(todayStr());const c=msCtx();const bits=[];if(f)bits.push('Date din ceas pentru azi: '+[f.move?f.move+' kcal active':'',f.total?f.total+' kcal consum total':'',f.exMin?f.exMin+' min exercițiu':'',f.steps?f.steps+' pași':''].filter(Boolean).join(', ')+'.');if(c.lost)bits.push('A dat jos '+c.lost+' kg față de prima cântărire'+(c.wStreak>1?(', se cântărește de '+c.wStreak+' zile la rând'):'')+'.');const nx=msNext(c);if(nx)bits.push('Următorul reper: „'+nx.m.t+'" — '+Math.max(0,+(nx.m.n-msVal(nx.m,c)).toFixed(1))+(nx.m.u||'')+' de parcurs.');return bits.length?(' '+bits.join(' ')):'';}catch(e){return '';}})()} Fasting activ: ${S.diet.fasting.active?'da':'nu'} (schemă ${S.diet.fasting.hours||16}:${24-(S.diet.fasting.hours||16)}). Următoarele activități din calendar: ${evs}. Obiective active: ${goals}.`;
 }
 /* ============ ATAȘAMENTE ÎN ASISTENT (poza cu meniul zilei, eticheta, farfuria) ============ */
 const ASK_MAXF=3;
@@ -4173,6 +4863,7 @@ fabRestore();
 // reține cine e conectat — întreabă doar dacă nu există un membru activ salvat
 if(!S.settings.activeUser||!memById(S.settings.activeUser))askUser();
 renderNotifBadge();
+if(typeof checkMilestones==='function')try{checkMilestones(true);}catch(e){}
 handleActHash(); // acțiune venită dintr-o notificare (aplicația pornită de la zero)
 const _imported=importSyncFromHash();
 if(!_imported&&SYNC.token&&SYNC.pass&&SYNC.gistId&&SYNC.auto!==false)syncPull(true);
@@ -4188,6 +4879,9 @@ console.info('%cFamLink v'+APP_VER,'font-weight:bold;color:#2c7a5f',
 '\n• Acțiuni rapide din notificări: apă (100/250/500/750 ml/1 L/altă cantitate), fasting (Finalizează/+30 min/+1 h), calendar (Finalizat/Amână/Editează).'+
 '\n• Asistent: buton mutabil cu poziție memorată; memorie separată per membru; nume canonice (Alice→Alisa); obiectivele au mereu titlu, cu literă mare.'+
 '\n• Atașamente în asistent: trimiți poza cu meniul zilei / eticheta / farfuria și primești ce să mănânci și CÂT (linguri, bucăți, polonice + grame și kcal), calculat pe caloriile care ți-au mai rămas azi; bifezi ce iei și intră direct în mese.'+
+'\n• Cântărire din poză: fotografiezi afișajul cântarului, AI-ul citește kilogramele (kg/lb/st), recunoaște codurile de eroare și lasă mereu o cale de corectare manuală.'+
+'\n• Repere (Sănătate → Progres): 35+ borne pe greutate, sănătate, constanță, mișcare și fasting, cu următorul reper și cât mai ai până la el; la prima rulare se însămânțează tăcut, apoi fiecare reper nou se sărbătorește o singură dată.'+
+'\n• Calibrare după ceas (Sănătate → Ceas): import de screenshot-uri din Apple Fitness/Health, Google Fit, Samsung Health, Fitbit sau Garmin; consumul total măsurat înlocuiește factorul de activitate din formulă, iar caloriile active ale zilei intră în bugetul de la Mese în locul estimării MET.'+
 '\n• Temă întunecată (auto/manual), acuratețe restore/backup, igienă memorie, accesibilitate.');
 </script>
 </body></html>
