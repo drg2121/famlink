@@ -435,3 +435,13 @@ Cererea: fastingul să se închidă și să se reia singur, mesaje de susținere
 - Import: gist simulat cu două fișiere (două formate, doi membri) → zilele și greutatea importate, fișierele șterse.
 - Toate ecranele: mobil 375 px și desktop, temă luminoasă și întunecată, utilizator nou fără date — fără erori în consolă.
 - Cache PWA: `famlink-v49`.
+
+---
+
+## v4.0.1 — scurtătura Health descrisă, nu construită de mână (2026-09-24)
+
+- Sănătate → Ceas → Import automat: secțiune nouă „Varianta rapidă”. Butonul **Copiază** dă o descriere în engleză (`fitAiPrompt`) pentru **Describe a shortcut** din Scurtături, cu id-ul membrului și URL-ul gistului deja puse; iPhone-ul construiește singur acțiunile (Find Health Samples, Calculate Statistics, Format Date, Text, Get Contents of URL).
+- Tokenul GitHub **nu** intră în descriere (`PASTE_TOKEN_HERE`); se lipește după, în antetul Authorization, cu butonul de copiere de dedesubt.
+- Automatizarea zilnică (21:30) rămâne de făcut de mână — 5 atingeri, doar alegi scurtătura „FamLink Health”.
+- Ghidul vechi rămâne ca „Pas cu pas, manual”.
+- Testat: mobil 375 px, temă luminoasă și întunecată, cu și fără Sincronizare, fără erori în consolă. Cache PWA: `famlink-v50`.

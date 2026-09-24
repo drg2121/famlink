@@ -1061,6 +1061,8 @@ html[data-theme="dark"] .fitauto{background:linear-gradient(135deg,#2a211a,var(-
 .fa-guide .steps li{margin-bottom:9px;font-size:13px;line-height:1.5}
 .cpy{display:flex;align-items:center;gap:8px;margin-top:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 6px 6px 10px}
 .cpy code{flex:1;min-width:0;font-size:11.5px;overflow-wrap:anywhere;color:var(--ink);font-family:ui-monospace,Menlo,monospace;line-height:1.4}
+.cpy.tall{align-items:flex-start}
+.cpy.tall code{max-height:150px;overflow:auto;white-space:pre-wrap}
 
 /* ---------- notificări cu măsură ---------- */
 .nfhero{display:flex;gap:12px;align-items:flex-start;background:linear-gradient(135deg,var(--soft),var(--soft2));border:1px solid var(--line);border-radius:20px;padding:14px;margin-bottom:10px}
@@ -1823,7 +1825,7 @@ html[data-theme="dark"] .mealchat{background:linear-gradient(135deg,#2a211a,#241
 <script>
 /* ============ FamLink v1.0 — arhitectură ArhiLink (single-file, localStorage) ============ */
 const KEY='famlink_v1';
-const APP_VER='4.0.0';
+const APP_VER='4.0.1';
 /* prima literă mare (titluri de obiective, etichete de mementouri, titluri AI) */
 const capFirst=s=>{s=String(s||'').trim();return s?s.charAt(0).toLocaleUpperCase('ro-RO')+s.slice(1):s;};
 /* curăță titlul unui obiectiv: scoate din față formulările de COMANDĂ
@@ -5232,19 +5234,41 @@ async function fitAutoCheck(){
 }
 function v4Copy(txt,lbl){(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>toast((lbl||'Text')+' copiat ✓')).catch(()=>{prompt('Copiază:',txt);});}
 function fitAutoBody(mid){return '{"files":{"fit-'+mid+'-[Zi].json":{"content":"m='+mid+';d=[Zi];move=[Active];rest=[Repaus];steps=[Pasi];ex=[Exercitiu];km=[Km];kg=[Kg]"}}}';}
+/* descrierea în engleză pentru „Describe a shortcut" din Scurtături: iPhone-ul construiește singur acțiunile; tokenul rămâne în afara textului */
+function fitAiPrompt(mid,url){
+  return 'Create a shortcut named "FamLink Health" that sends today\'s Apple Health totals to FamLink. It must run silently: no alerts, no notifications, no questions. Build exactly these actions, in this order:\n\n'+
+    '1. Find Health Samples where Type is Active Energy and Start Date is today. Then Calculate Statistics: Sum of the found samples. Call the result "Active".\n'+
+    '2. Do the same (Find Health Samples for today + Calculate Statistics Sum) for Steps (result "Pasi"), Exercise Minutes (result "Exercitiu"), Resting Energy (result "Repaus") and Walking + Running Distance in kilometers (result "Km").\n'+
+    '3. Find Health Samples where Type is Weight in kilograms, sorted by Start Date, Latest First, Limit 1. Call the result "Kg".\n'+
+    '4. Format Date: Current Date with custom format "yyyy-MM-dd". Call the result "Zi".\n'+
+    '5. A Text action with exactly the content below. Every name in square brackets ([Zi], [Active], [Repaus], [Pasi], [Exercitiu], [Km], [Kg]) must be replaced by the variable with that name; everything else stays literal text:\n'+
+    fitAutoBody(mid)+'\n'+
+    '6. Get Contents of URL: URL '+url+' , Method PATCH, Headers "Authorization" = "PASTE_TOKEN_HERE" and "Content-Type" = "application/json", Request Body: File, set to the Text from step 5.';
+}
 function rFitAuto(){
   const el=document.getElementById('fitAutoBox');if(!el)return;
   const mid=V4_ME(),me=(memById(mid)||{}).name||'tine';
   const ok=!!(SYNC.token&&SYNC.pass&&SYNC.gistId);
   const last=((S.diet.fitness||{})[mid]||[]).filter(x=>x.auto).slice(-1)[0];
   const url=ok?('https://api.github.com/gists/'+SYNC.gistId):'';
-  const code=(t,lbl,key)=>'<div class="cpy"><code>'+esc(t)+'</code><button class="btn sm sec" onclick="v4Copy(_fitCopy[\''+key+'\'],\''+lbl+'\')"><i data-lucide="copy"></i>Copiază</button></div>';
-  window._fitCopy={url,auth:ok?('token '+SYNC.token):'',body:fitAutoBody(mid)};
+  const code=(t,lbl,key,cls)=>'<div class="cpy'+(cls?' '+cls:'')+'"><code>'+esc(t)+'</code><button class="btn sm sec" onclick="v4Copy(_fitCopy[\''+key+'\'],\''+lbl+'\')"><i data-lucide="copy"></i>Copiază</button></div>';
+  window._fitCopy={url,auth:ok?('token '+SYNC.token):'',body:fitAutoBody(mid),ai:ok?fitAiPrompt(mid,url):''};
+  const authShow=ok?('token ••••'+String(SYNC.token).slice(-4)):'';
   el.innerHTML='<div class="fitauto">'+
     '<div class="fa-h"><span class="fa-ic"><i data-lucide="zap"></i></span><div><b>Import automat din Apple Health</b><span>'+(last?('Merge ✓ — ultima zi adusă: '+remDateLabel(last.d)+(last.at?(' la '+fmtHM(new Date(last.at))):'')):'Pași, calorii active, minute de exercițiu și greutatea (de la cântarul inteligent), în fiecare seară, fără capturi.')+'</span></div></div>'+
     (ok?('<div class="row" style="gap:8px;margin-top:10px"><button class="btn sm" onclick="fitAutoCheck()"><i data-lucide="refresh-cw"></i>Verifică acum</button></div>')
       :('<p class="fa-warn"><i data-lucide="info"></i><span>Datele ajung în FamLink prin gistul tău privat de la <b>Sincronizare</b>. Pornește-o întâi (Setări → Sincronizare între dispozitive), apoi revino aici.</span></p><button class="btn sm sec" onclick="go(\'set\')"><i data-lucide="settings"></i>Deschide Setările</button>'))+
-    '<details class="fa-guide" id="fitGuide"><summary><i data-lucide="list-ordered"></i>Cum configurez scurtătura (o singură dată, ~5 minute)<span class="chev"><i data-lucide="chevron-down"></i></span></summary>'+
+    '<details class="fa-guide" id="fitGuideAi"><summary><i data-lucide="sparkles"></i>Varianta rapidă: o descrii, iPhone-ul o construiește (~2 minute)<span class="chev"><i data-lucide="chevron-down"></i></span></summary>'+
+    (ok?('<ol class="steps">'+
+      '<li>Copiază descrierea de mai jos. E în engleză și are deja id-ul tău și adresa gistului.'+code(window._fitCopy.ai,'Descrierea','ai','tall')+'</li>'+
+      '<li>În <b>Scurtături</b> apasă <b>+</b>, apoi <b>Describe a shortcut</b> (Descrie o scurtătură) și lipește textul.</li>'+
+      '<li>În scurtătura creată, la <b>Get Contents of URL</b> → <b>Headers</b>, înlocuiește <b>PASTE_TOKEN_HERE</b> cu antetul de mai jos. Tokenul nu stă în descriere, ca să nu ajungă la modelul care construiește scurtătura.'+code(authShow,'Antetul Authorization','auth')+'</li>'+
+      '<li>Verifică acțiunea <b>Text</b>: [Zi], [Active], [Repaus], [Pasi], [Exercitiu], [Km], [Kg] trebuie să fie bule colorate (variabile), nu text scris. Dacă vreuna a rămas text, atinge-o → <b>Selectează variabila</b>.</li>'+
+      '<li>Ca să ruleze singură: <b>Automatizare</b> → <b>+</b> → <b>Oră din zi</b> → <b>21:30</b>, <b>Zilnic</b> → <b>Rulează imediat</b> → alege <b>FamLink Health</b>.</li>'+
+      '<li>Apasă ▶ o dată ca test, apoi aici <b>Verifică acum</b>.</li>'+
+    '</ol>'):'<p class="fa-warn" style="margin-top:6px">Descrierea apare aici după ce pornești Sincronizarea.</p>')+
+    '</details>'+
+    '<details class="fa-guide" id="fitGuide"><summary><i data-lucide="list-ordered"></i>Pas cu pas, manual (o singură dată, ~5 minute)<span class="chev"><i data-lucide="chevron-down"></i></span></summary>'+
     '<ol class="steps">'+
       '<li>Pe iPhone deschide <b>Scurtături</b> (Shortcuts) → <b>Automatizare</b> → <b>+</b> → <b>Oră din zi</b> (Time of Day) → <b>21:30</b>, <b>Zilnic</b> → alege <b>Rulează imediat</b> (Run Immediately) → <b>Automatizare nouă, goală</b>.</li>'+
       '<li>Adaugă <b>Găsește mostre de sănătate</b> (Find Health Samples): tip <b>Energie activă</b>, <b>Data începerii</b> este <b>Azi</b>. Sub ea, <b>Calculează statistici</b> (Calculate Statistics) → <b>Sumă</b>. Redenumește rezultatul <b>Active</b>.</li>'+
@@ -5252,7 +5276,7 @@ function rFitAuto(){
       '<li>Opțional, greutatea de la cântarul inteligent: <b>Găsește mostre de sănătate</b> tip <b>Greutate</b>, sortează după dată, <b>cea mai recentă</b>, limită <b>1</b> → redenumește <b>Kg</b>.</li>'+
       '<li><b>Formatează data</b> (Format Date): <b>Data curentă</b>, format personalizat <b>yyyy-MM-dd</b> → redenumește <b>Zi</b>.</li>'+
       '<li>Adaugă <b>Text</b> și lipește șablonul de mai jos. Apoi înlocuiește fiecare <b>[Zi]</b>, <b>[Active]</b>, <b>[Repaus]</b>, <b>[Pasi]</b>, <b>[Exercitiu]</b>, <b>[Km]</b>, <b>[Kg]</b> cu variabila cu același nume (atingi cuvântul → <b>Selectează variabila</b>).'+code(window._fitCopy.body,'Șablonul','body')+'</li>'+
-      '<li>Adaugă <b>Obține conținutul URL-ului</b> (Get Contents of URL): URL-ul de mai jos, <b>Metodă: PATCH</b>, <b>Anteturi</b>: <b>Authorization</b> = valoarea de mai jos și <b>Content-Type</b> = <b>application/json</b>, <b>Corpul cererii: Fișier</b> (File) → alege <b>Text</b>-ul de la pasul anterior.'+(ok?(code(url,'URL-ul','url')+code('token ••••'+String(SYNC.token).slice(-4),'Antetul Authorization','auth')):'<p class="fa-warn" style="margin-top:6px">URL-ul și antetul apar aici după ce pornești Sincronizarea.</p>')+'</li>'+
+      '<li>Adaugă <b>Obține conținutul URL-ului</b> (Get Contents of URL): URL-ul de mai jos, <b>Metodă: PATCH</b>, <b>Anteturi</b>: <b>Authorization</b> = valoarea de mai jos și <b>Content-Type</b> = <b>application/json</b>, <b>Corpul cererii: Fișier</b> (File) → alege <b>Text</b>-ul de la pasul anterior.'+(ok?(code(url,'URL-ul','url')+code(authShow,'Antetul Authorization','auth')):'<p class="fa-warn" style="margin-top:6px">URL-ul și antetul apar aici după ce pornești Sincronizarea.</p>')+'</li>'+
       '<li>Apasă ▶ o dată ca test, apoi aici <b>Verifică acum</b>. De acum, în fiecare seară ziua ta vine singură — și pe celelalte dispozitive ale familiei.</li>'+
     '</ol>'+
     '<p class="fa-note">Scurtătura e pentru <b>'+esc(me)+'</b>. Fiecare membru își face una pe telefonul lui, din contul lui din FamLink (șablonul are id-ul lui). Datele stau în gistul tău privat doar până le preia aplicația (câteva minute), apoi se șterg. Tokenul rămâne doar în scurtătura de pe telefonul tău.</p>'+
