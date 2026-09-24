@@ -1125,6 +1125,15 @@ html[data-theme="dark"] .fitauto{background:linear-gradient(135deg,#2a211a,var(-
 html[data-theme="dark"] .mealchat{background:linear-gradient(135deg,#2a211a,#241c16);border-color:#3a2d22}
 .mealor{display:flex;align-items:center;gap:10px;margin:8px 0 2px;font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
 .mealor::before,.mealor::after{content:"";flex:1;height:1px;background:var(--line)}
+/* poza farfuriei, notată singură */
+.fdone{display:flex;align-items:center;gap:9px;flex-wrap:wrap;background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:9px 11px;margin:0 0 10px}
+.fdone>svg.lucide{width:20px;height:20px;color:var(--pri);flex:none}
+.fdone>span{flex:1;min-width:150px}
+.fdone b{display:block;font-size:14px}
+.fdone small{display:block;font-size:12px;color:var(--muted);line-height:1.4;margin-top:1px}
+.fdone select{width:auto;height:34px;min-height:34px;padding:3px 30px 3px 9px;font-size:12.5px;border-radius:10px;font-weight:700}
+.fdone.off{background:var(--soft2)}
+.fdone.off>svg.lucide{color:var(--muted)}
 </style>
 <style id="pageStyle">@page{size:A4 landscape;margin:9mm}</style>
 </head>
@@ -1256,8 +1265,8 @@ html[data-theme="dark"] .mealchat{background:linear-gradient(135deg,#2a211a,#241
         <button class="btn ghost" id="mlCancelBtn" style="width:100%;margin-top:8px;display:none" onclick="cancelMealEdit()"><i data-lucide="x"></i>Anulează editarea</button>
         <button class="photozone" type="button" style="margin-top:12px" onclick="openCamera()">
           <span class="pz-ic"><i data-lucide="camera"></i></span>
-          <b>Fă o poză mesei</b>
-          <span class="hint">AI-ul recunoaște mâncarea și estimează caloriile și macro-nutrienții</span>
+          <b>Fă o poză farfuriei sau meniului</b>
+          <span class="hint">Farfuria: calculez caloriile și o notez singur. Meniul: îți spun ce și cât să-ți pui.</span>
         </button>
         <div class="row" style="margin-top:8px;justify-content:center">
           <button class="btn ghost sm" onclick="document.getElementById('aiPhoto').click()"><i data-lucide="image"></i>Alege din galerie</button>
@@ -1825,7 +1834,7 @@ html[data-theme="dark"] .mealchat{background:linear-gradient(135deg,#2a211a,#241
 <script>
 /* ============ FamLink v1.0 — arhitectură ArhiLink (single-file, localStorage) ============ */
 const KEY='famlink_v1';
-const APP_VER='4.0.5';
+const APP_VER='4.1.0';
 /* prima literă mare (titluri de obiective, etichete de mementouri, titluri AI) */
 const capFirst=s=>{s=String(s||'').trim();return s?s.charAt(0).toLocaleUpperCase('ro-RO')+s.slice(1):s;};
 /* curăță titlul unui obiectiv: scoate din față formulările de COMANDĂ
@@ -3792,8 +3801,35 @@ function burnToday(){
 }
 function mergeFitness(a,b,tomb){
   const out={},mids=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);
-  mids.forEach(mid=>{out[mid]=applyTomb(mergeById((a||{})[mid]||[],(b||{})[mid]||[]),tomb).sort((x,y)=>x.d<y.d?-1:1);});
+  mids.forEach(mid=>{out[mid]=fitDedupe(applyTomb(mergeById((a||{})[mid]||[],(b||{})[mid]||[]),tomb),mid,tomb);});
   return out;
+}
+/* v4.1: o singură zi din ceas pe membru. Înainte, fiecare dispozitiv al familiei care citea fișierul din gist
+   crea ziua cu alt id, iar sincronizarea (uniune pe id) le păstra pe toate → aceeași zi apărea de 2–3 ori.
+   Acum ziua are id fix (fitDayId), iar dublurile vechi se contopesc: câștigă cifrele cele mai noi (u). */
+function fitDayId(mid,d){return 'fit-'+mid+'-'+d;}
+function fitDedupe(arr,mid,tomb){
+  const by={},out=[];
+  (arr||[]).forEach(x=>{if(x&&x.d)(by[x.d]=by[x.d]||[]).push(x);});
+  for(const d in by){
+    const t=(tomb||{})['f:'+mid+':'+d];   // ziua ștearsă (toate id-urile ei), până la o nouă înregistrare
+    const g=t?by[d].filter(x=>(x.u||0)>t):by[d];
+    if(!g.length)continue;
+    if(g.length===1){out.push(g[0]);continue;}
+    g.sort((x,y)=>(x.u||0)-(y.u||0));
+    const m={};g.forEach(x=>{for(const k in x)if(x[k]!=null&&x[k]!=='')m[k]=x[k];});
+    m.id=fitDayId(mid,d);m.u=g[g.length-1].u||0;
+    if(tomb)g.forEach(x=>{if(x.id!==m.id)tomb[x.id]=Math.max(tomb[x.id]||0,Date.now());}); // și dispozitivele încă pe versiunea veche le scot
+    out.push(m);
+  }
+  return out.sort((x,y)=>x.d<y.d?-1:1);
+}
+/* curățenie locală (la pornire): contopește dublurile deja salvate pe dispozitiv */
+function fitDedupeAll(){
+  const F=S.diet.fitness||{};let ch=false;S.tomb=S.tomb||{};
+  for(const mid in F){const a=F[mid]||[],b=fitDedupe(a,mid,S.tomb);if(b.length!==a.length){F[mid]=b;ch=true;}}
+  if(ch)save();
+  return ch;
 }
 /* un reper atins rămâne atins: la sincronizare câștigă data cea mai VECHE */
 function mergeBadges(a,b){
@@ -4432,7 +4468,7 @@ function saveFitRecords(zile,forMid){
       steps:fitNum(z.pasi),km:fitNum(z.distanta_km),floors:fitNum(z.etaje)};
     const ex=arr.find(x=>x.d===rec.d);
     if(ex){for(const k in rec){if(rec[k]!=null&&rec[k]!=='')ex[k]=rec[k];}ex.u=Date.now();if(ex.useMove==null)ex.useMove=true;}
-    else arr.push(Object.assign({id:uid(),u:Date.now(),useMove:true},rec));
+    else arr.push(Object.assign({id:fitDayId(mid,rec.d),u:Date.now(),useMove:true},rec));
     n++;
   });
   arr.sort((a,b)=>a.d<b.d?-1:1);
@@ -4450,9 +4486,11 @@ function saveFitDays(){
   toast(n>1?(n+' zile salvate din ceas'):'Ziua salvată din ceas');
 }
 function delFitDay(id){
-  const mid=dietMid();
-  S.diet.fitness[mid]=(S.diet.fitness[mid]||[]).filter(x=>x.id!==id);
-  tombstone(id);save();rFit();rMeals();toast('Zi ștearsă');
+  const mid=dietMid(),arr=S.diet.fitness[mid]||[],f=arr.find(x=>x.id===id);
+  const gone=f?arr.filter(x=>x.d===f.d):arr.filter(x=>x.id===id);
+  S.diet.fitness[mid]=arr.filter(x=>!gone.includes(x));
+  gone.forEach(x=>tombstone(x.id));if(f)tombstone('f:'+mid+':'+f.d);   // ziua întreagă, cu orice id ar avea pe alt dispozitiv
+  save();rFit();rMeals();toast('Zi ștearsă');
 }
 function toggleFitUse(id){
   const f=(S.diet.fitness[dietMid()]||[]).find(x=>x.id===id);
@@ -5054,7 +5092,7 @@ function rToday(){
   document.getElementById('tdQuick').innerHTML='<div class="tdq">'+
     qa('q-water','glass-water','+250 ml apă',wt?(fmtN(wt)+' ml azi'):'primul pahar','tdWater(250)')+
     qa('q-chat','message-circle-heart','Ce-am mâncat','spune-i asistentului',"askFill('Am mâncat ')")+
-    qa('q-photo','camera','Poză la masă','calorii din poză','go(\'meals\');setTimeout(()=>openCamera(),120)')+
+    qa('q-photo','camera','Poză la masă','farfurie sau meniu','go(\'meals\');setTimeout(()=>openCamera(),120)')+
     qa('q-weigh','scale',wToday?'Cântărit ✓':'Cântărire',lw?(fmtH(lw.w)+' kg'+(wToday?' azi':' ultima dată')):'prima cântărire','tdWeigh()')+
     qa('q-fast',f.active?'square':'timer',f.active?'Oprește fastingul':'Pornește fastingul',f.active?('de '+fmtH((Date.now()-new Date(f.start))/36e5)+' h'):(fa.on?('singur la '+fa.at):(Number(f.hours)||16)+' h'),'fastToggle()')+
     qa('q-move','dumbbell','Mișcare',mv?(mv+' min azi'):'notează sport',"go('health');dTab('sport')")+
@@ -5215,7 +5253,7 @@ function fitImportPayload(o){
   const W=(kg!=null&&kg>=20&&kg<=350)?fitWeightIn(mid,d,Math.round(kg*10)/10,o.kgd||o.kgdate):{};
   if(has){
     let ex2=arr.find(x=>x.d===d);
-    if(!ex2){ex2={id:uid(),d,useMove:true};arr.push(ex2);}
+    if(!ex2){ex2={id:fitDayId(mid,d),d,useMove:true};arr.push(ex2);}
     for(const k in rec)if(rec[k]!=null&&rec[k]>0)ex2[k]=rec[k];
     ex2.src=String(o.src||'Apple Health').slice(0,40);ex2.auto=true;ex2.at=Date.now();ex2.u=Date.now();
     if(kg!=null&&kg>=20&&kg<=350)ex2.kgIn=Math.round(kg*10)/10;
@@ -5268,7 +5306,7 @@ function fitAutoLine(mid){return 'm='+mid+';d=[Zi];move=[Active];rest=[Repaus];s
 function fitAutoBody(mid){return '{"files":{"fit-'+mid+'-[Zi].json":{"content":"'+fitAutoLine(mid)+'"}}}';}
 /* descrierea în engleză pentru „Describe a shortcut" din Scurtături: iPhone-ul construiește singur acțiunile; tokenul rămâne în afara textului */
 function fitAiPrompt(mid,url){
-  const T=t=>'Find Health Samples where Type is '+t+' and Start Date is today. Calculate Statistics: Sum of those samples.';
+  const T=t=>'Find Health Samples where Type is '+t+' and Start Date is today, Group By Day (so iPhone and Apple Watch are not counted twice). Calculate Statistics: Sum of those samples.';
   return 'Create a shortcut named "FamLink Health" that sends today\'s Apple Health totals to FamLink. It must run silently: no alerts, no notifications, no questions. Build exactly these actions, in this order:\n\n'+
     '1. '+T('Active Energy')+' Set Variable "Active" to the sum.\n'+
     '2. '+T('Resting Energy')+' Set Variable "Repaus" to the sum.\n'+
@@ -5302,12 +5340,12 @@ function rFitAuto(){
       '<li>În scurtătura creată, la <b>Get Contents of URL</b> → <b>Headers</b>, înlocuiește <b>PASTE_TOKEN_HERE</b> cu antetul de mai jos. Dacă acolo mai apare un rând gol (<b>Key / Text</b>), șterge-l: altfel iese eroarea „cannot parse response”. Tokenul nu stă în descriere, ca să nu ajungă la modelul care construiește scurtătura.'+code(authShow,'Antetul Authorization','auth')+'</li>'+
       '<li>Apasă ▶ o dată. Când te întreabă, apasă <b>Allow Access</b> la fiecare tip din Health (altfel câmpul acela vine gol). Apoi aici, <b>Verifică acum</b>.</li>'+
       '<li>Ca să ruleze singură: <b>Automatizare</b> → <b>+</b> → <b>Oră din zi</b> → <b>21:30</b>, <b>Zilnic</b> → <b>Rulează imediat</b> → alege <b>FamLink Health</b>.</li>'+
-    '</ol>'+'<p class="fa-note">Greutatea ajunge la data la care te-ai cântărit, nu la data rulării. O cântărire veche nu se mai trece ca fiind de azi, iar ce notezi tu de mână într-o zi are prioritate.</p>'):'<p class="fa-warn" style="margin-top:6px">Descrierea apare aici după ce pornești Sincronizarea.</p>')+
+    '</ol>'+'<p class="fa-note">Greutatea ajunge la data la care te-ai cântărit, nu la data rulării. O cântărire veche nu se mai trece ca fiind de azi, iar ce notezi tu de mână într-o zi are prioritate. Poți rula scurtătura de câte ori vrei într-o zi: ziua se actualizează, nu se dublează.</p><p class="fa-note">Pașii sau distanța ies cam dublu față de aplicația Sănătate? Scurtătura adună și telefonul, și ceasul. Refă-o din descrierea de mai sus, care cere acum <b>Group By Day</b>.</p>'):'<p class="fa-warn" style="margin-top:6px">Descrierea apare aici după ce pornești Sincronizarea.</p>')+
     '</details>'+
     '<details class="fa-guide" id="fitGuide"><summary><i data-lucide="list-ordered"></i>Pas cu pas, manual (o singură dată, ~5 minute)<span class="chev"><i data-lucide="chevron-down"></i></span></summary>'+
     '<ol class="steps">'+
       '<li>Pe iPhone deschide <b>Scurtături</b> (Shortcuts) → <b>Automatizare</b> → <b>+</b> → <b>Oră din zi</b> (Time of Day) → <b>21:30</b>, <b>Zilnic</b> → alege <b>Rulează imediat</b> (Run Immediately) → <b>Automatizare nouă, goală</b>.</li>'+
-      '<li>Adaugă <b>Găsește mostre de sănătate</b> (Find Health Samples): tip <b>Energie activă</b>, <b>Data începerii</b> este <b>Azi</b>. Sub ea, <b>Calculează statistici</b> (Calculate Statistics) → <b>Sumă</b>. Redenumește rezultatul <b>Active</b>.</li>'+
+      '<li>Adaugă <b>Găsește mostre de sănătate</b> (Find Health Samples): tip <b>Energie activă</b>, <b>Data începerii</b> este <b>Azi</b>, <b>Grupează după: Zi</b> (Group By Day — altfel pașii din telefon și din ceas se adună de două ori). Sub ea, <b>Calculează statistici</b> (Calculate Statistics) → <b>Sumă</b>. Redenumește rezultatul <b>Active</b>.</li>'+
       '<li>La fel pentru: <b>Pași</b> → <b>Pasi</b> · <b>Minute de exercițiu</b> → <b>Exercitiu</b> · <b>Energie în repaus</b> → <b>Repaus</b> · <b>Distanță mers și alergare</b> → <b>Km</b>.</li>'+
       '<li>Opțional, greutatea de la cântarul inteligent: <b>Găsește mostre de sănătate</b> tip <b>Greutate</b>, sortează după dată, <b>cea mai recentă</b>, limită <b>1</b> → redenumește <b>Kg</b>. Apoi <b>Formatează data</b>: <b>Data începerii</b> a lui Kg, format <b>yyyy-MM-dd</b> → redenumește <b>KgZi</b> (așa greutatea ajunge la ziua cântăririi).</li>'+
       '<li><b>Formatează data</b> (Format Date): <b>Data curentă</b>, format personalizat <b>yyyy-MM-dd</b> → redenumește <b>Zi</b>.</li>'+
@@ -5395,6 +5433,7 @@ function planRoute(text,wait){
 function v4Boot(){
   fastAutoCfg();
   try{fitMigWeights403();}catch(e){console.warn(e);}
+  try{fitDedupeAll();}catch(e){console.warn(e);}
   try{handleFitHash();}catch(e){}
   try{fastAutoTick(Date.now(),true);}catch(e){console.warn(e);}
   try{nfCfg();}catch(e){}
@@ -5509,7 +5548,7 @@ function macroMini(m){
   if(!(p||c||f))return '';
   return `<span class="macmini"><b style="color:#c94258">${p}g</b> P · <b style="color:#e0952f">${c}g</b> C · <b style="color:#8b5cf6">${f}g</b> G</span>`;
 }
-const FOOD_PROMPT='Ești nutriționist expert în estimarea porțiilor din fotografii. Fii cât mai realist, nu optimist, și mai ales CONSISTENT: aceeași poză trebuie să dea mereu aceleași cifre. Urmează OBLIGATORIU pașii:\n1) Identifică exact fiecare aliment din poză (atenție la confuzii: măr vs. prună, sarmale vs. chiftele, orez vs. paste); ține cont de preparate românești.\n2) Estimează GRAMAJUL folosind repere de scară vizibile: o farfurie normală ≈ 26 cm diametru, o furculiță ≈ 19 cm, o lingură ≈ 15 ml, un pahar ≈ 250 ml, o mână. Raportează mâncarea la aceste repere — NU presupune o „porție standard", estimează cât e efectiv în poză.\n3) Ține cont de metoda de preparare și de grăsimile ascunse: prăjit în ulei (+10–15 g grăsime/porție), sosuri, brânză, unt, smântână, maioneză — toate cresc mult caloriile.\n4) DESCOMPUNE masa în componentele ei principale (fiecare aliment/ingredient vizibil ca element separat) și estimează pentru fiecare: gramajul, categoria și caloriile. Categoria trebuie să fie una dintre: paste, orez, cartofi, paine, carne, peste, ou, branza, lactate, legume, fructe, sos, supa, dulce, grasime, bautura, altele.\n5) Pentru consistență, rotunjește gramajele la multiplu de 10 g și caloriile la multiplu de 5. Suma componentelor (grame și kcal) trebuie să fie egală cu totalul.\n6) Calculează caloriile din gramaj × densitatea calorică tipică a preparatului (kcal la 100 g), NU ghici direct un total. Asigură-te că „calorii" ≈ portie_g × kcal_per_100g / 100 = suma kcal a componentelor.\nRăspunde DOAR cu JSON valid, fără markdown: {"nume":"...","portie_g":număr_grame_estimat,"kcal_per_100g":număr,"calorii":număr_total_realist,"proteine_g":număr,"carbohidrati_g":număr,"grasimi_g":număr,"componente":[{"nume":"ex: paste penne","categorie":"paste","grame":număr,"kcal":număr}],"incredere":"mare|medie|mică","evaluare":"o frază naturală, la persoana a doua („tu"), despre cât de potrivită e pentru slăbit — fără clișee","sugestie":"o sugestie scurtă și firească de îmbunătățire, la persoana a doua"}';
+const FOOD_PROMPT='Ești nutriționist expert în estimarea porțiilor din fotografii. Fii cât mai realist, nu optimist, și mai ales CONSISTENT: aceeași poză trebuie să dea mereu aceleași cifre. Urmează OBLIGATORIU pașii:\n0) Stabilește întâi ce e în poză: mâncare reală (farfurie, bol, porție, gustare, băutură) → tip_imagine="farfurie"; un MENIU scris (listă de feluri pe foaie, tablă, ecran, meniul zilei de la cantină sau restaurant, chiar și cu prețuri) → tip_imagine="meniu" și te oprești aici: restul câmpurilor goale sau 0; altceva (nu e mâncare) → tip_imagine="altceva".\n1) Identifică exact fiecare aliment din poză (atenție la confuzii: măr vs. prună, sarmale vs. chiftele, orez vs. paste); ține cont de preparate românești.\n2) Estimează GRAMAJUL folosind repere de scară vizibile: o farfurie normală ≈ 26 cm diametru, o furculiță ≈ 19 cm, o lingură ≈ 15 ml, un pahar ≈ 250 ml, o mână. Raportează mâncarea la aceste repere — NU presupune o „porție standard", estimează cât e efectiv în poză.\n3) Ține cont de metoda de preparare și de grăsimile ascunse: prăjit în ulei (+10–15 g grăsime/porție), sosuri, brânză, unt, smântână, maioneză — toate cresc mult caloriile.\n4) DESCOMPUNE masa în componentele ei principale (fiecare aliment/ingredient vizibil ca element separat) și estimează pentru fiecare: gramajul, categoria și caloriile. Categoria trebuie să fie una dintre: paste, orez, cartofi, paine, carne, peste, ou, branza, lactate, legume, fructe, sos, supa, dulce, grasime, bautura, altele.\n5) Pentru consistență, rotunjește gramajele la multiplu de 10 g și caloriile la multiplu de 5. Suma componentelor (grame și kcal) trebuie să fie egală cu totalul.\n6) Calculează caloriile din gramaj × densitatea calorică tipică a preparatului (kcal la 100 g), NU ghici direct un total. Asigură-te că „calorii" ≈ portie_g × kcal_per_100g / 100 = suma kcal a componentelor.\nRăspunde DOAR cu JSON valid, fără markdown: {"tip_imagine":"farfurie|meniu|altceva","nume":"...","portie_g":număr_grame_estimat,"kcal_per_100g":număr,"calorii":număr_total_realist,"proteine_g":număr,"carbohidrati_g":număr,"grasimi_g":număr,"componente":[{"nume":"ex: paste penne","categorie":"paste","grame":număr,"kcal":număr}],"incredere":"mare|medie|mică","evaluare":"o frază naturală, la persoana a doua („tu"), despre cât de potrivită e pentru slăbit — fără clișee","sugestie":"o sugestie scurtă și firească de îmbunătățire, la persoana a doua"}';
 async function aiAnalyze(){
   const f=_photoBlob||document.getElementById('aiPhoto').files[0];
   if(!f)return toast('Fă o poză sau alege una mai întâi');
@@ -5519,9 +5558,69 @@ async function aiAnalyze(){
     const b64=await fileToB64(f);
     _aiFoodImg={mime:f.type||'image/jpeg',data:b64};
     const txt=await gemini([{inline_data:{mime_type:_aiFoodImg.mime,data:_aiFoodImg.data}},{text:FOOD_PROMPT}],{json:true,temp:0,seed:7,model:'gemini-2.5-flash'});
-    _aiFood=parseAIJson(txt);
+    const j=parseAIJson(txt),kind=String(j.tip_imagine||'').toLowerCase();
+    if(kind==='meniu')return photoMenuToAsk(f);
+    if(kind==='altceva'||!(Number(j.calorii)>0||(Array.isArray(j.componente)&&j.componente.some(x=>Number(x.kcal)>0)))){_aiFood=null;out.innerHTML=aiErr('Nu văd mâncare în poză. Fă o poză farfuriei (de sus, cu toată farfuria în cadru) sau meniului.');return;}
+    _aiFood=j;
     renderFoodResult();
+    aiFoodAutoLog();
   }catch(e){out.innerHTML=aiErr('Eroare: '+esc(e.message)+'');}
+}
+/* v4.1: poza farfuriei se notează singură în mesele de azi; editările de pe card actualizează masa notată, „Anulează" o scoate */
+let _aiFoodMealId=null,_aiFoodT=null;
+function aiFoodMeal(){return _aiFoodMealId?mealById(_aiFoodMealId):null;}
+function aiFoodVals(){
+  const n=(document.getElementById('aiFoodName')?.value||'Masă').trim()||'Masă';
+  const c=Math.max(0,Math.round(Number(document.getElementById('aiFoodCal')?.value)||0));
+  const g=Number(document.getElementById('aiFoodPortion')?.value)||0;
+  const j=_aiFood||{},g0=Number(j.portie_g)||0;
+  const sc=(g0>0&&g>0)?g/g0:1;          // dacă ai schimbat gramajul → scalează macro + componente
+  const rp=v=>Math.round((Number(v)||0)*sc);
+  return {n,c,extra:{p:rp(j.proteine_g),c:rp(j.carbohidrati_g),f:rp(j.grasimi_g),g:g||g0,
+    comp:Array.isArray(j.componente)?j.componente.map(x=>({nume:x.nume,categorie:x.categorie,grame:rp(x.grame),kcal:rp(x.kcal)})):[]}};
+}
+/* scrie masa: prima dată o creează, apoi doar o actualizează (nu apar dubluri la „Analizează din nou" sau la corecturi) */
+function aiFoodSave(){
+  const v=aiFoodVals();let m=aiFoodMeal();
+  if(m){m.name=v.n;m.cal=v.c;Object.assign(m,v.extra);m.u=Date.now();save();rMeals();v4Refresh();return m;}
+  m=quickMeal(v.n,v.c,_mlType||mealTypeNow(),v.extra,true);
+  _aiFoodMealId=m.id;return m;
+}
+function aiFoodAutoLog(){
+  if(!_aiFood)return;
+  const had=!!aiFoodMeal();window._fastNote='';
+  const m=aiFoodSave();_aiFood._undone=false;if(!had)_aiFood._fastNote=window._fastNote||'';window._fastNote='';
+  renderFoodResult();
+  if(!had&&!_aiFood._fastNote)toastAct('Notat: '+m.name+' · '+fmtN(m.cal)+' kcal','Anulează',()=>aiFoodUndo(m.id),8000);
+  else if(had)toast('Masa notată e actualizată ✓');
+}
+function aiFoodSyncSoon(){clearTimeout(_aiFoodT);if(aiFoodMeal())_aiFoodT=setTimeout(()=>{if(aiFoodMeal()){aiFoodSave();const el=document.getElementById('aiFoodDone');if(el)el.outerHTML=aiFoodDoneHtml();LI();}},700);}
+function aiFoodType(t){const m=aiFoodMeal();if(!m)return;m.type=t;m.u=Date.now();save();rMeals();v4Refresh();}
+function aiFoodUndo(id){
+  id=id||_aiFoodMealId;const m=id&&mealById(id);if(!m)return;
+  removeMeal(m.id);
+  if(id===_aiFoodMealId){clearTimeout(_aiFoodT);_aiFoodMealId=null;if(_aiFood)_aiFood._undone=true;if(document.getElementById('aiFoodName'))renderFoodResult();}
+  save();rMeals();v4Refresh();
+  toast('Am scos masa din jurnal');
+}
+function aiFoodDoneHtml(){
+  const m=aiFoodMeal();
+  if(!m)return (_aiFood&&_aiFood._undone)?'<div class="fdone off" id="aiFoodDone"><i data-lucide="undo-2"></i><span><b>Anulat</b><small>Nu e notată. Dacă vrei totuși, apasă „Adaugă la mesele de azi".</small></span></div>':'<div id="aiFoodDone"></div>';
+  const b=dayBudget(dietMid());
+  return '<div class="fdone" id="aiFoodDone"><i data-lucide="check-circle-2"></i><span><b>Notat · '+fmtN(m.cal)+' kcal</b><small>'+(b.left>=0?('Azi mai ai ~'+fmtN(b.left)+' kcal.'):('Azi ești peste cu '+fmtN(-b.left)+' kcal.'))+' Ce schimbi mai jos se salvează singur.'+((_aiFood&&_aiFood._fastNote)?(' '+esc(_aiFood._fastNote)):'')+'</small></span>'+
+    '<select onchange="aiFoodType(this.value)" aria-label="Tipul mesei">'+['Mic dejun','Prânz','Cină','Gustare'].map(t=>'<option'+(t===m.type?' selected':'')+'>'+t+'</option>').join('')+'</select>'+
+    '<button class="btn sm ghost" onclick="aiFoodUndo()"><i data-lucide="undo-2"></i>Anulează</button></div>';
+}
+/* poza cu meniul ajunge la asistent, care îți spune ce și cât să-ți pui */
+async function photoMenuToAsk(f){
+  const out=document.getElementById('aiPhotoOut');
+  let o;try{o=await askShrink(f);}catch(e){if(out)out.innerHTML=aiErr('Nu am putut citi poza.');return;}
+  _aiFood=null;_aiFoodMealId=null;clearPhoto();
+  const p=document.getElementById('askPanel');if(p&&!p.classList.contains('show'))toggleAsk();
+  _askFiles=[{name:'meniu.jpg',mime:o.mime,data:o.data,url:o.url,isPdf:false,sent:false}];
+  window._askKindHint='meniu';
+  const inp=document.getElementById('askInput');if(inp)inp.value='';
+  rAskAtt();askSend();
 }
 function renderFoodResult(){
   const j=_aiFood;
@@ -5535,10 +5634,11 @@ function renderFoodResult(){
   if(!j._base)j._base={kcal:(Array.isArray(j.componente)&&j.componente.length?j.componente.reduce((a,x)=>a+(Number(x.kcal)||0),0):Number(j.calorii))||1,p:Number(j.proteine_g)||0,c:Number(j.carbohidrati_g)||0,f:Number(j.grasimi_g)||0,g:Number(j.portie_g)||0};
   const per=Number(j.kcal_per_100g)||0;
   const conf=j.incredere==='mică'?' · <span style="color:var(--amber)">nesigur — corectează porția sau alimentul mai jos</span>':(j.incredere==='medie'?' · <span class="muted">încredere medie — verifică gramajul</span>':'');
-  aiShow('aiPhotoOut',`<div class="row" style="gap:8px;flex-wrap:wrap"><div style="flex:2;min-width:130px"><label>Aliment (poți edita)</label><input id="aiFoodName" value="${esc(j.nume||'')}"></div><div style="flex:1;min-width:74px"><label>Porție (g)</label><input id="aiFoodPortion" type="number" min="0" step="10" value="${Number(j.portie_g)||0}" oninput="recalcFoodPortion()"></div><div style="flex:1;min-width:74px"><label>Kcal</label><input id="aiFoodCal" type="number" min="0" value="${Number(j.calorii)||0}"></div></div>${per?`<p class="muted" style="margin:6px 0 0;font-size:12px">≈ ${per} kcal / 100 g — schimbă gramajul (sus sau pe componente) și totul se recalculează singur.</p>`:''}<div class="pmult big" id="foodMult">${foodMultHtml()}</div><div class="macros"><div class="macro"><b id="aiMacP">${Number(j.proteine_g)||0}</b><span>proteine</span></div><div class="macro"><b id="aiMacC">${Number(j.carbohidrati_g)||0}</b><span>carbo</span></div><div class="macro"><b id="aiMacF">${Number(j.grasimi_g)||0}</b><span>grăsimi</span></div></div>${compEditor(j.componente)}${conf}
+  const logged=!!aiFoodMeal();
+  aiShow('aiPhotoOut',`${aiFoodDoneHtml()}<div class="row" style="gap:8px;flex-wrap:wrap"><div style="flex:2;min-width:130px"><label>Aliment (poți edita)</label><input id="aiFoodName" value="${esc(j.nume||'')}" oninput="aiFoodSyncSoon()"></div><div style="flex:1;min-width:74px"><label>Porție (g)</label><input id="aiFoodPortion" type="number" min="0" step="10" value="${Number(j.portie_g)||0}" oninput="recalcFoodPortion()"></div><div style="flex:1;min-width:74px"><label>Kcal</label><input id="aiFoodCal" type="number" min="0" value="${Number(j.calorii)||0}" oninput="aiFoodSyncSoon()"></div></div>${per?`<p class="muted" style="margin:6px 0 0;font-size:12px">≈ ${per} kcal / 100 g — schimbă gramajul (sus sau pe componente) și totul se recalculează singur.</p>`:''}<div class="pmult big" id="foodMult">${foodMultHtml()}</div><div class="macros"><div class="macro"><b id="aiMacP">${Number(j.proteine_g)||0}</b><span>proteine</span></div><div class="macro"><b id="aiMacC">${Number(j.carbohidrati_g)||0}</b><span>carbo</span></div><div class="macro"><b id="aiMacF">${Number(j.grasimi_g)||0}</b><span>grăsimi</span></div></div>${compEditor(j.componente)}${conf}
 
 ${esc(j.evaluare||'')}${j.sugestie?('\nSugestie: '+esc(j.sugestie)):''}`,
-  `<div class="row" style="margin-top:8px;gap:8px"><input id="aiFoodFix" class="grow" placeholder="Corectează: „e măr, nu prună”, „am mâncat doar jumătate”, „și o felie de pâine”" onkeydown="if(event.key==='Enter')aiFoodFix()"><button class="btn sec" onclick="aiFoodFix()"><i data-lucide="wand-2"></i>Corectează</button></div><button class="btn" style="margin-top:8px" onclick="aiFoodAdd()"><i data-lucide="plus"></i>Adaugă la mesele de azi</button>`);
+  `<div class="row" style="margin-top:8px;gap:8px"><input id="aiFoodFix" class="grow" placeholder="Corectează: „e măr, nu prună”, „am mâncat doar jumătate”, „și o felie de pâine”" onkeydown="if(event.key==='Enter')aiFoodFix()"><button class="btn sec" onclick="aiFoodFix()"><i data-lucide="wand-2"></i>Corectează</button></div>${logged?'<button class="btn sec" style="margin-top:8px" onclick="aiFoodDoneClose()"><i data-lucide="check"></i>Gata</button>':'<button class="btn" style="margin-top:8px" onclick="aiFoodAdd()"><i data-lucide="plus"></i>Adaugă la mesele de azi</button>'}`);
 }
 /* densitate calorică tipică pe categorie (kcal / 100 g) — pentru ingrediente adăugate manual */
 const CAT_DENS={paste:150,orez:130,cartofi:90,paine:265,carne:250,peste:180,ou:155,branza:350,lactate:70,legume:35,fructe:55,sos:120,grasime:800,supa:40,dulce:400,bautura:45,altele:150};
@@ -5555,7 +5655,7 @@ function compEditor(comp){
 }
 function setCompCat(i,v){const x=_aiFood&&_aiFood.componente&&_aiFood.componente[i];if(!x)return;x.categorie=v;const dot=document.getElementById('ceDot'+i);if(dot)dot.style.background=foodCat(v).c;}
 function addFoodComp(){const j=_aiFood;if(!j)return;j.componente=Array.isArray(j.componente)?j.componente:[];j.componente.push({nume:'',categorie:'branza',grame:0,kcal:0,_d:catDensity('branza')});renderFoodResult();setTimeout(()=>{const rows=document.querySelectorAll('.ce-row .ce-name');const last=rows[rows.length-1];if(last)last.focus();},30);}
-function delFoodComp(i){const j=_aiFood;if(!j||!Array.isArray(j.componente))return;j.componente.splice(i,1);renderFoodResult();}
+function delFoodComp(i){const j=_aiFood;if(!j||!Array.isArray(j.componente))return;j.componente.splice(i,1);renderFoodResult();recalcCompTotals();}
 /* ai schimbat gramele unei componente → recalculează kcal-ul ei (din densitate) și totalurile */
 function recalcComp(i){
   const j=_aiFood;if(!j||!Array.isArray(j.componente)||!j.componente[i])return;
@@ -5588,6 +5688,7 @@ function recalcCompTotals(){
   const cEl=document.getElementById('aiFoodCal');if(cEl&&document.activeElement!==cEl)cEl.value=totK;
   const mp=document.getElementById('aiMacP'),mc=document.getElementById('aiMacC'),mf=document.getElementById('aiMacF');
   if(mp)mp.textContent=j.proteine_g;if(mc)mc.textContent=j.carbohidrati_g;if(mf)mf.textContent=j.grasimi_g;
+  aiFoodSyncSoon();
 }
 /* schimbi porția totală (sus): dacă avem componente le scalăm proporțional, altfel recalcul din densitate */
 function recalcFoodPortion(){
@@ -5600,7 +5701,7 @@ function recalcFoodPortion(){
   }else{recalcFoodCal();}
 }
 /* fără componente: schimbi gramajul → recalculează caloriile din densitatea kcal/100g dată de AI */
-function recalcFoodCal(){const g=Number(document.getElementById('aiFoodPortion')?.value)||0;const per=Number(_aiFood&&_aiFood.kcal_per_100g)||0;const cal=document.getElementById('aiFoodCal');if(cal&&g>0&&per>0)cal.value=Math.round(g*per/100);}
+function recalcFoodCal(){const g=Number(document.getElementById('aiFoodPortion')?.value)||0;const per=Number(_aiFood&&_aiFood.kcal_per_100g)||0;const cal=document.getElementById('aiFoodCal');if(cal&&g>0&&per>0)cal.value=Math.round(g*per/100);aiFoodSyncSoon();}
 async function aiFoodFix(){
   const fix=(document.getElementById('aiFoodFix')?.value||'').trim();
   if(!fix)return toast('Scrie ce e greșit, ex: „e măr, nu prună”');
@@ -5615,24 +5716,17 @@ IMPORTANT: analiza anterioară a fost ${JSON.stringify(_aiFood,(k,v)=>(k==='_d'|
     ],{json:true,temp:0,seed:7,model:'gemini-2.5-flash'});
     _aiFood=parseAIJson(txt);
     renderFoodResult();
-    toast('Analiză corectată ✓');
+    if(aiFoodMeal()){aiFoodSave();renderFoodResult();toast('Analiză corectată, masa notată e actualizată ✓');}
+    else toast('Analiză corectată ✓');
   }catch(e){out.innerHTML=aiErr('Eroare: '+esc(e.message)+'');}
 }
 function aiFoodAdd(){
-  const n=(document.getElementById('aiFoodName')?.value||'Masă').trim()||'Masă';
-  const c=Number(document.getElementById('aiFoodCal')?.value)||0;
-  const g=Number(document.getElementById('aiFoodPortion')?.value)||0;
-  const j=_aiFood||{};
-  const g0=Number(j.portie_g)||0;
-  const sc=(g0>0&&g>0)?g/g0:1;          // dacă ai schimbat gramajul → scalează macro + componente
-  const rp=v=>Math.round((Number(v)||0)*sc);
-  const extra={
-    p:rp(j.proteine_g),c:rp(j.carbohidrati_g),f:rp(j.grasimi_g),g:g||g0,
-    comp:Array.isArray(j.componente)?j.componente.map(x=>({nume:x.nume,categorie:x.categorie,grame:rp(x.grame),kcal:rp(x.kcal)})):[]
-  };
-  quickMeal(n,c,_mlType||mealTypeNow(),extra);
+  if(aiFoodMeal()){aiFoodSave();return aiFoodDoneClose();}
+  const v=aiFoodVals();
+  quickMeal(v.n,v.c,_mlType||mealTypeNow(),v.extra);
   clearAI('aiPhotoOut');clearPhoto();
 }
+function aiFoodDoneClose(){clearTimeout(_aiFoodT);if(aiFoodMeal())aiFoodSave();clearAI('aiPhotoOut');clearPhoto();}
 
 async function aiMenu(){
   const out=document.getElementById('aiMenuOut');
@@ -5895,7 +5989,7 @@ let _camStream=null,_photoBlob=null,_camMode='food';
 /* v3.11: aceeași cameră servește și farfuria, și afișajul cântarului — mode: 'food' | 'scale' */
 async function openCamera(mode){
   _camMode=(mode==='scale')?'scale':'food';
-  const tt=document.getElementById('camTitle');if(tt)tt.textContent=_camMode==='scale'?'Fă o poză cântarului':'Fă o poză mesei';
+  const tt=document.getElementById('camTitle');if(tt)tt.textContent=_camMode==='scale'?'Fă o poză cântarului':'Farfuria sau meniul';
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
     if(_camMode==='scale'){const i=document.getElementById('scalePhoto');if(i)i.click();return;}
     return toast('Camera nu e disponibilă aici. Folosește „Din galerie".');
@@ -5920,12 +6014,12 @@ function snapPhoto(){
     if(!b)return toast('Captură eșuată');
     b.name='poza.jpg';
     if(_camMode==='scale'){_scaleBlob=b;showScalePrev(URL.createObjectURL(b));closeCamera();if(S.settings.geminiKey)scaleAnalyze();else scaleNoKeyHint();return;}
-    _photoBlob=b;showPhotoPrev(URL.createObjectURL(b));closeCamera();if(S.settings.geminiKey)aiAnalyze();else photoNoKeyHint();
+    _photoBlob=b;_aiFoodMealId=null;showPhotoPrev(URL.createObjectURL(b));closeCamera();if(S.settings.geminiKey)aiAnalyze();else photoNoKeyHint();
   },'image/jpeg',0.9);
 }
-function photoPicked(inp){const f=inp.files[0];if(!f)return;_photoBlob=f;showPhotoPrev(URL.createObjectURL(f));if(S.settings.geminiKey)aiAnalyze();else photoNoKeyHint();}
+function photoPicked(inp){const f=inp.files[0];if(!f)return;_photoBlob=f;_aiFoodMealId=null;showPhotoPrev(URL.createObjectURL(f));if(S.settings.geminiKey)aiAnalyze();else photoNoKeyHint();}
 function showPhotoPrev(url){document.getElementById('photoPrev').innerHTML='<div class="photoprev"><img src="'+url+'" alt="poză masă"><button class="aix" title="Șterge poza" onclick="clearPhoto()"><i data-lucide="x"></i></button></div>'+(S.settings.geminiKey?'<div class="row" style="margin-top:6px;justify-content:center"><button class="btn sm sec" onclick="aiAnalyze()"><i data-lucide="sparkles"></i>Analizează din nou</button></div>':'');LI();}
-function clearPhoto(){_photoBlob=null;document.getElementById('photoPrev').innerHTML='';clearAI('aiPhotoOut');const inp=document.getElementById('aiPhoto');if(inp)inp.value='';}
+function clearPhoto(){_photoBlob=null;_aiFoodMealId=null;clearTimeout(_aiFoodT);document.getElementById('photoPrev').innerHTML='';clearAI('aiPhotoOut');const inp=document.getElementById('aiPhoto');if(inp)inp.value='';}
 /* fără cheie AI: poza nu se poate analiza, dar tot se poate adăuga manual — cale clară de „Adaugă", ca să nu redeschidă camera */
 function photoNoKeyHint(){aiShow('aiPhotoOut','Am salvat poza, dar nu am o cheie AI ca s-o recunosc automat. Scrie mai sus ce ai mâncat și caloriile, apoi apasă butonul de jos — sau adaugă o cheie Gemini din Setări pentru analiză automată.','<button class="btn" style="margin-top:8px" onclick="photoAddManual()"><i data-lucide="plus"></i>Adaugă ca masă</button>');}
 function photoAddManual(){const n=(document.getElementById('mlName').value||'').trim();const c=Number(document.getElementById('mlCal').value)||0;if(!n){document.getElementById('mlName').focus();return toast('Scrie sus ce ai mâncat (și caloriile), apoi apasă din nou „Adaugă ca masă".');}quickMeal(n,c,_mlType||mealTypeNow());document.getElementById('mlName').value='';document.getElementById('mlCal').value='';clearPhoto();}
@@ -6253,9 +6347,9 @@ function askWelcome(){
   const h=new Date().getHours();
   const sal=h<5?'Bună seara':h<12?'Neața':h<18?'Salut':'Bună seara';
   const me=(memById(S.settings.activeUser||S.members[0].id)||{}).name||'';
-  appendAsk('bot',sal+(me&&me!=='Eu'?', '+me:'')+'! Spune-mi pur și simplu ce ai mâncat — „o ciorbă și două felii de pâine" — și îl notez pe loc; dacă a fost mai mult sau mai puțin, îmi zici după sau apeși pe porție. Pot să pun și ceva în calendar, să-ți spun câte calorii mai ai sau să citesc o poză: meniul zilei, farfuria, cântarul ori o captură din ceas.');
+  appendAsk('bot',sal+(me&&me!=='Eu'?', '+me:'')+'! Spune-mi pur și simplu ce ai mâncat — „o ciorbă și două felii de pâine" — și îl notez pe loc; dacă a fost mai mult sau mai puțin, îmi zici după sau apeși pe porție. Pot să pun și ceva în calendar, să-ți spun câte calorii mai ai sau să citesc o poză: farfuria o notez singur, la meniu îți spun ce și cât să-ți pui, iar cântarul și captura din ceas le citesc.');
   const chips=document.createElement('div');chips.id='askChips';chips.className='askchips';
-  [['utensils','Am mâncat…','fill'],['image','Poza cu meniul zilei','att'],['glass-water','Am băut un pahar de apă'],['flame','Câte calorii mai am azi?'],['scale','Poza cu cântarul','att'],['watch','Captură din ceas','att'],['calendar','Ce am mâine în calendar?']].forEach(p=>{
+  [['utensils','Am mâncat…','fill'],['image','Poză: farfurie sau meniu','att'],['glass-water','Am băut un pahar de apă'],['flame','Câte calorii mai am azi?'],['scale','Poza cu cântarul','att'],['watch','Captură din ceas','att'],['calendar','Ce am mâine în calendar?']].forEach(p=>{
     const b=document.createElement('button');b.className='askchip';b.innerHTML='<i data-lucide="'+p[0]+'"></i>'+p[1];
     b.onclick=p[2]==='att'?(()=>askPickFile()):(p[2]==='fill'?(()=>askFill('Am mâncat ')):(()=>{document.getElementById('askInput').value=p[1];askSend();}));
     chips.appendChild(b);
@@ -6407,14 +6501,14 @@ function appendAskImgs(files,txt){
 /* repere ca AI-ul să traducă gramele în măsuri de casă (linguri, bucăți, polonice) */
 const ASK_UNITS='Repere de cantitate: 1 lingură rasă ≈ 15 g (ulei sau miere ≈ 12 g), 1 lingură cu vârf ≈ 25–30 g, 1 linguriță ≈ 5 g, 1 polonic ≈ 200 ml (supă ≈ 200 g, tocăniță ≈ 220 g), 1 felie de pâine ≈ 30–35 g, o bucată de carne cât palma ≈ 100–120 g, 1 pumn de frunze/salată ≈ 30 g, 1 căuș de garnitură ≈ 150 g, 1 pahar ≈ 250 ml, 1 cartof mediu ≈ 100 g, 1 ou mediu ≈ 55 g, 1 lingură de smântână ≈ 20 g, 1 felie de brânză ≈ 25 g.';
 async function askSendFiles(text,wait,hist){
-  const files=_askFiles.slice();
+  const files=_askFiles.slice(),hint=window._askKindHint||'';window._askKindHint='';
   const b=askBudget();
   const hadTypes=b.meals.length?[...new Set(b.meals.map(m=>m.type))].join(', '):'niciuna';
   const memTxt=aiMemFor().join(' | ')||'(nimic reținut încă)';
   const now=new Date();
   try{
     const prompt=`Ești asistentul personal din aplicația FamLink (sănătate + calendar de familie) și te pricepi ca un nutriționist. Vorbești în română, natural și direct, la persoana a doua. Azi este ${DAYS[now.getDay()]}, ${todayStr()}, ora ${now.toTimeString().slice(0,5)}.
-Utilizatorul ți-a trimis ${files.length===1?'un atașament (poză sau PDF)':files.length+' atașamente'} și vrea să știe CE și mai ales CÂT să mănânce.
+Utilizatorul ți-a trimis ${files.length===1?'un atașament (poză sau PDF)':files.length+' atașamente'}. Dacă e o FARFURIE, vrea să-i calculezi și să-i notezi masa. Dacă e un MENIU, vrea să știe CE și mai ales CÂT să-și pună.${hint==='meniu'?' Poza a fost deja recunoscută ca MENIU.':''}
 DATELE LUI REALE: ${askCtx()}
 BUGETUL PE CARE TE BAZEZI (cifre exacte, nu le schimba): țintă ${b.tgt} kcal${b.burned?(' + '+b.burned+' kcal arse la sport = buget '+b.budget+' kcal'):''}; a mâncat deja ${b.eaten} kcal; ${b.left>=0?('ÎI MAI RĂMÂN '+b.left+' kcal până la finalul zilei'):('a DEPĂȘIT bugetul cu '+(-b.left)+' kcal')}. Mese deja înregistrate azi: ${hadTypes}. Macro consumate azi: ${b.mac.p} g proteine, ${b.mac.c} g carbohidrați, ${b.mac.f} g grăsimi.
 MEMORIE DE LUNGĂ DURATĂ (preferințe, alergii, restricții — respectă-le fără să le repeți): ${memTxt}
@@ -6424,14 +6518,14 @@ MESAJUL LUI ACUM: "${text||'(fără text — a trimis doar atașamentul)'}"
 
 PASUL 1 — Citește TOT din atașament (inclusiv textul mic, alergenii, gramajele scrise) și stabilește ce este: un MENIU (listă de feluri, ex. meniul zilei la cantină sau restaurant), o FARFURIE cu mâncare, o ETICHETĂ nutrițională de produs, o REȚETĂ, o listă de cumpărături sau altceva. Poate fi și un CÂNTAR (afișajul cu cifre al unui cântar de baie, cu segmente LED/LCD, de obicei fotografiat de sus) sau o captură FITNESS (ecran din Apple Fitness/Health, Google Fit, Samsung Health, Fitbit, Garmin, Strava: inele de activitate, calorii active, pași, minute de exercițiu). Dacă e CÂNTAR → tip_imagine="cantar"; dacă e FITNESS → tip_imagine="fitness"; în ambele cazuri pune "recomandari":[] și "intrebari":[], iar în reply o singură frază scurtă că ai văzut cântarul/captura și o citești acum — cifrele exacte le citește alt pas, nu tu.
 PASUL 2 — Dacă e MENIU sau REȚETĂ: alege din el ce i se potrivește și spune-i EXACT cât să-și pună din fiecare fel. Ținta e să acopere frumos caloriile rămase la masa asta — nu-l lăsa flămând, dar nici nu-l trece peste buget. Dacă mai urmează mese azi (uită-te la oră și la ce a mâncat deja), lasă loc și pentru ele; dacă e ultima masă a zilei, poate folosi tot restul. Dacă un fel nu încape deloc, nu i-l propune.
-Dacă e o FARFURIE și din mesaj reiese că a mâncat-o deja (sau tocmai mănâncă) → mod="mancat": estimează ce e efectiv în farfurie, nu-i mai recomanda altceva. Dacă e MENIU și utilizatorul spune la trecut ce a MÂNCAT deja din el („am mâncat tot piureul și jumătate din tocană", „am luat și murături") → mod="mancat" cu EXACT felurile și cantitățile spuse de el (nu ce i-ai fi recomandat tu); ce nu menționează nu pui.
+Dacă e o FARFURIE cu mâncare → mod="mancat" (implicit, și fără niciun text: o trimite ca s-o notezi): estimează ce e efectiv în farfurie, fiecare fel separat în "recomandari" (grame, kcal, macro, cantitatea în măsuri de casă), fără întrebări și fără să-i recomanzi altceva; masa se notează singură, el ajustează după. Doar dacă întreabă explicit dacă sau cât să mănânce din ea („pot să mănânc asta?", „cât să mănânc?") → mod="plan". Dacă e MENIU și utilizatorul spune la trecut ce a MÂNCAT deja din el („am mâncat tot piureul și jumătate din tocană", „am luat și murături") → mod="mancat" cu EXACT felurile și cantitățile spuse de el (nu ce i-ai fi recomandat tu); ce nu menționează nu pui.
 Dacă e o ETICHETĂ de produs → spune-i ce porție din produsul ăla se încadrează.
 PASUL 3 — CANTITĂȚILE se spun în măsuri de casă, nu doar în grame: „3 linguri cu vârf", „un polonic", „2 felii cât un deget", „o bucată cât palma", „jumătate de porție", „un căuș". Pune MEREU și gramajul estimat și kcal pentru fiecare. ${ASK_UNITS}
 PASUL 4 — Du-l spre proteină (carne, pește, ou, brânză, iaurt) și legume, și ține în frâu garniturile grase sau prăjite, sosurile și pâinea, ținând cont de macro consumate azi.
-PASUL 5 — ÎNTREABĂ dacă nu ești sigur: nu se citește, nu știi care e felul principal, nu știi dacă porția servită e mare sau mică, nu știi la ce masă e (prânz sau cină), nu știi dacă a mâncat deja din ea, sau ceva din meniu se bate cap în cap cu o restricție de-a lui. Atunci pune maximum 2 întrebări scurte în "intrebari" și lasă "recomandari" gol. Dacă neclaritatea e mică, mergi mai departe și spune-i în reply pe ce ai mizat.
+PASUL 5 — La MENIU și la FARFURIE NU pune întrebări: masa o deduci din oră (${mealTypeNow()} acum), porția servită o presupui obișnuită, iar felul principal îl alegi tu; spune-i în reply, pe scurt, pe ce ai mizat — el corectează după. Un fel care se bate cap în cap cu o restricție de-a lui nu i-l propui și îi spui de ce. Întrebări (maximum 2, în "intrebari", cu "recomandari" gol) pui DOAR dacă poza chiar nu se citește sau nu se vede ce e în ea.
 
 Răspunde DOAR cu JSON valid, fără markdown: {"tip_imagine":"meniu|farfurie|eticheta|reteta|lista|cantar|fitness|altceva","mod":"plan|mancat","descriere":"o frază despre ce ai văzut","tip_masa":"Mic dejun|Prânz|Cină|Gustare","meniu":["fiecare fel din meniu, exact cum e scris (doar la tip_imagine=meniu, altfel [])"],"recomandari":[{"nume":"felul, exact cum e scris în meniu","cantitate":"măsura de casă cu gramaj, ex: 3 linguri cu vârf (≈ 150 g)","grame":număr,"kcal":număr,"proteine_g":număr,"carbohidrati_g":număr,"grasimi_g":număr,"motiv":"de ce atâta, foarte scurt"}],"de_evitat":[{"nume":"","motiv":""}],"intrebari":["întrebare scurtă"],"memory":["fapt durabil nou despre el"],"reply":"răspunsul tău"}
-Reguli pentru "reply": 2-4 fraze de proză caldă, ca un om real — fără liste, fără markdown, fără clișee motivaționale, fără formule de salut. Folosește cifrele reale și spune-i clar cu câte kcal rămâne după ce mănâncă ce i-ai propus. Dacă pui întrebări, reply-ul e scurt și se termină cu întrebarea.
+Reguli pentru "reply": 2-4 fraze de proză caldă, ca un om real — fără liste, fără markdown, fără clișee motivaționale, fără formule de salut. Folosește cifrele reale și spune-i clar cu câte kcal rămâne după ce mănâncă ce i-ai propus. La mod="mancat" spune ce ai văzut în farfurie, totalul de kcal și cât îi mai rămâne azi (masa e deja notată). Dacă pui întrebări, reply-ul e scurt și se termină cu întrebarea.
 În "memory" pune doar lucruri durabile (preferințe, alergii, ce nu-i place), nu ce a mâncat azi. Dacă nu e nimic nou, pune [].`;
     const parts=files.map(f=>({inline_data:{mime_type:f.mime,data:f.data}}));
     parts.push({text:prompt});
@@ -6456,7 +6550,11 @@ Reguli pentru "reply": 2-4 fraze de proză caldă, ca un om real — fără list
     wait.textContent=reply||(qs.length?qs.join('\n'):'Gata ✓');
     _askHist.push({who:'bot',txt:(reply||'')+(qs.length?' '+qs.join(' '):'')});
     if(qs.length&&reply)appendAsk('bot',qs.join('\n'));
-    if(items.length)renderPlan({mod:j.mod==='mancat'?'mancat':'plan',descriere:j.descriere||'',tip_masa:j.tip_masa||mealTypeNow(),recomandari:items,de_evitat:Array.isArray(j.de_evitat)?j.de_evitat.filter(x=>x&&x.nume):[],meniu:Array.isArray(j.meniu)?j.meniu.map(x=>String(x||'').trim()).filter(Boolean):[]});
+    if(items.length){
+      const pid=renderPlan({mod:j.mod==='mancat'?'mancat':'plan',descriere:j.descriere||'',tip_masa:j.tip_masa||mealTypeNow(),recomandari:items,de_evitat:Array.isArray(j.de_evitat)?j.de_evitat.filter(x=>x&&x.nume):[],meniu:Array.isArray(j.meniu)?j.meniu.map(x=>String(x||'').trim()).filter(Boolean):[]});
+      /* v4.1: farfuria (sau ce spune că a mâncat din meniu) se notează singură; cardul de sub ea are porția și „Anulează" */
+      if(j.mod==='mancat'&&!qs.length&&typeof planCommit==='function')planCommit(pid);
+    }
   }catch(e){wait.textContent='Nu am reușit: '+e.message;}
 }
 /* cardul cu planul de masă: bifezi ce iei, vezi pe loc câte kcal îți rămân, apoi îl treci în mese */
@@ -6473,6 +6571,7 @@ function renderPlan(p){
   box.innerHTML=planHtml(id);log.appendChild(box);LI();log.scrollTop=log.scrollHeight;
   planHist(p);
   window._lastPlan={id,ts:Date.now()};
+  return id;
 }
 function planHtml(id){
   const p=_askPlans[id],items=p.recomandari||[],b=askBudget();
@@ -6713,7 +6812,7 @@ function foodMult(m){
   const j=_aiFood;if(!j||!j._base)return;
   const g0=Number(j._base.g)||0,pEl=document.getElementById('aiFoodPortion');
   if(g0>0&&pEl){pEl.value=Math.round(g0*m);recalcFoodPortion();}
-  else{const cEl=document.getElementById('aiFoodCal');if(cEl)cEl.value=Math.round((Number(j._base.kcal)||0)*m);}
+  else{const cEl=document.getElementById('aiFoodCal');if(cEl)cEl.value=Math.round((Number(j._base.kcal)||0)*m);aiFoodSyncSoon();}
   const box=document.getElementById('foodMult');if(box)box.innerHTML=foodMultHtml();
 }
 /* citirea de pe cântar poate veni în „citire", în „cod" sau chiar în „valoare", cu spații
@@ -6769,6 +6868,7 @@ window.addEventListener('load',()=>{LI();fabRestore();});
 /* la revenirea în prim-plan (iPhone: aplicația „înghețată"): retrimite coada, verifică mementourile, reîmprospătează ziua */
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){try{flushPush();tick();if(typeof fcmRegister==='function')fcmRegister(false);if(typeof nudgeSchedule==='function')nudgeSchedule();}catch(e){}}});
 console.info('%cFamLink v'+APP_VER,'font-weight:bold;color:#2c7a5f',
+'\n• v4.1: poza farfuriei se notează singură (cu porție și „Anulează"), poza meniului primește direct sugestii; ziua din Apple Health nu se mai dublează când o citesc mai multe dispozitive.'+
 '\n• v4.0: ecranul Azi (inele pentru calorii/apă/mișcare/fasting, acțiuni rapide, calendarul zilei); fasting automat (pornește seara, se oprește la prima masă sau la țintă, cu „Anulează"); notificări cu măsură (plafon pe zi, liniște noaptea, doar când e cazul); import automat din Apple Health printr-o scurtătură iPhone; mesele spuse în chat se notează pe loc și se ajustează din card.'+
 '\n• Notificări: ștergerea unui memento/eveniment anulează și notificările programate pe server (pe toate dispozitivele, la prima sincronizare); fără dubluri local+push; handler FCM legat o singură dată.'+
 '\n• Acțiuni rapide din notificări: apă (100/250/500/750 ml/1 L/altă cantitate), fasting (Finalizează/+30 min/+1 h), calendar (Finalizat/Amână/Editează).'+

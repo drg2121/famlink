@@ -469,3 +469,33 @@ Cererea: fastingul să se închidă și să se reia singur, mesaje de susținere
 
 - Primul import real de pe iPhone: `steps=3134; move=198; rest=454; ex=3; km=2.33; kg=105.1; kgd=2025-11-21`. Pașii și caloriile au intrat, iar greutatea din noiembrie 2025 a fost ignorată (mai veche de 60 de zile), cum trebuia.
 - „Describe a shortcut” adăugase un antet gol (Key / Text), din care ieșea eroarea „cannot parse response”. Descrierea cere acum exact două antete, iar ghidul spune să ștergi rândul gol dacă apare. Cache PWA: `famlink-v54`.
+
+## v4.1.0 — poza farfuriei se notează singură, meniul primește sugestii, ziua din Health nu se mai dublează (2026-09-24)
+
+### Import Apple Health: o singură zi, oricâte dispozitive
+
+- **Cauza dublurii:** gistul e comun familiei. Fiecare dispozitiv care se sincroniza cât fișierul `fit-*` era încă acolo (telefon, laptop, telefonul Alisei) crea ziua cu alt id (`uid()`), iar sincronizarea, care unește pe id, le păstra pe toate. La fiecare rulare a scurtăturii (dimineață ca test, apoi automat la 21:30) ziua apărea din nou în Ceas, iar minutele de mișcare pe săptămână se adunau de mai multe ori.
+- **Acum:** ziua are id fix pe membru și dată (`fitDayId` → `fit-<membru>-<zi>`), atât la import cât și la capturi. Două dispozitive care citesc același fișier produc aceeași înregistrare.
+- `fitDedupe` contopește dublurile deja existente: la pornire (`fitDedupeAll`) și la fiecare sincronizare (`mergeFitness`). Câștigă cifrele cele mai noi (`u`), câmpurile lipsă se completează din celelalte, iar id-urile vechi primesc tombstone, ca să le scoată și dispozitivele încă pe versiunea veche.
+- Ștergerea unei zile scoate toate înregistrările ei și pune un tombstone pe zi (`f:<membru>:<zi>`), deci o copie veche de pe alt dispozitiv nu o mai readuce. Un import nou, de după ștergere, intră normal.
+- Descrierea scurtăturii cere acum **Group By Day** la fiecare sumă din Health, ca pașii și distanța să nu se numere o dată din iPhone și încă o dată din ceas. Ghidul manual are pasul „Grupează după: Zi”. Scurtăturile existente merg în continuare; trebuie refăcute doar dacă pașii ies cam dublu față de aplicația Sănătate.
+
+### Poza farfuriei se notează singură
+
+- **Mese → poză** (și „Poză la masă” de pe Azi): `FOOD_PROMPT` recunoaște întâi ce e în poză (`tip_imagine`: farfurie / meniu / altceva).
+- **Farfurie:** caloriile se calculează și masa se notează imediat (`aiFoodAutoLog`), cu mesaj „Notat: … · Anulează”. Pe card apare „Notat · X kcal”, cât mai ai azi, tipul mesei și „Anulează”. Porția (½ · ¾ · 1 · 1½ · 2), gramele, kcal-ul, numele și componentele actualizează **aceeași** masă (`aiFoodSyncSoon`, la 0,7 s), la fel „Corectează” și „Analizează din nou”. Nu apar dubluri. După „Anulează”, butonul „Adaugă la mesele de azi” revine.
+- **Meniu:** poza trece direct în asistent (`photoMenuToAsk`), care propune ce și cât să-ți pui.
+- **Altceva:** mesaj clar („Nu văd mâncare în poză…”), nimic notat.
+
+### Asistentul: farfuria se notează, meniul primește sugestii direct
+
+- Poza unei farfurii în chat e tratată implicit ca „am mâncat asta” (`mod="mancat"`), chiar fără text: fiecare fel e notat pe loc (`planCommit`), cu cardul de porție și „Anulează” dedesubt. Doar la „pot să mănânc asta?” / „cât să mănânc?” rămâne propunere.
+- La meniu asistentul nu mai întreabă „e prânz sau cină?” ori „cât de mare e porția?”: deduce masa din oră, presupune porția obișnuită, propune direct și spune pe ce a mizat. Întreabă doar dacă poza nu se citește.
+- Chips-ul de bun venit: „Poză: farfurie sau meniu”.
+
+### Testat
+
+- Health (în browser): trei înregistrări pentru aceeași zi → una (`fit-m1-<zi>`, cifrele cele mai noi, `kgIn` păstrat); sincronizare cu o copie veche care are alte id-uri → o zi; două dispozitive care importă același fișier → o zi după sincronizare; scurtătura rulată de două ori în aceeași zi → o zi, cu cifrele de la a doua rulare; ștergere + copie veche → nu revine, import nou → revine.
+- Poza din Mese cu Gemini simulat: farfurie → masă notată (520 kcal); ½ → aceeași masă 260 kcal / 175 g; „Analizează din nou” și „Corectează” → tot o masă; „Anulează” → 0 mese și butonul „Adaugă”; redenumire → masa redenumită; meniu → asistentul se deschide cu poza și dă cardul „Cât să-ți pui”, nimic notat.
+- Chat: poza unei farfurii fără text → 2 mese notate, card „Notat în mesele de azi”, atașamentul scos.
+- Mobil 375 px, temă luminoasă și întunecată, fără scroll orizontal, fără erori în consolă. Cache PWA: `famlink-v55`.
