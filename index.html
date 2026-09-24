@@ -915,6 +915,214 @@ html[data-theme="dark"] .pnote.warn{background:#2a2418;border-color:#4a3d22;colo
 .nudge .nt b{display:block;font-size:14px}
 .nudge .nt span{font-size:12px;color:var(--muted);display:block;line-height:1.35}
 .nudge input[type=time]{width:100px;height:36px;min-height:36px;padding:4px 8px;font-size:13px;flex:none}
+/* ===================== v4.0 — Azi, fasting automat, notificări cu măsură, import automat, mese din chat ===================== */
+/* meniul de jos: 5 taburi, pastila activă mai vizibilă */
+nav{backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);background:color-mix(in srgb,var(--card) 90%,transparent)}
+nav button{position:relative;font-size:10.5px;letter-spacing:-.1px;padding:7px 1px 6px;min-width:0}
+nav button svg.lucide{width:22px;height:22px;transition:transform .2s cubic-bezier(.3,1.5,.6,1)}
+nav button.on svg.lucide{transform:translateY(-1px) scale(1.06)}
+nav button.on::after{content:"";position:absolute;bottom:3px;left:50%;width:14px;height:3px;border-radius:3px;background:var(--pri);transform:translateX(-50%)}
+@media(min-width:760px){nav button{font-size:14.5px;min-width:150px;padding:10px 18px}nav button.on::after{display:none}}
+@media(max-width:360px){nav button{font-size:9.5px}nav button svg.lucide{width:20px;height:20px}}
+/* toast: pastilă mai caldă, cu buton de „Anulează" */
+#toast{display:flex;align-items:center;gap:12px;border-radius:18px;padding:11px 16px;line-height:1.35;box-shadow:0 12px 30px rgba(20,40,35,.28);bottom:calc(112px + env(safe-area-inset-bottom));width:max-content;max-width:min(92vw,440px);text-align:left;transform:translate(-50%,8px);transition:opacity .25s,transform .25s}
+#toast.show{transform:translate(-50%,0)}
+#toast.act{pointer-events:auto}
+#toast button{flex:none;border:none;background:rgba(255,255,255,.16);color:#bff0a8;font-family:inherit;font-weight:800;font-size:13px;border-radius:10px;padding:6px 10px;cursor:pointer}
+html[data-theme="dark"] #toast button{background:rgba(0,0,0,.08);color:var(--pri)}
+@media(min-width:760px){#toast{bottom:28px}}
+
+/* ---------- AZI ---------- */
+#v-today{animation:tdIn .35s ease-out}
+@keyframes tdIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.tdhero{position:relative;overflow:hidden;background:var(--hero);color:#fff;border-radius:28px;padding:18px 16px 16px;margin-bottom:12px;box-shadow:0 18px 40px rgba(20,58,47,.28)}
+.tdhero::before{content:"";position:absolute;width:300px;height:300px;border-radius:50%;right:-120px;top:-150px;background:radial-gradient(circle,rgba(255,255,255,.16),rgba(255,255,255,0) 70%)}
+.tdhero::after{content:"";position:absolute;width:240px;height:240px;border-radius:50%;left:-90px;bottom:-140px;background:radial-gradient(circle,rgba(123,217,74,.28),rgba(123,217,74,0) 70%)}
+.tdhero>*{position:relative;z-index:1}
+.tdh-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tdh-date{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;opacity:.78}
+.tdh-pill{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:800;white-space:nowrap}
+.tdh-pill svg.lucide{width:14px;height:14px;color:#ffc46b}
+.tdhero h1{font-size:25px;letter-spacing:-.6px;line-height:1.15;margin:8px 0 5px}
+.tdh-msg{font-size:14px;line-height:1.5;opacity:.92;max-width:560px}
+.tdrings{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:14px}
+.tdring{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:9px 4px 8px;color:#fff;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;min-width:0;transition:transform .12s,background .15s}
+.tdring:active{transform:scale(.95)}
+.tdring:hover{background:rgba(255,255,255,.15)}
+.tdring .rg{position:relative;width:54px;height:54px;margin-bottom:4px}
+.tdring svg{width:54px;height:54px;transform:rotate(-90deg)}
+.tdring circle{fill:none;stroke-width:6}
+.tdring .tr{stroke:rgba(255,255,255,.16)}
+.tdring .pr{stroke-linecap:round;transition:stroke-dashoffset .7s cubic-bezier(.3,.9,.3,1)}
+.tdring .rg svg.lucide{position:absolute;left:50%;top:50%;width:18px;height:18px;transform:translate(-50%,-50%);color:#fff;opacity:.95}
+.tdring b{font-size:13.5px;letter-spacing:-.3px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tdring>span:last-child{font-size:10px;opacity:.75;font-weight:700;text-align:center;line-height:1.2;padding:0 2px}
+.tdh-left{display:flex;align-items:center;gap:7px;margin-top:12px;font-size:13px;font-weight:600;background:rgba(0,0,0,.14);border-radius:14px;padding:9px 12px}
+.tdh-left svg.lucide{width:16px;height:16px;color:#bff0a8;flex:none}
+.tdh-left b{color:#fff}
+/* ce e nou */
+.tdnew{background:linear-gradient(135deg,#fff8ec,#fdf0dc);border:1px solid #f1dcbc;border-radius:22px;padding:13px 15px 12px;margin-bottom:12px;animation:tdIn .4s ease-out}
+.tdn-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tdn-h b{display:flex;align-items:center;gap:8px;font-size:14.5px;color:#8a4b22}
+.tdn-h svg.lucide{width:18px;height:18px;color:var(--ai)}
+.tdn-h button{border:none;background:rgba(0,0,0,.05);border-radius:10px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:#8a4b22;cursor:pointer}
+.tdnew ul{margin:8px 0 0 18px;font-size:13px;line-height:1.5;color:#5f4632}
+.tdnew li{margin:3px 0}
+html[data-theme="dark"] .tdnew{background:linear-gradient(135deg,#2a211a,#241c16);border-color:#3a2d22}
+html[data-theme="dark"] .tdnew ul{color:#d9c6b3}html[data-theme="dark"] .tdn-h b,html[data-theme="dark"] .tdn-h button{color:#f0c9a3}
+/* acțiuni rapide */
+.tdq{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.tdqa{--qc:var(--pri);background:var(--card);border:1px solid var(--line);border-radius:20px;padding:12px 8px 11px;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:inherit;color:var(--ink);cursor:pointer;box-shadow:var(--sh);transition:transform .12s,border-color .15s;min-width:0}
+.tdqa:active{transform:scale(.95)}
+.tdqa:hover{border-color:color-mix(in srgb,var(--qc) 45%,var(--line))}
+.tdqa .ic{width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--qc) 14%,var(--card));margin-bottom:3px}
+.tdqa .ic svg.lucide{width:21px;height:21px;color:var(--qc)}
+.tdqa b{font-size:13px;line-height:1.2;text-align:center}
+.tdqa>span:last-child{font-size:11px;color:var(--muted);font-weight:600;text-align:center;line-height:1.25}
+.q-water{--qc:#3b8fd6}.q-chat{--qc:var(--ai)}.q-photo{--qc:#d9822b}.q-weigh{--qc:var(--pri)}.q-fast{--qc:#8f7bd8}.q-move{--qc:#e2a53f}
+/* carduri de pe Azi */
+.tdcard{display:block;width:100%;text-align:left;font-family:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:22px;padding:13px 14px;margin-bottom:12px;box-shadow:var(--sh)}
+.tdcard.slim{padding:11px 13px}
+.tdcard.cta{cursor:pointer;background:linear-gradient(135deg,var(--soft),var(--soft2))}
+.tdcard.cta:active{transform:scale(.99)}
+.tdc-h{display:flex;align-items:center;gap:11px}
+.tdc-h>div{flex:1;min-width:0}
+.tdc-h b{display:block;font-size:14.5px;line-height:1.25}
+.tdc-h>div>span{display:block;font-size:12px;color:var(--muted);margin-top:2px;line-height:1.35}
+.tdc-h>svg.lucide{color:var(--muted);flex:none}
+.tdc-ic{width:38px;height:38px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex:none;background:var(--soft)}
+.tdc-ic svg.lucide{width:19px;height:19px;color:var(--pri)}
+.tdc-ic.f{background:#efeaff}.tdc-ic.f svg.lucide{color:#7b64d1}
+.tdc-ic.c{background:#e6f1fb}.tdc-ic.c svg.lucide{color:#3b82c4}
+.tdc-ic.w{background:#fff3df}.tdc-ic.w svg.lucide{color:#d9822b}
+html[data-theme="dark"] .tdc-ic.f{background:#2a2540}html[data-theme="dark"] .tdc-ic.c{background:#1c2a38}html[data-theme="dark"] .tdc-ic.w{background:#33281a}
+.tdc-r{font-weight:800;font-size:15px;color:#7b64d1;font-variant-numeric:tabular-nums}
+.tdbar{height:9px;border-radius:99px;background:#efeaff;overflow:hidden;margin:11px 0 9px}
+html[data-theme="dark"] .tdbar{background:#2a2540}
+.tdbar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#a996f0,#7b64d1);transition:width .6s}
+.tdc-f{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13px;font-weight:600}
+.tdc-f>span:first-child{display:flex;align-items:center;gap:6px}
+.tdc-f svg.lucide{width:15px;height:15px;color:var(--pri)}
+.tdc-b{display:flex;gap:6px}
+.tdc-n{font-size:12px;color:var(--muted);margin:8px 0 0;line-height:1.4}
+.tdevs{margin-top:9px;display:flex;flex-direction:column}
+.tdev{display:flex;align-items:center;gap:9px;padding:9px 2px;border-top:1px dashed var(--line);font-size:14px}
+.tdev input{width:19px;height:19px;accent-color:var(--pri);flex:none;margin:0}
+.tdev .dot{width:9px;height:9px;border-radius:50%;flex:none}
+.tdev .tm{font-weight:800;font-size:12.5px;color:var(--pri2);min-width:44px;font-variant-numeric:tabular-nums}
+.tdev .ti{flex:1;min-width:0;font-weight:600;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tdev.done .ti{text-decoration:line-through;opacity:.5}
+.tdadd{margin-top:8px;width:100%;border:1.5px dashed var(--line);background:none;border-radius:14px;padding:9px;font-family:inherit;font-weight:700;font-size:13px;color:var(--pri2);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer}
+.tdadd svg.lucide{width:16px;height:16px}
+.tdfit{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:7px;margin-top:10px}
+.tdfit span{background:var(--soft2);border-radius:13px;padding:8px 10px;font-size:11.5px;color:var(--muted);font-weight:700}
+.tdfit b{display:block;font-size:16px;color:var(--ink);letter-spacing:-.3px}
+.tdtip{display:flex;align-items:center;gap:11px;flex-wrap:wrap;background:linear-gradient(135deg,var(--soft),var(--soft2));border:1px solid var(--line);border-radius:22px;padding:14px 15px;margin-bottom:12px}
+.tdtip>svg.lucide{width:22px;height:22px;color:var(--pri);flex:none;opacity:.8}
+.tdtip p{flex:1;min-width:180px;font-size:14px;line-height:1.5;font-style:italic;color:var(--ink)}
+.tdweigh{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:4px}
+.tdweigh input{width:130px;text-align:center;font-size:30px!important;font-weight:800;height:62px;border-radius:18px;letter-spacing:-.5px}
+.tdweigh span{font-weight:800;color:var(--muted)}
+.tdweigh button{width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:var(--soft);font-size:24px;font-weight:700;color:var(--pri2);cursor:pointer;font-family:inherit}
+@media(max-width:380px){.tdrings{gap:4px}.tdring .rg,.tdring svg{width:48px;height:48px}.tdring b{font-size:12.5px}.tdq{gap:6px}.tdqa{padding:10px 4px}.tdqa b{font-size:12px}}
+@media(min-width:760px){.tdq{grid-template-columns:repeat(6,1fr)}.tdhero{padding:24px 24px 20px}.tdhero h1{font-size:30px}}
+
+/* ---------- fasting automat ---------- */
+.fauto{border:1px solid var(--line);border-radius:20px;padding:13px 14px;margin:14px 0 4px;background:var(--soft2)}
+.fauto.on{background:linear-gradient(135deg,#f3efff,var(--soft2));border-color:#ddd3fb}
+html[data-theme="dark"] .fauto.on{background:linear-gradient(135deg,#25213a,var(--soft2));border-color:#3a3360}
+.fa-h{display:flex;align-items:center;gap:11px}
+.fa-h>div{flex:1;min-width:0}
+.fa-h b{display:block;font-size:15px}
+.fa-h>div>span{display:block;font-size:12.5px;color:var(--muted);line-height:1.4;margin-top:2px}
+.fa-ic{width:38px;height:38px;border-radius:13px;background:linear-gradient(135deg,#a996f0,#7b64d1);display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 4px 12px rgba(123,100,209,.3)}
+.fa-ic svg.lucide{width:19px;height:19px;color:#fff}
+.fa-time{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0 4px;padding:10px 0 2px;border-top:1px dashed var(--line)}
+.fa-time label{margin:0;font-size:13px;color:var(--ink)}
+.fa-time input{width:112px}
+.fa-win{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);flex-basis:100%}
+.fa-win svg.lucide{width:14px;height:14px;color:var(--pri)}
+.fa-opt{display:flex;align-items:center;gap:10px;justify-content:space-between;margin:0;padding:10px 0 2px;border-top:1px dashed var(--line);cursor:pointer;font-weight:500;color:var(--ink)}
+.fa-opt b{display:block;font-size:13.5px}
+.fa-opt small{display:block;font-size:12px;color:var(--muted);line-height:1.35;font-weight:500}
+.fa-note{font-size:12px;color:var(--muted);line-height:1.45;margin-top:9px}
+.fa-warn{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;line-height:1.45;color:var(--ink);background:var(--aisoft);border-radius:12px;padding:9px 11px;margin:10px 0 8px}
+.fa-warn svg.lucide{width:16px;height:16px;color:var(--ai);flex:none;margin-top:1px}
+/* ---------- import automat din Health ---------- */
+.fitauto{border:1px solid var(--line);border-radius:20px;padding:13px 14px;margin:12px 0;background:linear-gradient(135deg,#fff8ec,var(--soft2))}
+html[data-theme="dark"] .fitauto{background:linear-gradient(135deg,#2a211a,var(--soft2))}
+.fitauto .fa-ic{background:linear-gradient(135deg,#f0b35b,#d9822b);box-shadow:0 4px 12px rgba(217,130,43,.3)}
+.fa-guide{margin-top:10px;border-top:1px dashed var(--line);padding-top:6px}
+.fa-guide>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;color:var(--pri2);padding:6px 0}
+.fa-guide>summary::-webkit-details-marker{display:none}
+.fa-guide>summary svg.lucide{width:16px;height:16px}
+.fa-guide>summary .chev{margin-left:auto;display:inline-flex;transition:transform .2s}
+.fa-guide[open]>summary .chev{transform:rotate(180deg)}
+.fa-guide .steps li{margin-bottom:9px;font-size:13px;line-height:1.5}
+.cpy{display:flex;align-items:center;gap:8px;margin-top:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 6px 6px 10px}
+.cpy code{flex:1;min-width:0;font-size:11.5px;overflow-wrap:anywhere;color:var(--ink);font-family:ui-monospace,Menlo,monospace;line-height:1.4}
+
+/* ---------- notificări cu măsură ---------- */
+.nfhero{display:flex;gap:12px;align-items:flex-start;background:linear-gradient(135deg,var(--soft),var(--soft2));border:1px solid var(--line);border-radius:20px;padding:14px;margin-bottom:10px}
+.nfhero .hb{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--pri),var(--acc));display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 4px 12px rgba(44,122,95,.3)}
+.nfhero .hb svg.lucide{width:21px;height:21px;color:#fff}
+.nfhero b{font-size:16px;display:block;margin-bottom:3px}
+.nfhero p{font-size:13px;color:var(--muted);line-height:1.5}
+.nfstate{margin:4px 0 12px;font-size:13px;font-weight:600}
+.nfok,.nfbad{display:inline-flex;align-items:center;gap:6px}
+.nfok{color:var(--pri2)}.nfbad{color:#c94258}
+.nfok svg.lucide,.nfbad svg.lucide{width:16px;height:16px}
+.nflbl{font-size:12.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:4px 0 7px}
+.seg3{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--soft2);border:1px solid var(--line);border-radius:16px;padding:4px}
+.seg3 button{border:none;background:none;border-radius:12px;padding:10px 4px;font-family:inherit;font-weight:700;font-size:13px;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:background .15s,color .15s}
+.seg3 button svg.lucide{width:15px;height:15px}
+.seg3 button.on{background:var(--card);color:var(--pri2);box-shadow:0 3px 10px rgba(20,58,47,.14)}
+.nfdesc{font-size:12.5px;color:var(--muted);margin:7px 2px 10px;line-height:1.45}
+.nfquiet{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;font-weight:600;background:var(--soft2);border:1px solid var(--line);border-radius:14px;padding:9px 11px}
+.nfquiet svg.lucide{width:16px;height:16px;color:#7b64d1}
+.nfquiet input{width:104px;height:38px;min-height:38px;padding:4px 8px}
+.nftoday{margin:12px 0 4px;border:1px solid var(--line);border-radius:16px;padding:11px 13px;background:var(--card)}
+.nft-h{display:flex;align-items:center;gap:7px;font-weight:800;font-size:13.5px;margin-bottom:5px}
+.nft-h svg.lucide{width:16px;height:16px;color:var(--pri)}
+.nft-i{display:flex;align-items:center;gap:9px;padding:6px 0;border-top:1px dashed var(--line);font-size:13px}
+.nft-i .t{font-weight:800;color:var(--pri2);min-width:42px;font-variant-numeric:tabular-nums}
+.nft-i svg.lucide{width:15px;height:15px;color:var(--muted);flex:none}
+.nudge .nt em{font-style:normal}
+.nudge .nhint{display:block;font-size:11.5px;color:var(--pri2);margin-top:4px;line-height:1.6}
+.nudge .nchip{display:inline-flex;align-items:center;gap:2px;background:var(--soft);border-radius:99px;padding:1px 3px 1px 9px;font-weight:700;margin:3px 3px 0 0;white-space:nowrap}
+.nudge .nchip button{border:none;background:none;color:var(--muted);font-size:15px;line-height:1;cursor:pointer;padding:0 4px}
+@media(max-width:560px){.nudge .nt{flex:1 1 calc(100% - 60px)}.nudge input[type=time]{margin-left:46px}.nudge .sw{margin-left:auto}}
+.nfquiet input{width:98px}
+
+/* ---------- mese din chat ---------- */
+.mrc h4 svg.lucide{color:var(--pri)!important}
+.mrrow{padding:9px 0;border-top:1px dashed var(--line)}
+.mrrow:first-of-type{border-top:none;padding-top:2px}
+.mr-top{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.mr-n{font-size:13.5px;line-height:1.35;min-width:0;flex:1}
+.mr-k{display:inline-flex;align-items:center;gap:4px;font-weight:800;font-size:12px;color:var(--muted);flex:none}
+.mrc .mr-k input{width:74px;height:34px;min-height:34px;padding:4px 8px;text-align:right;font-weight:800;font-size:14px;border-radius:10px}
+.mr-sub{display:flex;align-items:center;gap:8px;margin-top:6px}
+.mr-sub select{width:auto;height:30px;padding:3px 30px 3px 9px;font-size:12px;border-radius:9px;background-color:var(--soft2);border-color:transparent;font-weight:700}
+.mr-g{font-size:11.5px;color:var(--muted);font-weight:700}
+.mr-mult{flex-wrap:nowrap;gap:3px}
+.mr-mult button{padding:5px 0;font-size:12px;min-width:31px;border-radius:9px}
+@media(max-width:420px){.mr-mult .pml{display:none}.mr-mult button{min-width:34px}}
+.mr-note{display:flex;gap:6px;align-items:flex-start;margin:8px 0 0!important;color:#6b57b8!important}
+.mr-note svg.lucide{width:14px;height:14px;flex:none;margin-top:2px}
+.mr-act{display:flex;align-items:center;gap:8px;justify-content:space-between;margin-top:9px;font-size:11.5px;color:var(--muted);line-height:1.35}
+.mr-act .btn{flex:none}
+.mealchat{width:100%;display:flex;align-items:center;gap:11px;text-align:left;font-family:inherit;color:var(--ink);background:linear-gradient(135deg,#fff5ea,#fdebd9);border:1px solid #f1d7bb;border-radius:18px;padding:11px 12px;margin:6px 0 4px;cursor:pointer;transition:transform .12s}
+.mealchat:active{transform:scale(.98)}
+.mealchat .ic{width:40px;height:40px;border-radius:13px;background:linear-gradient(135deg,var(--ai2),var(--ai));display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 4px 12px rgba(201,107,69,.28)}
+.mealchat .ic svg.lucide{width:20px;height:20px;color:#fff}
+.mealchat>span:nth-child(2){flex:1;min-width:0}
+.mealchat b{display:block;font-size:14.5px}
+.mealchat small{display:block;font-size:12px;color:var(--muted);line-height:1.35;margin-top:1px}
+.mealchat>svg.lucide{color:var(--ai);flex:none}
+html[data-theme="dark"] .mealchat{background:linear-gradient(135deg,#2a211a,#241c16);border-color:#3a2d22}
+.mealor{display:flex;align-items:center;gap:10px;margin:8px 0 2px;font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.mealor::before,.mealor::after{content:"";flex:1;height:1px;background:var(--line)}
 </style>
 <style id="pageStyle">@page{size:A4 landscape;margin:9mm}</style>
 </head>
@@ -929,7 +1137,8 @@ html[data-theme="dark"] .pnote.warn{background:#2a2418;border-color:#4a3d22;colo
 </header>
 
 <nav>
-  <button data-v="cal" class="on" onclick="go('cal')"><i data-lucide="calendar-days"></i>Calendar</button>
+  <button data-v="today" class="on" onclick="go('today')"><i data-lucide="sun"></i>Azi</button>
+  <button data-v="cal" onclick="go('cal')"><i data-lucide="calendar-days"></i>Calendar</button>
   <button data-v="meals" onclick="go('meals')"><i data-lucide="utensils"></i>Mese</button>
   <button data-v="rem" onclick="go('rem')"><i data-lucide="alarm-clock"></i>Mementouri</button>
   <button data-v="health" onclick="go('health')"><i data-lucide="heart-pulse"></i>Sănătate</button>
@@ -945,8 +1154,18 @@ html[data-theme="dark"] .pnote.warn{background:#2a2418;border-color:#4a3d22;colo
 </div>
 
 <main>
+  <!-- ===== AZI (v4) — tot ce contează azi, pe un singur ecran ===== -->
+  <section id="v-today" style="display:none">
+    <div id="tdHero"></div>
+    <div id="tdQuick"></div>
+    <div id="tdFast"></div>
+    <div id="tdCal"></div>
+    <div id="tdFit"></div>
+    <div id="tdTip"></div>
+  </section>
+
   <!-- ===== LUNĂ ===== -->
-  <section id="v-month">
+  <section id="v-month" style="display:none">
     <div class="card">
       <div class="calnav">
         <button onclick="mvMonth(-1)"><i data-lucide="chevron-left"></i></button>
@@ -1022,6 +1241,8 @@ html[data-theme="dark"] .pnote.warn{background:#2a2418;border-color:#4a3d22;colo
       </div>
       <div class="mealadd">
         <div class="mealadd-h"><i data-lucide="plus-circle"></i>Adaugă rapid ce ai mâncat</div>
+        <button class="mealchat" type="button" onclick="askFill('Am mâncat ')"><span class="ic"><i data-lucide="message-circle-heart"></i></span><span><b>Spune-i asistentului</b><small>„o ciorbă și două felii de pâine" — notez pe loc, apoi ajustezi porția</small></span><i data-lucide="chevron-right"></i></button>
+        <div class="mealor"><span>sau scrie aici</span></div>
         <div class="chips" id="mlTypeChips" style="margin:4px 0 8px"></div>
         <input id="mlName" placeholder="Ce ai mâncat? ex: omletă cu legume" onkeydown="if(event.key==='Enter')addMeal()">
         <div class="row" style="margin-top:8px">
@@ -1154,6 +1375,7 @@ html[data-theme="dark"] .pnote.warn{background:#2a2418;border-color:#4a3d22;colo
         <div class="center muted" id="fWhen" style="margin:0 0 10px;font-size:13.5px"></div>
         <div class="center"><button class="btn" id="fBtn" onclick="fastToggle()"><i data-lucide="play"></i>Începe fastingul</button></div>
         <div class="fstages" id="fStages"></div>
+        <div id="fAuto"></div>
         <div class="sech"><span class="si"><i data-lucide="history"></i></span><div><b>Istoric</b><span class="sub">ultimele posturi, verde = țintă atinsă</span></div></div>
         <div id="fHist" class="muted">—</div>
       </div>
@@ -1185,6 +1407,7 @@ html[data-theme="dark"] .pnote.warn{background:#2a2418;border-color:#4a3d22;colo
           <span class="hint">Poți trimite mai multe capturi din aceeași zi (rezumat + inele) — se completează una pe alta</span>
         </button>
         <input type="file" id="fitPhoto" accept="image/*" multiple style="display:none" onchange="fitPhotoPicked(this)">
+        <div id="fitAutoBox"></div>
         <div id="fitPrev"></div>
         <div id="aiFitOut"></div>
         <div id="fitCalib"></div>
@@ -1208,17 +1431,17 @@ html[data-theme="dark"] .pnote.warn{background:#2a2418;border-color:#4a3d22;colo
   <!-- ===== MEMENTOURI ===== -->
   <section id="v-rem" style="display:none">
     <div class="card">
-      <div class="aihero green">
-        <div class="hb"><i data-lucide="alarm-clock"></i></div>
-        <div><b>Mementouri zilnice</b><p>Primești o notificare la ora stabilită, în fiecare zi. Alege un memento rapid sau creează unul propriu.</p></div>
-      </div>
-      <div class="row" style="margin:8px 0"><button class="btn sec sm" onclick="askNotif();setTimeout(rRemView,600)"><i data-lucide="bell-ring"></i>Activează notificările</button><span class="muted" id="remNotifState"></span></div>
+      <div id="nfTop"></div>
+      <div id="nudgeBox"></div>
+    </div>
+    <div class="card">
+      <div class="sech" style="margin-top:2px"><span class="si"><i data-lucide="alarm-clock"></i></span><div><b>Mementourile tale</b><span class="sub">fixe, la ora aleasă — pentru lucruri personale (vitamine, medicamente, plimbarea câinelui)</span></div></div>
+      <div class="row" style="margin:0 0 10px"><span class="muted" id="remNotifState"></span></div>
       <div class="pregrid">
-        <button class="pretile" onclick="addPreset('Mic dejun','08:00')"><i data-lucide="egg-fried"></i>Mic dejun<span class="t">08:00</span></button>
-        <button class="pretile" onclick="addPreset('Prânz','13:00')"><i data-lucide="utensils"></i>Prânz<span class="t">13:00</span></button>
-        <button class="pretile" onclick="addPreset('Cină','19:00')"><i data-lucide="soup"></i>Cină<span class="t">19:00</span></button>
-        <button class="pretile" onclick="addPreset('Cântărire','07:30')"><i data-lucide="scale"></i>Cântărire<span class="t">07:30</span></button>
-        <button class="pretile" onclick="addWaterPreset()"><i data-lucide="glass-water"></i>Bea apă<span class="t">la 2 ore</span></button>
+        <button class="pretile" onclick="addPreset('Ia vitaminele','09:00')"><i data-lucide="pill"></i>Vitamine<span class="t">09:00</span></button>
+        <button class="pretile" onclick="addPreset('Medicamentele','20:00')"><i data-lucide="heart-pulse"></i>Medicamente<span class="t">20:00</span></button>
+        <button class="pretile" onclick="addPreset('Ieși la o plimbare','18:00')"><i data-lucide="footprints"></i>Plimbare<span class="t">18:00</span></button>
+        <button class="pretile" onclick="addPreset('Pregătește-te de somn','22:30')"><i data-lucide="moon"></i>Somn<span class="t">22:30</span></button>
       </div>
       <div id="remList"></div>
       <div class="mealadd">
@@ -1236,7 +1459,6 @@ html[data-theme="dark"] .pnote.warn{background:#2a2418;border-color:#4a3d22;colo
         <button class="btn mealadd-btn" id="remAddBtn" onclick="addReminder()"><i data-lucide="plus"></i>Adaugă memento</button>
         <button class="btn ghost" id="remCancelBtn" style="width:100%;margin-top:8px;display:none" onclick="cancelRemEdit()"><i data-lucide="x"></i>Anulează editarea</button>
       </div>
-      <div id="nudgeBox" style="margin-top:6px"></div>
     </div>
   </section>
 
@@ -1601,7 +1823,7 @@ html[data-theme="dark"] .pnote.warn{background:#2a2418;border-color:#4a3d22;colo
 <script>
 /* ============ FamLink v1.0 — arhitectură ArhiLink (single-file, localStorage) ============ */
 const KEY='famlink_v1';
-const APP_VER='3.13.0';
+const APP_VER='4.0.0';
 /* prima literă mare (titluri de obiective, etichete de mementouri, titluri AI) */
 const capFirst=s=>{s=String(s||'').trim();return s?s.charAt(0).toLocaleUpperCase('ro-RO')+s.slice(1):s;};
 /* curăță titlul unui obiectiv: scoate din față formulările de COMANDĂ
@@ -1683,7 +1905,7 @@ const dstr=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
 const fromStr=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c);};
 const todayStr=()=>dstr(new Date());
 const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('show'),2600);}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.remove('act');t.classList.add('show');clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('show'),Math.min(6000,2600+String(m||'').length*25));}
 function LI(){if(window.lucide)try{lucide.createIcons();}catch(e){}}
 /* ---------- temă (auto / luminoasă / întunecată) ---------- */
 const _mqDark=window.matchMedia?window.matchMedia('(prefers-color-scheme: dark)'):null;
@@ -1719,7 +1941,7 @@ let VY=new Date().getFullYear();                                // year view
 let VD={d:todayStr()};                                          // day view
 let gScope='m';let gEditId=null;
 
-function goHome(){const n=new Date();VM.y=n.getFullYear();VM.m=n.getMonth();go('cal');try{window.scrollTo({top:0,behavior:'smooth'});}catch(e){try{window.scrollTo(0,0);}catch(_){}}}
+function goHome(){const n=new Date();VM.y=n.getFullYear();VM.m=n.getMonth();go('today');try{window.scrollTo({top:0,behavior:'smooth'});}catch(e){try{window.scrollTo(0,0);}catch(_){}}}
 function go(v){
   if(v==='cal')v=calSub;
   if(CALV.includes(v))calSub=v;
@@ -1728,12 +1950,13 @@ function go(v){
   document.getElementById('v-'+v).style.display='';
   document.getElementById('calTabs').style.display=CALV.includes(v)?'':'none';
   document.querySelectorAll('#calTabs [data-cs]').forEach(b=>b.classList.toggle('on',b.dataset.cs===v));
-  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',(b.dataset.v==='cal'&&CALV.includes(v))||(b.dataset.v==='health'&&v==='health')||(b.dataset.v==='rem'&&v==='rem')||(b.dataset.v==='meals'&&v==='meals')));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',(b.dataset.v==='cal'&&CALV.includes(v))||b.dataset.v===v));
   render();
 }
-function render(){rMotto();if(VIEW==='month')rMonth();else if(VIEW==='year')rYear();else if(VIEW==='day')rDay();else if(VIEW==='goals')rGoals();else if(VIEW==='health')rDiet();else if(VIEW==='meals')rMealsView();else if(VIEW==='rem')rRemView();else if(VIEW==='set')rSet();LI();}
+function render(){rMotto();if(VIEW==='today'){if(typeof rToday==='function')rToday();}else if(VIEW==='month')rMonth();else if(VIEW==='year')rYear();else if(VIEW==='day')rDay();else if(VIEW==='goals')rGoals();else if(VIEW==='health')rDiet();else if(VIEW==='meals')rMealsView();else if(VIEW==='rem')rRemView();else if(VIEW==='set')rSet();LI();}
 function rRemView(){
   remWhoFill(document.getElementById('remWho')&&document.getElementById('remWho').value);
+  if(typeof rNfTop==='function')rNfTop();
   rReminders();
   if(typeof rNudges==='function')rNudges();
   const el=document.getElementById('remNotifState');
@@ -2193,8 +2416,7 @@ function notify(title,body){
     n.onclick=function(){ // atingerea notificării locale te duce fix la ce e despre
       try{window.focus();}catch(e){}
       const t=String(title||'');
-      let kind='rem';
-      if(/^Fasting/i.test(t))kind='fast';else if(/ap[ăa]|water/i.test(t))kind='water';
+      let kind=(typeof flNotifKind==='function'?flNotifKind({title:t,body:String(body||'')}):'')||'rem';
       try{if(typeof notifGoto==='function')notifGoto(kind,{title:t});if(kind==='water'&&typeof qsOpen==='function')qsOpen('water');}catch(e){}
       try{n.close();}catch(e){}
     };
@@ -2227,31 +2449,33 @@ function tick(){
     const key=e.id+ds;
     if(now>=at&&now-at<90000&&!FIRED[key]){FIRED[key]=1;if(!pushCovers('event'))notify('Calendar: '+e.title,(e.notify?('în '+(e.notify>=60?(e.notify/60)+' h':e.notify+' min')+' — '):'acum — ')+'la '+e.time);}
   });
-  // fasting
+  // fasting — v4: notificarea de final + modul automat (pornește/închide singur)
   const f=S.diet.fasting;
   if(f.active&&f.start){
     const el=(now-new Date(f.start))/36e5;
-    if(el>=f.hours&&!FIRED['fast'+f.start]){FIRED['fast'+f.start]=1;if(!f.pushed||!pushCovers('fasting'))notify('Fasting complet!','Ai atins ținta de '+f.hours+' ore. Bravo! Poți mânca.');}
+    if(el>=f.hours&&el<f.hours+0.25&&!FIRED['fast'+f.start]){FIRED['fast'+f.start]=1;if(!f.pushed||!pushCovers('fasting')){const _fm=(typeof fastDoneMsg==='function')?fastDoneMsg(f.hours):null;notify(_fm?_fm.title:'Fasting complet!',_fm?_fm.body:('Ai atins ținta de '+f.hours+' ore. Poți mânca.'));}}
   }
+  if(typeof fastAutoTick==='function')try{fastAutoTick(now.getTime(),false);}catch(e){console.warn('fastAuto',e);}
   // mementouri
   const _au=S.settings.activeUser||(S.members[0]||{}).id;
   (S.settings.reminders||[]).forEach(r=>{
     if(r.on===false)return;
     if(r.who&&r.who!=='all'&&r.who!==_au)return; // mementoul altui membru — nu pe acest dispozitiv
+    if(typeof remHK==='function'&&remHK(r))return; // v4: apă / cântărire / mese → notificările inteligente, doar când e cazul
     if(r.once){ // memento o singură dată: sună la data + ora fixată, apoi se dezactivează
       if(r.fired||r.date!==ds)return;
       const[oh,om]=String(r.time||'09:00').split(':').map(Number);
       const at=new Date();at.setHours(oh||0,om||0,0,0);
-      if(now>=at&&now-at<24*36e5){r.fired=true;r.u=Date.now();save();notify('⏰ '+r.label,'E momentul!');if(VIEW==='rem')rReminders();}
+      if(now>=at&&now-at<24*36e5){r.fired=true;r.u=Date.now();save();notify(r.label,'Mementoul tău de la '+String(r.time||'09:00')+'.');if(VIEW==='rem')rReminders();}
     }else if(r.every){
       const h=now.getHours();
       if(h<8||h>22)return;
-      if(h%r.every===0&&now.getMinutes()<1){const key='rem_'+remKey(r)+'_'+ds+'_'+h;if(!FIRED[key]){FIRED[key]=1;if(!pushCovers('daily'))notify('⏰ '+r.label,'E momentul!');}} // cheie pe text+program → două mementouri identice sună o singură dată
+      if(h%r.every===0&&now.getMinutes()<1){const key='rem_'+remKey(r)+'_'+ds+'_'+h;if(!FIRED[key]){FIRED[key]=1;if(!pushCovers('daily'))notify(r.label,'Mementoul tău, la fiecare '+r.every+' ore.');}} // cheie pe text+program → două mementouri identice sună o singură dată
     }else if(r.time){
       const[hh,mm]=r.time.split(':').map(Number);
       const at=new Date();at.setHours(hh,mm,0,0);
       const key='rem_'+remKey(r)+'_'+ds;
-      if(now>=at&&now-at<90000&&!FIRED[key]){FIRED[key]=1;if(!pushCovers('daily'))notify('⏰ '+r.label,'E momentul!');}
+      if(now>=at&&now-at<90000&&!FIRED[key]){FIRED[key]=1;if(!pushCovers('daily'))notify(r.label,'Mementoul tău de la '+r.time+'.');}
     }
   });
   if(typeof nudgeTick==='function')try{nudgeTick(now,ds);}catch(e){}
@@ -2308,7 +2532,7 @@ function remIcon(r){
   return 'alarm-clock';
 }
 function rReminders(){
-  const rs=S.settings.reminders||[];
+  const rs=(S.settings.reminders||[]).filter(r=>!(typeof remHK==='function'&&remHK(r)));
   document.getElementById('remList').innerHTML=rs.length?rs.map(r=>`<div class="mealrow${r.id===_remEditId?' editing':''}">
     <span class="ric"><i data-lucide="${remIcon(r)}"></i></span>
     <span class="rlab grow"><b>${esc(r.label)} ${(r.who&&r.who!=='all'&&memById(r.who))?avatar(memById(r.who),'avs'):famAvatars()}</b><span class="muted">${r.once?('o singură dată · '+remDateLabel(r.date)+(r.time?(' la '+r.time):'')+(r.fired?' · trimis ✓':'')):(r.every?('la fiecare '+r.every+' h (08–22)'):('zilnic la '+r.time))}${(!r.who||r.who==='all')?' · toată familia':remWhoLabel(r)}</span></span>
@@ -2452,7 +2676,7 @@ function restore(inp){const f=inp.files[0];if(!f)return;const r=new FileReader()
 <script>
 /* ============ MODUL SLĂBIT ============ */
 let dietTab='prof';
-const dietMid=()=>{const el=document.getElementById(VIEW==='meals'?'mealsWho':'dietWho');return (el&&el.value)||S.settings.activeUser||S.members[0].id;};
+const dietMid=()=>{if(VIEW==='today')return S.settings.activeUser||S.members[0].id;const el=document.getElementById(VIEW==='meals'?'mealsWho':'dietWho');return (el&&el.value)||S.settings.activeUser||S.members[0].id;};
 function clearAI(id){const el=document.getElementById(id);if(el)el.innerHTML='';}
 function clearAIOuts(){['aiProfOut','aiBodyOut','aiMenuOut','aiPhotoOut','aiScaleOut','aiFitOut'].forEach(clearAI);}
 function aiShow(id,html,extra){const el=document.getElementById(id);if(!el)return;el.innerHTML='<div class="aibox"><button class="aix" title="Închide" onclick="clearAI(\''+id+'\')"><i data-lucide="x"></i></button><div class="aihead"><span class="badge"><i data-lucide="sparkles"></i></span><b>Asistent AI</b></div>'+html+'</div>'+(extra||'');LI();}
@@ -2467,7 +2691,7 @@ function fillWhoSel(sel){
 }
 function rDiet(){
   fillWhoSel(document.getElementById('dietWho'));
-  if(dietTab==='prof')rProf();else if(dietTab==='body')rBody();else if(dietTab==='fast')fastPaint(true);else if(dietTab==='sport')rSport();else if(dietTab==='fit')rFit();else if(dietTab==='prog')rProg();
+  if(dietTab==='prof')rProf();else if(dietTab==='body')rBody();else if(dietTab==='fast')fastPaint(true);else if(dietTab==='sport')rSport();else if(dietTab==='fit'){rFit();if(typeof rFitAuto==='function')rFitAuto();}else if(dietTab==='prog')rProg();
 }
 /* ---- vedere Mese (bara principală) ---- */
 let _mlType=null;
@@ -2752,31 +2976,19 @@ function fastProto(){
   save();fastPaint();
 }
 function fastToggle(){
+  /* v4: pornirea/oprirea trec prin fastStart/fastEnd (modulul v4) — aceleași reguli și
+     pentru butoane, notificări, asistent și modul automat */
   const f=S.diet.fasting;
-  if(f.active){
-    const el=(Date.now()-new Date(f.start))/36e5;
-    f.history.unshift({start:f.start,end:new Date().toISOString(),h:+el.toFixed(1),goal:f.hours});
-    f.history=f.history.slice(0,30);f.active=false;f.start=null;f.pushed=false;
-    if(typeof checkMilestones==='function')checkMilestones();
-    toast('Fasting oprit la '+el.toFixed(1)+' h');
-    if(typeof pushReady==='function'&&pushReady())pushQueue({action:'schedule',groups:[{prefix:'fast_'+DID,items:[]}]});
-  }else{
-    f.active=true;f.start=new Date().toISOString();toast('Fasting pornit ✓ Poți mânca '+fmtDT(new Date(Date.now()+f.hours*3600e3)));askNotifSilent();
-    if(typeof pushReady==='function'&&pushReady()&&pushOn('fasting',true)&&myEmail()){f.pushed=true;pushQueue({action:'schedule',groups:[{prefix:'fast_'+DID,items:[{key:'fast_'+DID,at:new Date(Date.now()+f.hours*3600e3).toISOString(),to:[myEmail()],kind:'fast',title:'Fasting complet ('+f.hours+' h)',body:'Ai atins ținta de '+f.hours+' ore. Bravo — poți mânca.\n— FamLink'}]}]});}
-  }
-  save();fastPaint(true);
+  if(f.active)fastEnd(Date.now(),'manual');
+  else fastStart(Date.now(),'manual');
 }
 function askNotifSilent(){if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();}
 /* prelungește fastingul activ cu N minute (din notificare sau din foaia rapidă) și reprogramează push-ul */
 function fastExtend(min){
   const f=S.diet.fasting;if(!f.active||!f.start)return toast('Fastingul nu e pornit');
   f.hours=+(f.hours+min/60).toFixed(2);
-  if(typeof pushReady==='function'&&pushReady()&&pushOn('fasting',true)&&myEmail()){
-    const at=new Date(new Date(f.start).getTime()+f.hours*3600e3);
-    f.pushed=true;
-    pushQueue({action:'schedule',groups:[{prefix:'fast_'+DID,items:[{key:'fast_'+DID,at:at.toISOString(),to:[myEmail()],kind:'fast',title:'Fasting complet ('+f.hours+' h)',body:'Ai atins ținta de '+f.hours+' ore. Bravo — poți mânca.\n— FamLink'}]}]});
-  }
-  save();fastPaint(true);toast('Fasting prelungit cu '+(min>=60?(min/60)+' h':min+' min')+' — țintă nouă: '+f.hours+' h');
+  save();if(typeof fastPushSync==='function')fastPushSync(true);fastPaint(true);
+  toast('Prelungit cu '+(min>=60?(min/60)+' h':min+' min')+' — noua țintă: '+String(f.hours).replace('.',',')+' h. Ține-te bine!');
 }
 /* „azi/ieri/mâine la HH:MM" — pentru început/sfârșit fasting */
 function fmtDT(d){
@@ -2825,6 +3037,7 @@ function fastPaint(full){
   const hist=f.history.slice(0,10),okN=f.history.filter(h=>Number(h.h)>=Number(h.goal)).length;
   const hh=hist.length?('<div class="fhist">'+hist.map(h=>{const ok=Number(h.h)>=Number(h.goal);const st=new Date(h.start);return '<div class="fh" title="'+h.h+' h din '+h.goal+' h"><span class="c'+(ok?'':' miss')+'">'+(Math.round(h.h*10)/10).toString().replace('.',',')+'h</span><small>'+st.getDate()+' '+MONTHS[st.getMonth()].slice(0,3)+'</small></div>';}).join('')+'</div><p class="muted" style="font-size:12px;margin-top:6px">'+okN+' din '+f.history.length+' duse la capăt · galben = oprit înainte de țintă</p>'):'<div class="empty">Încă niciun fasting încheiat.</div>';
   const fhEl=document.getElementById('fHist');if(fhEl.innerHTML!==hh)fhEl.innerHTML=hh;
+  if(full&&typeof rFastAuto==='function')rFastAuto();
   LI();
 }
 setInterval(()=>{if(S.diet.fasting.active&&document.getElementById('dt-fast').style.display!=='none'&&VIEW==='health')fastPaint();},1000);
@@ -2887,8 +3100,12 @@ function rSport(){
 function logWater(ml){
   const mid=dietMid(),t=todayStr();
   S.diet.water=S.diet.water||{};S.diet.water[mid]=S.diet.water[mid]||{};
-  S.diet.water[mid][t]=(S.diet.water[mid][t]||0)+(Number(ml)||250);
+  const _before=S.diet.water[mid][t]||0;
+  S.diet.water[mid][t]=_before+(Number(ml)||250);
+  if(typeof waterMark==='function')waterMark(mid);
   save();if(typeof checkMilestones==='function')checkMilestones();rMeals();
+  if(VIEW==='today'&&typeof rToday==='function')rToday();
+  if(typeof cheerWater==='function')toast(cheerWater(mid,_before,S.diet.water[mid][t]));
 }
 function waterToday(){const mid=dietMid();return (S.diet.water&&S.diet.water[mid]&&S.diet.water[mid][todayStr()])||0;}
 function todayMeals(){return S.diet.meals.filter(m=>m.mid===dietMid()&&m.date===todayStr());}
@@ -2905,7 +3122,7 @@ function rMeals(){
   put('mhLeft',rest>=0?('îți mai rămân ~'+rest+' kcal'):('ai depășit cu '+(-rest)+' kcal'));
   // linia „sport azi" din hero (albastru, distinct) — arată bonusul adăugat la buget
   const msEl=document.getElementById('mhSport');
-  if(msEl){if(burned>0){msEl.style.display='';msEl.innerHTML=`<i data-lucide="${_bn.src==='fit'?'watch':'dumbbell'}"></i> ${_bn.label}: <b style="margin:0 3px">${burned}</b> kcal arse <span class="muted" style="font-weight:500">(+${burned} la buget → ${tgt} kcal)</span>`;}else{msEl.style.display='none';msEl.innerHTML='';}}
+  if(msEl){if(burned>0){msEl.style.display='';msEl.innerHTML=`<i data-lucide="${_bn.src==='fit'?'watch':'dumbbell'}"></i><span>${_bn.label}: <b>${burned}</b> kcal arse <span class="muted" style="font-weight:500">(+${burned} la buget → ${tgt} kcal)</span></span>`;}else{msEl.style.display='none';msEl.innerHTML='';}}
   // lista sesiunilor de sport cu bifă (le incluzi/excluzi din buget)
   const spEl=document.getElementById('sportLine');
   if(spEl){const ss=todaySports();
@@ -3001,9 +3218,11 @@ function addMeal(){
     save();rMeals();toast('Masă actualizată ✓');
     return;
   }
-  S.diet.meals.push({id:uid(),mid:dietMid(),date:todayStr(),type:_mlType||mealTypeNow(),name:n,cal:c||0});
+  const _nm={id:uid(),mid:dietMid(),date:todayStr(),type:_mlType||mealTypeNow(),name:n,cal:c||0,at:Date.now()};
+  S.diet.meals.push(_nm);
   document.getElementById('mlName').value='';document.getElementById('mlCal').value='';
-  save();rMeals();toast('Masă adăugată ✓');
+  const _fm=(typeof fastOnMeal==='function')?fastOnMeal(_nm):null;
+  save();rMeals();if(!_fm)toast(typeof cheerMeal==='function'?cheerMeal(_nm.mid):'Masă adăugată ✓');
 }
 function editMeal(id){
   const m=S.diet.meals.find(x=>x.id===id);if(!m)return;
@@ -3090,7 +3309,7 @@ async function aiCalGuess(){
     toast('~'+Number(j.cal)+' kcal — poți corecta');
   }catch(e){toast('Nu am putut estima: '+e.message);}
 }
-function quickMeal(n,c,t,extra){const m={id:uid(),mid:dietMid(),date:todayStr(),type:t,name:n,cal:c};if(extra&&typeof extra==='object')Object.assign(m,extra);S.diet.meals.push(m);save();rMeals();toast('Adăugat: '+n);}
+function quickMeal(n,c,t,extra,silent){const m={id:uid(),mid:dietMid(),date:todayStr(),type:t,name:n,cal:c,at:Date.now()};if(extra&&typeof extra==='object')Object.assign(m,extra);S.diet.meals.push(m);const _fm=(typeof fastOnMeal==='function')?fastOnMeal(m):null;save();rMeals();if(VIEW==='today'&&typeof rToday==='function')rToday();if(!_fm&&!silent)toast(typeof cheerMeal==='function'?('Notat: '+n+'. '+cheerMeal(m.mid,true)):('Adăugat: '+n));return m;}
 function delMeal(id){if(_mealEditId===id)cancelMealEdit(true);S.diet.meals=S.diet.meals.filter(m=>m.id!==id);tombstone(id);save();rMeals();}
 </script>
 
@@ -3236,7 +3455,7 @@ function pushCronSync(){
   _nfCronT=setTimeout(()=>{
     const em=myEmail();
     const _au=S.settings.activeUser||(S.members[0]||{}).id;
-    let items=(pushOn('daily',true)&&em)?(S.settings.reminders||[]).filter(r=>r.on!==false&&!r.once&&(!r.who||r.who==='all'||r.who===_au)).map(r=>({id:r.id,label:r.label,time:r.time||'',every:r.every||0,kind:(/ap[ăa]|water/i.test(r.label||'')?'water':'rem')})):[];
+    let items=(pushOn('daily',true)&&em)?(S.settings.reminders||[]).filter(r=>r.on!==false&&!r.once&&(!r.who||r.who==='all'||r.who===_au)&&!(typeof remHK==='function'&&remHK(r))).map(r=>({id:r.id,label:r.label,time:r.time||'',every:r.every||0,kind:(/ap[ăa]|water/i.test(r.label||'')?'water':'rem')})):[];
     {const seen={};items=items.filter(it=>{const k=remLabelKey(it.label);if(seen[k])return false;seen[k]=1;return true;});} // fără dubluri la push — un memento cu același nume se programează O SINGURĂ DATĂ (chiar dacă are diacritice diferite sau apare de două ori)
     /* migrare (o singură dată pe dispozitiv): golește slotul VECHI legat de dispozitiv,
        ca să nu rămână pe server lângă slotul nou legat de email */
@@ -3262,7 +3481,7 @@ function rPushUI(){
   st.innerHTML=p.url?'<b style="color:var(--pri2)">Configurat ✓</b> — notificările se trimit direct în browser (push). Apasă „Testează" dacă vrei să verifici.':'<b>Neconfigurat</b> — deschide ghidul de mai jos și urmează pașii din PUSH-SETUP.md (o singură dată).';
   if(!p.url)document.getElementById('pushGuide').open=true;
   const defs={family:true,event:true,daily:true,fasting:true,digest:false};
-  const labels={family:'Activități noi/modificate de familie (instant)',event:'Memento înainte de evenimentele din calendar',daily:'Mementourile zilnice (apă, mese, personalizate)',fasting:'Fasting complet',digest:'Agenda zilei, dimineața (doar când există activități)'};
+  const labels={family:'Activități noi/modificate de familie (instant)',event:'Memento înainte de evenimentele din calendar',daily:'Mementourile tale + notificările cu măsură (apă, cântărire, mese — doar când e cazul)',fasting:'Fasting complet',digest:'Agenda zilei, dimineața (doar când există activități)'};
   document.getElementById('pushToggles').innerHTML=Object.keys(labels).map(k=>{
     const on=pushOn(k,defs[k]);
     return `<label style="display:flex;align-items:center;gap:9px;margin:6px 0;cursor:pointer;font-weight:500"><input type="checkbox" ${on?'checked':''} onchange="setPushOn('${k}',this.checked)" style="width:18px;height:18px;accent-color:var(--pri);flex:none">${labels[k]}</label>`;
@@ -3377,14 +3596,19 @@ function flNotifOpts(d){ // aceleași opțiuni ca în service worker, pentru mes
   return {body:d.body||'',icon:'icon-512.png',badge:'apple-touch-icon.png',
     data:{url:d.url||'./',kind,evId:d.evId||'',evDate:d.evDate||'',title:d.title||''},
     tag:kind==='event'?('fl-ev-'+(d.evId||d.title||'')):('fl-'+kind+'-'+String(d.title||'')),renotify:true, // v3.9.8: tag pe titlu — identicele se înlocuiesc, cele diferite nu se mai șterg reciproc
-    requireInteraction:true,vibrate:[90,40,90],timestamp:Date.now(),actions:acts};
+    requireInteraction:kind==='event'||kind==='fast',vibrate:[90,40,90],timestamp:Date.now(),actions:acts};
 }
 function flNotifKind(d){
   if(d.kind)return d.kind;
   const t=String(d.title||''),b=String(d.body||'');
-  if(/^Fasting/i.test(t))return 'fast';
-  if(/^Memento:/i.test(t)&&/ap[ăa]|water/i.test(t))return 'water';
+  /* v4: titlurile notificărilor spun singure despre ce e vorba (serverul nu transmite tipul) */
   if(/^Memento:/i.test(t)&&/Începe/i.test(b))return 'event';
+  if(/fasting/i.test(t))return 'fast';
+  if(/(^|[^\p{L}])ap[ăa]([^\p{L}]|$)|water/iu.test(t))return 'water';
+  if(/c[âa]nt[ăa]r/i.test(t))return 'weigh';
+  if(/m[âa]nc|mesele|dejun|pr[âa]nz|(^|\s)cin[ae]/i.test(t))return 'meal';
+  if(/plimbare|mi[șs]care|mi[șs]c[ăa]/i.test(t))return 'move';
+  if(/s[ăa]pt[ăa]m[âa]n|lipsit|ziua ta/i.test(t))return 'home';
   if(/^Memento:/i.test(t))return 'rem';
   return '';
 }
@@ -3400,6 +3624,10 @@ function notifGoto(kind,a){
     a=a||{};
     if(kind==='water')go('meals');
     else if(kind==='fast'){go('health');if(typeof dTab==='function')dTab('fast');}
+    else if(kind==='weigh'){go('today');setTimeout(()=>{if(typeof tdWeigh==='function')tdWeigh();},160);}
+    else if(kind==='meal'){go('today');setTimeout(()=>{if(typeof askFill==='function')askFill('Am mâncat ');},200);}
+    else if(kind==='move'){go('health');if(typeof dTab==='function')dTab('sport');}
+    else if(kind==='home')go('today');
     else if(kind==='event'){
       const e=findEventForNotif(a);
       const ds=(a.evDate&&/^\d{4}-\d{2}-\d{2}$/.test(a.evDate))?a.evDate:(e&&e.date);
@@ -3419,7 +3647,7 @@ function notifGoto(kind,a){
 function handleNotifAct(a){
   try{
     const act=String(a.act||'');
-    if(act==='water:add'){logWaterFor(S.settings.activeUser||(S.members[0]||{}).id,Number(a.ml)||250);toast('+'+(Number(a.ml)||250)+' ml apă ✓ — azi: '+waterToday()+' ml');return;}
+    if(act==='water:add'){const _wm=S.settings.activeUser||(S.members[0]||{}).id,_wb=((S.diet.water||{})[_wm]||{})[todayStr()]||0;logWaterFor(_wm,Number(a.ml)||250);toast(typeof cheerWater==='function'?cheerWater(_wm,_wb,_wb+(Number(a.ml)||250)):('+'+(Number(a.ml)||250)+' ml apă ✓'));return;}
     if(act==='open'){notifGoto(a.kind||'',a);return;}
     if(act==='qs:water'){notifGoto('water',a);return qsOpen('water');}
     if(act==='qs:fast'){notifGoto('fast',a);return qsOpen('fast');}
@@ -3453,7 +3681,8 @@ function pushSnooze(a){
 function logWaterFor(mid,ml){
   const t=todayStr();S.diet.water=S.diet.water||{};S.diet.water[mid]=S.diet.water[mid]||{};
   S.diet.water[mid][t]=(S.diet.water[mid][t]||0)+(Number(ml)||250);
-  save();if(VIEW==='meals')rMeals();
+  if(typeof waterMark==='function')waterMark(mid);
+  save();if(VIEW==='meals')rMeals();if(VIEW==='today'&&typeof rToday==='function')rToday();
 }
 /* ---------- foaia rapidă (deschisă la atingerea notificării) ---------- */
 function qsClose(){document.getElementById('qsBack').classList.remove('show');}
@@ -3937,65 +4166,7 @@ function planCtxText(){
   }catch(e){return '';}
 }
 
-/* ============ v3.13 — NOTIFICĂRI INTELIGENTE (doar când e cazul, cu cifrele tale) ============ */
-const NUDGE_DEF={
-  weigh:{t:'10:00',ic:'scale',l:'Cântărire',d:'dacă până la ora asta nu te-ai cântărit'},
-  move:{t:'17:00',ic:'dumbbell',l:'Mișcare',d:'dacă azi n-ai notat mișcare și săptămâna e sub țintă'},
-  water:{t:'18:30',ic:'droplets',l:'Apă',d:'dacă ești sub 60% din obiectivul de apă'},
-  meals:{t:'20:30',ic:'utensils',l:'Mesele de azi',d:'dacă ai notat sub jumătate din caloriile zilei'},
-  weekly:{t:'19:00',ic:'calendar-range',l:'Bilanțul săptămânii',d:'duminica, cu cifrele săptămânii'}
-};
-function nudgeCfg(){const n=S.settings.nudges=S.settings.nudges||{};for(const k in NUDGE_DEF){n[k]=Object.assign({on:true,t:NUDGE_DEF[k].t},n[k]||{});}return n;}
-function nudgeAt(t,d){const[h,m]=String(t||'09:00').split(':').map(Number);const x=d?new Date(d):new Date();x.setHours(h||0,m||0,0,0);return x;}
-/* lista notificărilor de azi care încă au rost — condițiile se judecă ACUM, pe datele utilizatorului activ */
-function nudgeList(){
-  const n=nudgeCfg(),out=[],fmt=v=>String(v).replace('.',','),t=todayStr();
-  const mid=S.settings.activeUser||(S.members[0]||{}).id;
-  const p=S.diet.profiles[mid]||{},ws=S.diet.weights[mid]||[];
-  if(n.weigh.on&&!ws.some(x=>x.d===t)){const last=ws[ws.length-1];out.push({key:'weigh',at:nudgeAt(n.weigh.t),kind:'rem',title:'Cântărire',body:'Nu te-ai cântărit azi.'+(last?(' Ultima: '+fmt(last.w)+' kg ('+remDateLabel(last.d)+').'):'')+' O poză cu afișajul și e gata.'});}
-  const wt=Number(((S.diet.water||{})[mid]||{})[t])||0,wg=Number(p.waterGoal)||2000;
-  if(n.water.on&&wt<wg*0.6)out.push({key:'water',at:nudgeAt(n.water.t),kind:'water',title:'Apă',body:'Ai băut '+wt+' din '+wg+' ml — mai ai vreo '+Math.ceil((wg-wt)/250)+' pahare.'});
-  const ms=(S.diet.meals||[]).filter(m=>m.mid===mid&&m.date===t),eaten=ms.reduce((a,m)=>a+(Number(m.cal)||0),0);
-  const w=ws.length?Number(ws[ws.length-1].w):null,c=calc(p,w),tg=Number(p.kcalGoal)>0?Math.round(Number(p.kcalGoal)):(c?c.target:2000);
-  if(n.meals.on&&eaten<tg*0.5)out.push({key:'meals',at:nudgeAt(n.meals.t),kind:'rem',title:'Mesele de azi',body:(ms.length?('Ai notat '+eaten+' din '+tg+' kcal.'):'N-ai notat nicio masă azi.')+' Ai mâncat și altceva? Scrie-i asistentului sau trimite o poză.'});
-  const wk=weekCtx(mid),g=wkGoals(p);
-  if(n.move.on&&wk.todayMin===0&&wk.moveMin<g.move)out.push({key:'move',at:nudgeAt(n.move.t),kind:'rem',title:'Mișcare',body:'Săptămâna asta: '+wk.moveMin+' din '+g.move+' min. O plimbare de 30 de minute azi?'});
-  if(n.weekly.on&&new Date().getDay()===0)out.push({key:'weekly',at:nudgeAt(n.weekly.t),kind:'rem',title:'Bilanțul săptămânii',body:(wk.dw!=null?((wk.dw>0?'+':'')+fmt(wk.dw)+' kg · '):'')+wk.weighDays+' cântăriri · '+wk.moveMin+' min mișcare · mese notate '+wk.mealDays+' zile · apă la țintă '+wk.waterDays+' zile'+(g.fast?(' · fasting '+wk.fastOk):'')+'. Vezi planul în Sănătate → Profil.'});
-  return out;
-}
-/* cu aplicația deschisă: sună pe loc, o singură dată pe zi fiecare (dacă nu e acoperită de push) */
-function nudgeTick(now,ds){
-  nudgeList().forEach(x=>{
-    const key='nd_'+x.key+'_'+ds;
-    if(now>=x.at&&now-x.at<90000&&!FIRED[key]){FIRED[key]=1;if(!pushCovers('daily'))notify(x.title,x.body);}
-  });
-}
-/* push (aplicația închisă): reprogramăm pe server, cu condițiile judecate acum; se reface la fiecare modificare */
-let _ndT=null;
-function nudgeSchedule(){if(typeof pushReady!=='function'||!pushReady())return;clearTimeout(_ndT);_ndT=setTimeout(_nudgeSchedule,4000);}
-function _nudgeSchedule(){
-  try{
-    const em=myEmail();if(!em||!pushOn('daily',true))return;
-    const now=new Date();
-    const items=nudgeList().filter(x=>x.at>now).map(x=>({key:'hn_'+x.key+'_'+todayStr(),at:x.at.toISOString(),to:[em],kind:x.kind,title:x.title,body:x.body}));
-    /* cântărirea de mâine se programează mereu — dacă te cântărești, la următoarea deschidere dispare */
-    const n=nudgeCfg();
-    if(n.weigh.on){const d=new Date();d.setDate(d.getDate()+1);const at=nudgeAt(n.weigh.t,d);items.push({key:'hn_weigh_'+dstr(d),at:at.toISOString(),to:[em],kind:'rem',title:'Cântărire',body:'Nu te-ai cântărit încă azi. O poză cu afișajul cântarului și e gata.'});}
-    const sig=JSON.stringify(items);
-    if(localStorage.getItem('famlink_nudge_sig')===sig)return;
-    localStorage.setItem('famlink_nudge_sig',sig);
-    pushQueue({action:'schedule',groups:[{prefix:'hn_'+cronSlotId(em),items}]});
-  }catch(e){}
-}
-function rNudges(){
-  const box=document.getElementById('nudgeBox');if(!box)return;
-  const n=nudgeCfg(),me=(memById(S.settings.activeUser||(S.members[0]||{}).id)||{}).name||'tine';
-  box.innerHTML='<div class="sech"><span class="si"><i data-lucide="brain"></i></span><div><b>Notificări inteligente</b><span class="sub">vin doar când e cazul, cu cifrele tale · pentru '+esc(me)+'</span></div></div>'+
-    Object.keys(NUDGE_DEF).map(k=>{const d=NUDGE_DEF[k],c=n[k];return '<div class="nudge'+(c.on?'':' off')+'"><span class="nic"><i data-lucide="'+d.ic+'"></i></span><span class="nt"><b>'+d.l+'</b><span>'+d.d+'</span></span><input type="time" value="'+esc(c.t)+'" onchange="setNudge(\''+k+'\',\'t\',this.value)"><input type="checkbox" class="sw" '+(c.on?'checked':'')+' onchange="setNudge(\''+k+'\',\'on\',this.checked)"></div>';}).join('')+
-    '<p class="muted" style="font-size:12px;margin:2px 0 4px">Cu aplicația deschisă apar pe loc; cu notificările push activate ajung și când e închisă. Se reprogramează singure de fiecare dată când notezi ceva — dacă te-ai cântărit sau ai băut apa, nu mai vin.</p>';
-  LI();
-}
-function setNudge(k,f,v){const n=nudgeCfg();if(!n[k])return;if(f==='t'){if(!/^\d{1,2}:\d{2}$/.test(v||''))return;n[k].t=v;}else n[k].on=!!v;save();rNudges();if(f==='on'&&v)maybeAskNotif();toast(NUDGE_DEF[k].l+(f==='on'?(v?' — activată':' — dezactivată'):(' la '+v)));}
+/* v4: notificările inteligente (NUDGE_DEF, planificare, programare push) s-au mutat în modulul v4 — „Notificări cu măsură". */
 /* ---------- linia de încurajare din Profil ---------- */
 function paintEncour(){
   const el=document.getElementById('pEncour');if(!el)return;
@@ -4245,8 +4416,8 @@ function renderFitResult(){
     '<button class="btn" style="margin-top:8px;width:100%" onclick="saveFitDays()"><i data-lucide="save"></i>Salvează '+(zile.length>1?('cele '+zile.length+' zile'):'ziua')+' și calibrează</button>');
 }
 /* scrie zilele citite din ceas în jurnal (folosit și din Sănătate → Ceas, și din asistent) */
-function saveFitRecords(zile){
-  const mid=dietMid();
+function saveFitRecords(zile,forMid){
+  const mid=forMid||dietMid();
   S.diet.fitness=S.diet.fitness||{};
   const arr=S.diet.fitness[mid]=S.diet.fitness[mid]||[];
   let n=0;
@@ -4383,6 +4554,798 @@ function rFit(){
   LI();
 }</script>
 
+<script>
+/* ============ FamLink v4.0 — Azi · fasting automat · notificări cu măsură · import automat din Apple Health · mese din chat ============
+   Ideea întregului modul: aplicația să facă singură ce se poate face singură (fasting, date din ceas,
+   notificări care apar doar când e cazul), iar ce rămâne de făcut de mână să fie la o atingere distanță,
+   cu mesaje calde în loc de „E momentul!". */
+
+/* ---------- utilitare comune ---------- */
+function V4_ME(){return S.settings.activeUser||(S.members[0]||{}).id;}
+function atT(t,base){const d=base?new Date(base):new Date();const[h,m]=String(t||'09:00').split(':').map(Number);d.setHours(h||0,m||0,0,0);return d;}
+function fmtN(v){return Math.round(Number(v)||0).toLocaleString('ro-RO');}
+function fmtH(h){return String(Math.round((Number(h)||0)*10)/10).replace('.',',');}
+function fmtHM(d){return pad(d.getHours())+':'+pad(d.getMinutes());}
+/* alegere stabilă pe zi: același mesaj toată ziua (nu clipește la fiecare randare), altul mâine */
+function pick(arr,seed){let h=7;const s=String(seed||'')+todayStr();for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return arr[Math.abs(h)%arr.length];}
+function pickR(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function firstName(mid){const m=memById(mid||V4_ME());const n=String((m&&m.name)||'').trim();return (!n||n==='Eu')?'':n.split(/\s+/)[0];}
+function mealById(id){return (S.diet.meals||[]).find(x=>x.id===id)||null;}
+/* ora la care a fost notată o masă: câmpul „at" (v4) sau, pentru mesele vechi, momentul ascuns în id */
+function mealAt(m){
+  if(!m)return 0;if(Number(m.at)>0)return Number(m.at);
+  const t=parseInt(String(m.id||'').slice(0,-4),36);
+  return (t>1.6e12&&t<Date.now()+864e5&&dstr(new Date(t))===m.date)?t:0;
+}
+function lastMealToday(mid){
+  mid=mid||dietMid();const t=todayStr();
+  const ms=(S.diet.meals||[]).filter(m=>m.mid===mid&&m.date===t);
+  if(!ms.length)return null;
+  return ms.slice().sort((a,b)=>(mealAt(a)||0)-(mealAt(b)||0)).pop();
+}
+function removeMeal(id){S.diet.meals=(S.diet.meals||[]).filter(m=>m.id!==id);tombstone(id);}
+/* bugetul unui membru anume — independent de ecranul pe care ești */
+function dayBudget(mid){
+  mid=mid||V4_ME();const t=todayStr();
+  const p=S.diet.profiles[mid]||{},ws=S.diet.weights[mid]||[],w=ws.length?Number(ws[ws.length-1].w):null;
+  const c=calc(p,w),tgt=Number(p.kcalGoal)>0?Math.round(Number(p.kcalGoal)):(c?c.target:2000);
+  const fit=((S.diet.fitness||{})[mid]||[]).find(x=>x.d===t);
+  const burned=(fit&&fit.useMove&&Number(fit.move)>0)?Math.round(Number(fit.move)):(S.diet.sports||[]).filter(s=>s.mid===mid&&s.date===t&&!s.off).reduce((a,s)=>a+(Number(s.kcal)||0),0);
+  const meals=(S.diet.meals||[]).filter(m=>m.mid===mid&&m.date===t);
+  const eaten=meals.reduce((a,m)=>a+(Number(m.cal)||0),0);
+  return {tgt,burned,budget:tgt+burned,eaten,left:tgt+burned-eaten,meals};
+}
+function moveToday(mid){
+  mid=mid||V4_ME();const t=todayStr();
+  const sm=(S.diet.sports||[]).filter(s=>s.mid===mid&&s.date===t&&!s.off).reduce((a,s)=>a+(Number(s.minutes)||0),0);
+  const fit=((S.diet.fitness||{})[mid]||[]).find(x=>x.d===t);
+  return Math.max(sm,(fit&&Number(fit.exMin))||0);
+}
+function waterOf(mid){return Number(((S.diet.water||{})[mid||V4_ME()]||{})[todayStr()])||0;}
+function waterGoalOf(mid){return Number(((S.diet.profiles||{})[mid||V4_ME()]||{}).waterGoal)||2000;}
+/* ora ultimului pahar (pe dispozitiv) — notificarea de apă nu vine la mai puțin de 2 ore după */
+function waterMark(mid){try{const o=JSON.parse(localStorage.getItem('famlink_water_at')||'{}');o[mid||V4_ME()]=Date.now();localStorage.setItem('famlink_water_at',JSON.stringify(o));}catch(e){}}
+function waterLast(mid){try{const o=JSON.parse(localStorage.getItem('famlink_water_at')||'{}');const t=Number(o[mid||V4_ME()])||0;return dstr(new Date(t))===todayStr()?t:0;}catch(e){return 0;}}
+/* mesaj scurt cu buton („Anulează") — pentru tot ce aplicația face singură */
+function toastAct(msg,label,fn,ms){
+  const t=document.getElementById('toast');if(!t)return;
+  t.innerHTML='';const sp=document.createElement('span');sp.textContent=msg;t.appendChild(sp);
+  if(label&&fn){const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=e=>{e.stopPropagation();t.classList.remove('show','act');try{fn();}catch(err){console.warn(err);}};t.appendChild(b);t.classList.add('act');}
+  else t.classList.remove('act');
+  t.classList.add('show');clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('show','act'),ms||7000);
+}
+function v4Refresh(){try{if(VIEW==='today')rToday();else if(VIEW==='meals')rMeals();else if(VIEW==='health'&&dietTab==='fast')fastPaint(true);}catch(e){}}
+
+/* ---------- mesaje de susținere ---------- */
+function cheerWater(mid,before,after){
+  const wg=waterGoalOf(mid),left=Math.max(0,wg-after),gl=Math.max(1,Math.ceil(left/250));
+  if(before<wg&&after>=wg)return pickR(['Ți-ai atins apa de azi — '+fmtN(after)+' ml. Bravo!','Apa de azi e bifată. Corpul tău îți mulțumește!','Gata ținta de apă: '+fmtN(after)+' ml. Frumos!']);
+  if(after>=wg)return pickR(['Notat — ești deja peste țintă azi.','Încă un pahar peste țintă. '+fmtN(after)+' ml azi.']);
+  return pickR(['Notat. Mai ai '+fmtN(left)+' ml până la țintă.','Bravo! Încă '+gl+(gl===1?' pahar':' pahare')+' și ai bifat ziua.','Un pahar mai aproape: '+fmtN(after)+' din '+fmtN(wg)+' ml.','Hidratarea contează. Mai ai '+gl+(gl===1?' pahar':' pahare')+'.']);
+}
+function cheerMeal(mid,short){
+  const b=dayBudget(mid||dietMid());
+  if(b.left>=0)return short?('Mai ai ~'+fmtN(b.left)+' kcal azi.'):pickR(['Notat. Mai ai ~'+fmtN(b.left)+' kcal azi.','Gata, e în jurnal. Îți mai rămân ~'+fmtN(b.left)+' kcal.','Bine că ai notat! Rămân ~'+fmtN(b.left)+' kcal pentru restul zilei.']);
+  return short?('Azi ești cu ~'+fmtN(-b.left)+' kcal peste țintă — nu-i nimic.'):pickR(['Notat. Azi ai trecut puțin de țintă — nu-i capăt de lume, mâine e o zi nouă.','Notat. Ești cu ~'+fmtN(-b.left)+' kcal peste azi. O plimbare de seară ajută, fără vinovăție.']);
+}
+const V4_TIPS=[
+  'Nu trebuie să fie perfect. Trebuie doar să continui.',
+  'Pașii mici, repetați, fac diferența mare.',
+  'Progresul nu e o linie dreaptă, e o direcție. Tu ești pe ea.',
+  'O alegere bună acum valorează mai mult decât un plan perfect de mâine.',
+  'Odihna face parte din progres, nu îl oprește.',
+  'Corpul tău face mult pentru tine. Azi fă și tu ceva mic pentru el.',
+  'Te compari doar cu tine cel de ieri — și ăla s-a descurcat bine.',
+  'Un pahar cu apă, o plimbare scurtă, o masă notată. Atât ajunge ca ziua să conteze.',
+  'Zilele sărite nu anulează nimic. Contează ce faci de azi încolo.',
+  'Cântarul arată o zi. Linia pe două săptămâni arată adevărul.',
+  'Ce măsori, se schimbă. Ce notezi, înțelegi.',
+  'Ai venit aici azi. Asta e deja jumătate din drum.'
+];
+/* fraza de sub salut: cea mai bună veste reală a zilei, altfel un gând pentru azi */
+function cheerLine(mid){
+  const c=(function(){try{return msCtx();}catch(e){return {};}})();
+  const f=S.diet.fasting,b=dayBudget(mid),wt=waterOf(mid),wg=waterGoalOf(mid),h=new Date().getHours();
+  const ws=S.diet.weights[mid]||[],t=todayStr();
+  const todayW=ws.find(x=>x.d===t),prevW=ws.filter(x=>x.d<t).pop();
+  if(todayW&&prevW&&Number(todayW.w)<Number(prevW.w))return 'Ai coborât '+fmtH(Number(prevW.w)-Number(todayW.w))+' kg față de cântărirea trecută. Continuă tot așa, fără grabă.';
+  if(f.active&&f.start){const el=(Date.now()-new Date(f.start))/36e5;if(el>=f.hours*0.7)return 'Ești în fasting de '+fmtH(el)+' h — mai ai puțin până la '+fmtH(f.hours)+' h. Ține-te bine!';}
+  if(wt>=wg)return 'Ți-ai bifat apa de azi. Corpul tău simte asta, chiar dacă nu-ți spune.';
+  if(c.wStreak>=3)return 'A '+c.wStreak+'-a zi la rând în care ai grijă de tine. Se vede.';
+  if(c.lost>=1)return 'Ai lăsat în urmă '+fmtH(c.lost)+' kg de când ai început. Asta nu e noroc, e muncă.';
+  if(h<11&&!b.meals.length)return pick(['Zi nouă, pagină curată. Un pahar cu apă e un început perfect.','Azi e o zi bună să ai grijă de tine. Începe cu ceva mic.'],'m'+mid);
+  if(h>=19)return pick(['Seara e bună pentru bilanț. Ce-a mers bine azi?','Încă puțin și ziua e gata. Ai făcut destul de bine.'],'e'+mid);
+  return pick(V4_TIPS,'tip'+mid);
+}
+
+/* ============ FASTING AUTOMAT ============
+   • pornește singur seara, la ora aleasă (sau de la ultima masă, dacă mănânci după ora aceea);
+   • se oprește singur când notezi prima masă — sau îl reia de la masa asta, dacă abia începuse;
+   • se închide singur la țintă (dacă vrei), ca să nu rămână pornit din greșeală.
+   Orice mișcare automată apare într-un mesaj cu „Anulează". */
+function typicalStart(hs){
+  const mins=(hs||[]).slice(0,10).map(h=>{const d=new Date(h.start);let m=d.getHours()*60+d.getMinutes();if(m<12*60)m+=1440;return m;}).sort((a,b)=>a-b);
+  if(!mins.length)return '20:00';
+  let m=mins[Math.floor(mins.length/2)];m=Math.round(m/15)*15%1440;
+  return pad(Math.floor(m/60))+':'+pad(m%60);
+}
+function fastAutoCfg(){
+  const f=S.diet.fasting;
+  if(!f.auto||typeof f.auto!=='object'){
+    const hs=f.history||[];
+    /* cine folosește deja fastingul îl primește automat (poate opri oricând); ora = ora obișnuită de start */
+    f.auto={on:hs.length>0,at:typicalStart(hs),stopOnMeal:true,endAtGoal:true,handled:0,fresh:hs.length>0?1:0};
+    f.auto.handled=fastSlotBefore(Date.now(),f.auto.at); // fără porniri „retroactive" la activare
+  }
+  return f.auto;
+}
+function fastSlotBefore(ms,at){const d=atT(at||fastAutoCfg().at,ms);if(d.getTime()>ms)d.setDate(d.getDate()-1);return d.getTime();}
+function fastSlotAfter(ms,at){const d=atT(at||fastAutoCfg().at,ms);if(d.getTime()<=ms)d.setDate(d.getDate()+1);return d.getTime();}
+function fastDoneMsg(h,auto){
+  return {title:'Fasting reușit: '+fmtH(h)+' ore',body:auto?'Am închis fastingul automat, la țintă. Poftă bună — ai meritat-o!':pick(['Ai ajuns la țintă. Poftă bună — ai meritat-o!','Gata! Prima masă: ceva cu proteine și legume, și ai închis frumos ziua.','Bravo! Încă un post dus la capăt.'],'fd'+h)};
+}
+function fastStart(ms,reason){
+  const f=S.diet.fasting,a=fastAutoCfg();
+  f.active=true;f.start=new Date(ms).toISOString();f.pushed=false;f.startReason=reason||'manual';
+  a.handled=Math.max(a.handled||0,fastSlotBefore(Date.now(),a.at));
+  save();fastPushSync(true);fastPaint(true);v4Refresh();
+  if(reason==='manual'){
+    const end=new Date(ms+f.hours*36e5);
+    toast(pickR(['Fasting pornit. Poți mânca '+fmtDT(end)+'. Nu uita de apă!','Gata, cronometrul merge. Ținta: '+fmtH(f.hours)+' h — '+fmtDT(end)+'.','Ai pornit fastingul. Mult succes — poți mânca '+fmtDT(end)+'.']));
+    askNotifSilent();
+  }
+}
+function fastEnd(endMs,reason){
+  const f=S.diet.fasting;if(!f.active||!f.start)return null;
+  const st=new Date(f.start).getTime();endMs=Math.max(st,Math.min(endMs,Date.now()));
+  const el=(endMs-st)/36e5;
+  const rec={start:f.start,end:new Date(endMs).toISOString(),h:+el.toFixed(1),goal:f.hours};
+  if(reason&&reason!=='manual')rec.auto=reason;
+  f.history=f.history||[];f.history.unshift(rec);f.history=f.history.slice(0,60);
+  f.active=false;f.start=null;f.pushed=false;
+  const a=fastAutoCfg();a.handled=Math.max(a.handled||0,fastSlotBefore(Date.now(),a.at));
+  if(typeof checkMilestones==='function')checkMilestones();
+  save();fastPushSync(true);fastPaint(true);v4Refresh();
+  const ok=el>=Number(f.hours)-0.05;
+  if(reason==='manual')toast(ok?pickR(['Ai dus la capăt '+fmtH(el)+' h de fasting. Bravo, poftă bună!','Fasting reușit: '+fmtH(el)+' h. Corpul tău îți mulțumește!']):pickR(['Ai ținut '+fmtH(el)+' h. Orice oră contează — data viitoare mai adaugi puțin.','Oprit la '+fmtH(el)+' h. E în regulă să asculți de corp.']));
+  return {ok,h:rec.h,rec};
+}
+function fastUndoEnd(rec){
+  const f=S.diet.fasting;const i=(f.history||[]).indexOf(rec);if(i>=0)f.history.splice(i,1);
+  f.active=true;f.start=rec.start;f.pushed=false;save();fastPushSync(true);fastPaint(true);v4Refresh();toast('Fastingul continuă.');
+}
+/* chemată la fiecare masă notată (din Mese, poză, asistent) */
+function fastOnMeal(m){
+  const f=S.diet.fasting,a=fastAutoCfg();
+  if(!f.active||!f.start||a.stopOnMeal===false||!m)return null;
+  if(m.mid!==V4_ME()||m.date!==todayStr()||(Number(m.cal)||0)<50)return null; // cafea neagră, ceai, apă — nu rup postul
+  const t=m.at||Date.now(),st=new Date(f.start).getTime(),el=(t-st)/36e5;
+  if(el<0)return null;
+  if(el<Number(f.hours)*0.4){ // abia începuse → îl reluăm de la ora mesei
+    const prev=f.start;f.start=new Date(t).toISOString();f.pushed=false;save();fastPushSync(true);fastPaint(true);
+    const msg='Am reluat fastingul de la masa asta — poți mânca din nou '+fmtDT(new Date(t+f.hours*36e5))+'.';
+    window._fastNote=msg;
+    toastAct(msg,'Anulează',()=>{S.diet.fasting.start=prev;save();fastPushSync(true);fastPaint(true);v4Refresh();toast('Am păstrat ora de start inițială.');});
+    return {kind:'resume',msg};
+  }
+  const r=fastEnd(t,'meal');if(!r)return null;
+  const msg=r.ok?('Fasting încheiat la '+fmtH(r.h)+' h — exact cât ți-ai propus. Poftă bună!'):('Fastingul s-a încheiat la '+fmtH(r.h)+' h, odată cu masa. Orice oră contează!');
+  window._fastNote=msg;
+  toastAct(msg,'Anulează',()=>fastUndoEnd(r.rec));
+  return {kind:'end',msg};
+}
+/* rulează la pornire și la fiecare 30 s: închide la țintă, pornește seara, recuperează ce s-a întâmplat cât aplicația a fost închisă */
+function fastAutoTick(now,boot){
+  now=now||Date.now();
+  const f=S.diet.fasting,a=fastAutoCfg();let note='';
+  if(f.active&&f.start){
+    const st=new Date(f.start).getTime(),goalEnd=st+Number(f.hours)*36e5;
+    if(now>=goalEnd&&(a.endAtGoal!==false||now>=goalEnd+24*36e5)){
+      const r=fastEnd(goalEnd,'goal');
+      if(r)note='Fasting reușit: '+fmtH(r.h)+' h — l-am închis automat la '+fmtHM(new Date(goalEnd))+'. Poftă bună!';
+    }
+  }
+  if(a.on&&!f.active){
+    const slot=fastSlotBefore(now,a.at);
+    if(slot>(a.handled||0)&&now-slot<(Number(f.hours)+12)*36e5){
+      a.handled=slot;
+      const lastEnd=(f.history&&f.history[0])?new Date(f.history[0].end).getTime():0;
+      if(lastEnd<=slot){
+        const mid=V4_ME();
+        const ms=(S.diet.meals||[]).filter(m=>m.mid===mid&&(Number(m.cal)||0)>=50&&mealAt(m)>slot&&mealAt(m)<=now).sort((x,y)=>mealAt(x)-mealAt(y));
+        let start=slot,ended=0;
+        for(const m of ms){const tt=mealAt(m);if((tt-start)/36e5<Number(f.hours)*0.4)start=tt;else{ended=tt;break;}}
+        f.active=true;f.start=new Date(start).toISOString();f.pushed=false;f.startReason='auto';
+        if(ended){const r=fastEnd(ended,'meal');if(r)note='Fastingul de aseară s-a încheiat la '+fmtH(r.h)+' h, odată cu prima masă.';}
+        else if(a.endAtGoal!==false&&now>=start+Number(f.hours)*36e5){const r=fastEnd(start+Number(f.hours)*36e5,'goal');if(r)note='Fasting reușit peste noapte: '+fmtH(r.h)+' h. Bravo!';}
+        else{save();fastPushSync(true);if(!boot)note='Fastingul a pornit automat. Poți mânca '+fmtDT(new Date(start+Number(f.hours)*36e5))+'.';else note='Fastingul e pornit din '+fmtDT(new Date(start))+' — merge singur.';}
+      }else save();
+      fastPaint(true);v4Refresh();
+    }
+  }
+  if(note&&(boot||document.visibilityState==='visible'))setTimeout(()=>toast(note),boot?900:0);
+  return note;
+}
+/* notificarea „Fasting reușit" pe server: pentru postul în curs sau, în modul automat, pentru următorul */
+function fastPushSync(force){
+  try{
+    if(typeof pushReady!=='function'||!pushReady())return;
+    const em=myEmail();if(!em)return;
+    const f=S.diet.fasting,a=fastAutoCfg(),pre='fast_'+cronSlotId(em),items=[];
+    if(pushOn('fasting',true)){
+      let st=null;
+      if(f.active&&f.start)st=new Date(f.start).getTime();else if(a.on)st=fastSlotAfter(Date.now(),a.at);
+      if(st){const at=st+Number(f.hours)*36e5;if(at>Date.now()){const dm=fastDoneMsg(f.hours,a.endAtGoal!==false);items.push({key:pre+'_'+at,at:new Date(at).toISOString(),to:[em],kind:'fast',title:dm.title,body:dm.body});}}
+    }
+    f.pushed=!!(f.active&&items.length);
+    const sig=JSON.stringify(items);
+    if(!force&&localStorage.getItem('famlink_fast_sig')===sig)return;
+    if(localStorage.getItem('famlink_fast_sig')===sig&&localStorage.getItem('famlink_fast_mig')==='v4')return;
+    localStorage.setItem('famlink_fast_sig',sig);
+    const groups=[{prefix:pre,items}];
+    if(localStorage.getItem('famlink_fast_mig')!=='v4'){localStorage.setItem('famlink_fast_mig','v4');groups.push({prefix:'fast_'+DID,items:[]});} // programarea veche, pe dispozitiv
+    pushQueue({action:'schedule',groups});
+  }catch(e){console.warn('fastPushSync',e);}
+}
+function setFastAuto(k,v){
+  const a=fastAutoCfg();
+  if(k==='at'){if(!/^\d{1,2}:\d{2}$/.test(v||''))return;a.at=v;a.handled=fastSlotBefore(Date.now(),v);}
+  else a[k]=!!v;
+  if(k==='on'&&v)a.handled=fastSlotBefore(Date.now(),a.at);
+  a.fresh=0;save();fastPushSync(true);rFastAuto();v4Refresh();
+  toast(k==='on'?(v?'Fasting automat pornit — începe singur la '+a.at+'.':'Fasting automat oprit — îl pornești tu.'):(k==='at'?'Pornește la '+v+'.':'Salvat.'));
+}
+function rFastAuto(){
+  const el=document.getElementById('fAuto');if(!el)return;
+  const f=S.diet.fasting,a=fastAutoCfg(),H=Number(f.hours)||16;
+  const eatStart=new Date(atT(a.at).getTime()+H*36e5),win=24-H;
+  const nx=fastSlotAfter(Date.now(),a.at);
+  const status=f.active?('În curs — '+(f.startReason==='auto'?'pornit automat':'pornit de tine')+' '+fmtDT(new Date(f.start))+'.'):(a.on?('Următorul pornește singur '+fmtDT(new Date(nx))+'.'):'Îl pornești tu, din butonul de mai sus.');
+  const sw=(k,on,l,d)=>'<label class="fa-opt"><span><b>'+l+'</b><small>'+d+'</small></span><input type="checkbox" class="sw" '+(on?'checked':'')+' onchange="setFastAuto(\''+k+'\',this.checked)"></label>';
+  el.innerHTML='<div class="fauto'+(a.on?' on':'')+'">'+
+    '<div class="fa-h"><span class="fa-ic"><i data-lucide="wand-sparkles"></i></span><div><b>Fasting automat</b><span>'+esc(status)+'</span></div><input type="checkbox" class="sw" '+(a.on?'checked':'')+' onchange="setFastAuto(\'on\',this.checked)" aria-label="Fasting automat"></div>'+
+    (a.on?('<div class="fa-time"><label>Pornește în fiecare seară la</label><input type="time" value="'+esc(a.at)+'" onchange="setFastAuto(\'at\',this.value)"><span class="fa-win"><i data-lucide="utensils"></i><span>Fereastra de mâncat: <b>'+fmtHM(eatStart)+' – '+esc(a.at)+'</b> ('+fmtH(win)+' h)</span></span></div>'):'')+
+    sw('stopOnMeal',a.stopOnMeal!==false,'Se oprește când mănânci','prima masă notată încheie postul; dacă abia începuse, îl reia de la ora mesei')+
+    sw('endAtGoal',a.endAtGoal!==false,'Se închide singur la țintă','după '+fmtH(H)+' h îl trec în istoric, ca să nu rămână pornit din greșeală')+
+    '<p class="fa-note">Tot ce face singur apare într-un mesaj cu „Anulează". Cafeaua neagră, ceaiul și apa nu rup postul.</p></div>';
+  LI();
+}
+
+/* ============ NOTIFICĂRI CU MĂSURĂ ============
+   Înainte: apă la fiecare 2 ore, cântărire + memento de cântărire, mese la ore fixe — și încă o
+   notificare „inteligentă" peste fiecare. Acum există un singur planificator: fiecare notificare
+   vine doar dacă mai are rost (nu te-ai cântărit, rămâi în urmă cu apa, n-ai notat mesele), cu un
+   plafon pe zi, la distanță una de alta și niciodată în orele de liniște. */
+const NF_MODES={
+  calm:{l:'Liniștit',ic:'moon',cap:2,water:1,gap:180,d:'cel mult 2 pe zi — doar ce contează cu adevărat'},
+  normal:{l:'Echilibrat',ic:'leaf',cap:4,water:2,gap:120,d:'cel mult 4 pe zi, la cel puțin 2 ore una de alta'},
+  all:{l:'Mai des',ic:'bell-ring',cap:7,water:4,gap:60,d:'până la 7 pe zi, pentru zilele în care vrei să fii ținut din scurt'}
+};
+const NUDGE_DEF={
+  weigh:{t:'08:30',ic:'scale',l:'Cântărire',d:'dimineața, doar dacă nu te-ai cântărit încă'},
+  water:{t:'',ic:'droplets',l:'Apă',d:'doar când rămâi în urmă față de ritmul zilei, niciodată la mai puțin de 2 ore după un pahar'},
+  meals:{t:'20:30',ic:'utensils',l:'Mesele de azi',d:'seara, dacă ai notat sub jumătate din calorii'},
+  move:{t:'17:30',ic:'footprints',l:'Mișcare',d:'dacă azi n-ai notat mișcare și săptămâna e sub țintă'},
+  weekly:{t:'19:00',ic:'calendar-range',l:'Bilanțul săptămânii',d:'duminica, cu cifrele tale'},
+  back:{t:'18:00',ic:'heart-handshake',l:'Te așteptăm înapoi',d:'o singură dată, dacă n-ai deschis aplicația 2 zile'}
+};
+/* mementourile vechi de apă / cântărire / mese devin inteligente (nu se mai trimit la oră fixă) */
+function remHK(r){
+  if(!r||r.once)return null;
+  const k=remLabelKey(r.label);
+  if(/(^|\s)apa(\s|$)/.test(k)&&(Number(r.every)>0||/^(bea apa|apa|bea apa!)$/.test(k)))return 'water';
+  if(/^cantar/.test(k))return 'weigh';
+  if(/^(mic dejun|micul dejun|pranz|pranzul|cina|cina de seara|gustare|gustarea)$/.test(k))return 'meal';
+  return null;
+}
+function mealLabelType(l){const k=remLabelKey(l);return /dejun/.test(k)?'Mic dejun':/pranz/.test(k)?'Prânz':/cina/.test(k)?'Cină':'Gustare';}
+function nfCfg(mid){
+  mid=mid||V4_ME();
+  const by=S.settings.nfBy=S.settings.nfBy||{};
+  let n=by[mid];
+  if(!n){ // prima rulare: preluăm ce era setat în v3.13 (pe dispozitiv)
+    const old=S.settings.nudges||{};n={mode:'normal',quiet:{from:'21:30',to:'08:00'},u:0};
+    const oldDef={weigh:'10:00',move:'17:00',water:'18:30'}; // orele implicite din v3.13 trec pe cele noi; cele alese de tine rămân
+    for(const k in NUDGE_DEF){const o=old[k]||{};n[k]={on:o.on!==false,t:(!o.t||o.t===oldDef[k])?NUDGE_DEF[k].t:o.t};}
+    by[mid]=n;
+  }
+  for(const k in NUDGE_DEF)n[k]=Object.assign({on:true,t:NUDGE_DEF[k].t},n[k]||{});
+  if(!NF_MODES[n.mode])n.mode='normal';
+  n.quiet=Object.assign({from:'21:30',to:'08:00'},n.quiet||{});
+  return n;
+}
+function nfEff(mid){
+  mid=mid||V4_ME();const n=nfCfg(mid);
+  const rs=(S.settings.reminders||[]).filter(r=>r.on!==false&&!r.once&&(!r.who||r.who==='all'||r.who===mid));
+  const lw=rs.find(r=>remHK(r)==='water'),lc=rs.find(r=>remHK(r)==='weigh'),lm=rs.filter(r=>remHK(r)==='meal'&&r.time);
+  return {n,waterEvery:Number(lw&&lw.every)||0,weighT:n.weigh.set?n.weigh.t:((lc&&lc.time)||n.weigh.t),mealTimes:lm.map(r=>({id:r.id,type:mealLabelType(r.label),t:r.time}))};
+}
+function inQuiet(d,q){const m=d.getHours()*60+d.getMinutes(),a=hmMin(q.from),b=hmMin(q.to);return a>b?(m>=a||m<b):(m>=a&&m<b);}
+function hmMin(t){const[h,m]=String(t||'0:0').split(':').map(Number);return (h||0)*60+(m||0);}
+/* cât ar trebui să fi băut până la ora asta, dacă bei uniform între trezire și liniștea de seară */
+function waterPace(d,q){const a=hmMin(q.to),b=hmMin(q.from)>a?hmMin(q.from):1320,m=d.getHours()*60+d.getMinutes();return Math.max(0,Math.min(1,(m-a)/Math.max(60,b-a)));}
+function waterSlots(every,q){
+  const a=hmMin(q.to),b=hmMin(q.from)>a?hmMin(q.from):1320,out=[];
+  if(every>0){for(let h=0;h<24;h++){const m=h*60;if(h%every===0&&m>=a+90&&m<=b-60)out.push(atT(pad(h)+':00'));}}
+  else['11:00','14:30','17:30','19:30'].forEach(t=>{const m=hmMin(t);if(m>=a+90&&m<=b-30)out.push(atT(t));});
+  return out;
+}
+/* ce s-a trimis deja azi (programat pe server sau afișat local) — pentru plafon și distanța dintre ele */
+function nfLogGet(){try{const o=JSON.parse(localStorage.getItem('famlink_nf_log')||'{}');return o.d===todayStr()?o:{d:todayStr(),it:[]};}catch(e){return {d:todayStr(),it:[]};}}
+function nfLogSave(o){try{localStorage.setItem('famlink_nf_log',JSON.stringify(o));}catch(e){}}
+function nfSent(now){const o=nfLogGet(),seen={};return o.it.filter(x=>x.at<=now&&!seen[x.key]&&(seen[x.key]=1));}
+function fastingAt(ms){
+  const f=S.diet.fasting;if(f.active&&f.start){const st=new Date(f.start).getTime();return ms>=st&&ms<st+Number(f.hours)*36e5;}
+  const a=fastAutoCfg();if(a.on){const s=fastSlotBefore(ms,a.at);return ms<s+Number(f.hours)*36e5;}
+  return false;
+}
+/* textele — calde, variate, cu cifrele tale (alese stabil pe zi, ca programarea să nu se refacă degeaba) */
+function nfMsg(kind,x){
+  const nm=firstName(x.mid);
+  switch(kind){
+    case 'weigh':return pick([
+      {title:'Cântărirea de dimineață',body:'Durează zece secunde: urci, faci o poză afișajului și am notat.'+(x.last?(' Ultima dată: '+fmtH(x.last.w)+' kg.'):'')},
+      {title:'Un pas pe cântar?',body:'Nu cifra de azi contează, ci linia pe două săptămâni. Hai s-o completăm'+(nm?', '+nm:'')+'.'},
+      {title:'Cântarul te așteaptă',body:'Înainte de micul dejun, ca cifrele să se compare corect de la o zi la alta.'}],'w'+x.mid);
+    case 'water':{const left=Math.max(0,x.wg-x.wt),gl=Math.max(1,Math.ceil(left/250));return pick([
+      {title:'Un pahar cu apă?',body:'Ești la '+fmtN(x.wt)+' din '+fmtN(x.wg)+' ml azi. Un pahar acum și ești în grafic.'},
+      {title:'Pauză de apă',body:'Mai ai vreo '+gl+(gl===1?' pahar':' pahare')+' până la țintă. Fără grabă — unul acum e perfect.'},
+      {title:'Nu uita de apă',body:'Ajută la concentrare și ține foamea în frâu. Ești la '+fmtN(x.wt)+' / '+fmtN(x.wg)+' ml.'}],'a'+x.k+x.mid);}
+    case 'mealAt':return {'Mic dejun':{title:'Micul dejun, notat?',body:'Dacă ai mâncat deja, spune-i asistentului în două cuvinte — eu țin socoteala caloriilor.'},'Prânz':{title:'Prânzul, notat?',body:'O poză cu farfuria sau două cuvinte în chat și e gata.'},'Cină':{title:'Cina, notată?',body:'Notează-o acum, cât îți amintești — și ziua se închide frumos.'}}[x.type]||{title:'Gustarea, notată?',body:'Două cuvinte în chat și e în jurnal.'};
+    case 'meals':return {title:'Ce-ai mâncat azi?',body:(x.b.meals.length?('Ai notat '+fmtN(x.b.eaten)+' din '+fmtN(x.b.tgt)+' kcal.'):'Încă nicio masă notată azi.')+' Spune-i asistentului în două cuvinte sau trimite o poză — durează un minut.'};
+    case 'move':return pick([
+      {title:'O plimbare scurtă?',body:'Săptămâna asta ai '+x.wk.moveMin+' din '+x.g.move+' minute. 20 de minute de mers azi și ești mai aproape — plus un cap mai limpede.'},
+      {title:'Puțină mișcare azi?',body:'Nu trebuie sală: o plimbare de 20 de minute contează. Ești la '+x.wk.moveMin+' / '+x.g.move+' min săptămâna asta.'}],'mv'+x.mid);
+    case 'weekly':return {title:'Săptămâna ta, pe scurt',body:(x.wk.dw!=null?((x.wk.dw>0?'+':'')+fmtH(x.wk.dw)+' kg · '):'')+x.wk.weighDays+' cântăriri · '+x.wk.moveMin+' min mișcare · mese notate '+x.wk.mealDays+' zile · apă la țintă '+x.wk.waterDays+' zile. Ai făcut mai mult decât crezi.'};
+    case 'back':return {title:'Ne-ai lipsit',body:'Nicio grijă pentru zilele sărite — contează ce faci de azi. Un pahar cu apă notat și ești din nou pe drum.'};
+  }
+  return {title:'FamLink',body:''};
+}
+/* planul notificărilor de azi pentru un membru — condițiile se judecă pe datele de ACUM */
+function nfPlan(mid,now){
+  mid=mid||V4_ME();now=now||Date.now();
+  const E=nfEff(mid),n=E.n,M=NF_MODES[n.mode],t=todayStr(),out=[];
+  const p=S.diet.profiles[mid]||{},ws=S.diet.weights[mid]||[];
+  if(n.weigh.on&&!ws.some(x=>x.d===t))out.push(Object.assign({key:'weigh',pr:1,at:atT(E.weighT),kind:'weigh',user:1},nfMsg('weigh',{mid,last:ws[ws.length-1]})));
+  E.mealTimes.forEach(mt=>{
+    const at=atT(mt.t);if(fastingAt(at.getTime()))return;
+    if((S.diet.meals||[]).some(m=>m.mid===mid&&m.date===t&&m.type===mt.type))return;
+    out.push(Object.assign({key:'meal'+remLabelKey(mt.type).replace(/\s/g,''),pr:4,at,kind:'meal',user:1},nfMsg('mealAt',{type:mt.type})));
+  });
+  const b=dayBudget(mid);
+  if(n.meals.on&&b.eaten<b.tgt*0.5){const at=atT(n.meals.t);if(!fastingAt(at.getTime()-3*36e5))out.push(Object.assign({key:'meals',pr:2,at,kind:'meal'},nfMsg('meals',{b})));}
+  if(n.water.on){
+    const wg=waterGoalOf(mid),wt=waterOf(mid),last=waterLast(mid);let k=0;
+    waterSlots(E.waterEvery,n.quiet).forEach(at=>{
+      if(wg-wt<250)return;
+      if(wg*waterPace(at,n.quiet)-wt<300)return;             // nu ești în urmă → nu te deranjăm
+      if(last&&at.getTime()-last<2*36e5)return;               // ai băut de curând
+      out.push(Object.assign({key:'water'+k,pr:k?5:3,at,kind:'water'},nfMsg('water',{mid,wt,wg,k})));k++;
+    });
+  }
+  const wk=weekCtx(mid),g=wkGoals(p);
+  if(n.move.on&&wk.todayMin===0&&wk.moveMin<g.move)out.push(Object.assign({key:'move',pr:4,at:atT(n.move.t),kind:'move'},nfMsg('move',{mid,wk,g})));
+  if(n.weekly.on&&new Date(now).getDay()===0)out.push(Object.assign({key:'weekly',pr:2,at:atT(n.weekly.t),kind:'home',nocap:1},nfMsg('weekly',{wk})));
+  /* selecția: întâi ce contează mai mult, apoi plafonul zilei, distanța minimă și liniștea */
+  const sent=nfSent(now),chosen=[];
+  let cap=M.cap-sent.filter(x=>!x.nocap).length,wcap=M.water-sent.filter(x=>x.kind==='water').length;
+  out.filter(x=>x.user||!inQuiet(x.at,n.quiet)).filter(x=>x.at.getTime()>now-90000&&!sent.some(s=>s.key===x.key))
+    .sort((a,b)=>a.pr-b.pr||a.at-b.at).forEach(x=>{
+      if(x.nocap){chosen.push(x);return;}
+      if(cap<=0)return;if(x.kind==='water'&&wcap<=0)return;
+      const near=chosen.filter(y=>!y.nocap).map(y=>y.at.getTime()).concat(sent.map(s=>s.at)).some(tm=>Math.abs(tm-x.at.getTime())<M.gap*6e4);
+      if(near)return;
+      chosen.push(x);cap--;if(x.kind==='water')wcap--;
+    });
+  return chosen.sort((a,b)=>a.at-b.at);
+}
+/* cu aplicația deschisă (și fără push pe dispozitiv): apar pe loc */
+function nudgeTick(now,ds){
+  if(typeof pushCovers==='function'&&pushCovers('daily'))return;
+  nfPlan(null,now.getTime()).forEach(x=>{
+    const key='nd_'+x.key+'_'+ds;
+    if(now>=x.at&&now-x.at<90000&&!FIRED[key]){FIRED[key]=1;const o=nfLogGet();o.it.push({key:x.key,at:x.at.getTime(),kind:x.kind,nocap:x.nocap?1:0});nfLogSave(o);notify(x.title,x.body);}
+  });
+}
+/* cu aplicația închisă: programăm pe server; se reface la fiecare modificare (dacă ai băut apa, dispare) */
+let _ndT=null;
+function nudgeSchedule(){if(typeof pushReady!=='function'||!pushReady())return;clearTimeout(_ndT);_ndT=setTimeout(_nudgeSchedule,4000);}
+function _nudgeSchedule(){
+  try{
+    const em=myEmail();if(!em)return;
+    const mid=V4_ME(),now=Date.now(),n=nfCfg(mid),pre='hn_'+cronSlotId(em),on=pushOn('daily',true);
+    const plan=on?nfPlan(mid,now).filter(x=>x.at.getTime()>now):[];
+    const items=plan.map(x=>({key:pre+'_'+x.key+'_'+todayStr(),at:x.at.toISOString(),to:[em],kind:x.kind,title:x.title,body:x.body}));
+    if(on&&n.weigh.on){const d=new Date();d.setDate(d.getDate()+1);const E=nfEff(mid);const m=nfMsg('weigh',{mid,last:(S.diet.weights[mid]||[]).slice(-1)[0]});items.push({key:pre+'_weigh_'+dstr(d),at:atT(E.weighT,d).toISOString(),to:[em],kind:'weigh',title:m.title,body:m.body});}
+    if(on&&n.back.on){const d=new Date();d.setDate(d.getDate()+2);const m=nfMsg('back',{});items.push({key:pre+'_back',at:atT(n.back.t,d).toISOString(),to:[em],kind:'home',title:m.title,body:m.body});}
+    /* jurnalul zilei: ce a trecut rămâne, ce urmează se înlocuiește cu planul nou */
+    const o=nfLogGet();o.it=o.it.filter(x=>x.at<=now).concat(plan.map(x=>({key:x.key,at:x.at.getTime(),kind:x.kind,nocap:x.nocap?1:0})));nfLogSave(o);
+    const sig=JSON.stringify(items.map(x=>[x.key,x.at,x.title,x.body]));
+    if(localStorage.getItem('famlink_nudge_sig')===sig)return;
+    localStorage.setItem('famlink_nudge_sig',sig);
+    const groups=[{prefix:pre,items}];
+    /* v3.13 punea cheile în afara prefixului, deci notificările vechi nu se mai ștergeau niciodată
+       (de aici o parte din „prea multe") — le curățăm o singură dată */
+    if(localStorage.getItem('famlink_nudge_mig')!=='v4'){localStorage.setItem('famlink_nudge_mig','v4');['hn_weigh_','hn_water_','hn_meals_','hn_move_','hn_weekly_'].forEach(px=>groups.push({prefix:px,items:[]}));}
+    pushQueue({action:'schedule',groups});
+  }catch(e){console.warn('nudgeSchedule',e);}
+}
+function nfTouch(mid){const n=nfCfg(mid);n.u=Date.now();return n;}
+function setNudge(k,f,v){
+  const n=nfTouch();if(!n[k])return;
+  if(f==='t'){if(!/^\d{1,2}:\d{2}$/.test(v||''))return;n[k].t=v;if(k==='weigh')n[k].set=true;}else n[k].on=!!v;
+  save();rNfTop();if(f==='on'&&v)maybeAskNotif();
+  toast(NUDGE_DEF[k].l+(f==='on'?(v?' — pornită':' — oprită'):(' la '+v)));
+}
+function setNfMode(m){if(!NF_MODES[m])return;const n=nfTouch();n.mode=m;save();rNfTop();toast('Notificări: '+NF_MODES[m].l.toLowerCase()+' — '+NF_MODES[m].d+'.');}
+function setNfQuiet(f,v){if(!/^\d{1,2}:\d{2}$/.test(v||''))return;const n=nfTouch();n.quiet[f]=v;save();rNfTop();}
+function delMealRem(id){if(typeof delRem==='function')delRem(id);rNfTop();}
+const NF_KIND_IC={weigh:'scale',water:'droplets',meal:'utensils',move:'footprints',home:'sun',fast:'timer'};
+function rNfTop(){
+  const box=document.getElementById('nfTop');if(!box)return;
+  const mid=V4_ME(),n=nfCfg(mid),E=nfEff(mid),M=NF_MODES[n.mode];
+  const perm=('Notification' in window)?Notification.permission:'unsupported';
+  const st=perm==='granted'?'<span class="nfok"><i data-lucide="check-circle-2"></i>Notificările sunt pornite pe acest dispozitiv</span>'
+    :perm==='denied'?'<span class="nfbad"><i data-lucide="bell-off"></i>Notificările sunt blocate din setările telefonului/browserului</span>'
+    :perm==='unsupported'?'<span class="nfbad"><i data-lucide="bell-off"></i>Browserul acesta nu suportă notificări</span>'
+    :'<button class="btn sm" onclick="askNotif();setTimeout(rRemView,700)"><i data-lucide="bell-ring"></i>Pornește notificările</button>';
+  const plan=nfPlan(mid,Date.now());
+  const f=S.diet.fasting,fa=fastAutoCfg();
+  const fastLine=(f.active&&f.start)?{at:new Date(new Date(f.start).getTime()+Number(f.hours)*36e5),title:'Fasting reușit',kind:'fast'}:null;
+  const up=plan.concat(fastLine&&fastLine.at>new Date()&&dstr(fastLine.at)===todayStr()?[fastLine]:[]).filter(x=>x.at.getTime()>Date.now()-60000).sort((a,b)=>a.at-b.at);
+  box.innerHTML='<div class="nfhero"><span class="hb"><i data-lucide="bell-ring"></i></span><div><b>Notificări cu măsură</b><p>Vin doar când te ajută: dacă te-ai cântărit, ai băut apa sau ai notat mesele, notificarea nu mai apare. Niciodată în orele de liniște.</p></div></div>'+
+    '<div class="nfstate">'+st+'</div>'+
+    '<div class="nflbl">Cât de des?</div><div class="seg3">'+Object.keys(NF_MODES).map(k=>'<button class="'+(k===n.mode?'on':'')+'" onclick="setNfMode(\''+k+'\')"><i data-lucide="'+NF_MODES[k].ic+'"></i>'+NF_MODES[k].l+'</button>').join('')+'</div>'+
+    '<p class="nfdesc">'+esc(M.d)+'. Apa: cel mult '+M.water+(M.water===1?' dată':' ori')+' pe zi.</p>'+
+    '<div class="nfquiet"><i data-lucide="moon"></i><span>Liniște de la</span><input type="time" value="'+esc(n.quiet.from)+'" onchange="setNfQuiet(\'from\',this.value)"><span>până la</span><input type="time" value="'+esc(n.quiet.to)+'" onchange="setNfQuiet(\'to\',this.value)"></div>'+
+    '<div class="nftoday"><div class="nft-h"><i data-lucide="list-checks"></i>Azi te mai anunț</div>'+(up.length?up.map(x=>'<div class="nft-i"><span class="t">'+fmtHM(x.at)+'</span><i data-lucide="'+(NF_KIND_IC[x.kind]||'bell')+'"></i><span class="nm">'+esc(x.title)+'</span></div>').join(''):'<p class="muted" style="margin:2px 0 0">Nimic altceva azi — ai grijă de tine.</p>')+'</div>';
+  rNudges();
+  LI();
+}
+function rNudges(){
+  const box=document.getElementById('nudgeBox');if(!box)return;
+  const mid=V4_ME(),n=nfCfg(mid),E=nfEff(mid),me=(memById(mid)||{}).name||'tine';
+  const row=k=>{const d=NUDGE_DEF[k],c=n[k];let t='';
+    if(k==='weigh')t='<input type="time" value="'+esc(E.weighT)+'" onchange="setNudge(\'weigh\',\'t\',this.value)">';
+    else if(k!=='water')t='<input type="time" value="'+esc(c.t)+'" onchange="setNudge(\''+k+'\',\'t\',this.value)">';
+    let extra='';
+    if(k==='water'&&E.waterEvery)extra='<em class="nhint">verific la fiecare '+E.waterEvery+' h, ca în mementoul tău vechi „Bea apă"</em>';
+    if(k==='meals'&&E.mealTimes.length)extra='<em class="nhint">+ la ora mesei, dacă n-ai notat-o: '+E.mealTimes.map(mt=>'<em class="nchip">'+esc(mt.type)+' '+esc(mt.t)+'<button onclick="delMealRem(\''+mt.id+'\')" title="Scoate" aria-label="Scoate">×</button></em>').join(' ')+'</em>';
+    return '<div class="nudge'+(c.on?'':' off')+'"><span class="nic"><i data-lucide="'+d.ic+'"></i></span><span class="nt"><b>'+d.l+'</b><span>'+d.d+'</span>'+extra+'</span>'+t+'<input type="checkbox" class="sw" '+(c.on?'checked':'')+' onchange="setNudge(\''+k+'\',\'on\',this.checked)" aria-label="'+d.l+'"></div>';};
+  box.innerHTML='<div class="sech"><span class="si"><i data-lucide="sparkles"></i></span><div><b>Ce poate să-ți amintească</b><span class="sub">pentru '+esc(me)+' · fiecare vine doar dacă mai are rost</span></div></div>'+
+    Object.keys(NUDGE_DEF).map(row).join('')+
+    '<p class="muted" style="font-size:12px;margin:4px 2px 2px">Fastingul și activitățile din calendar au notificările lor (Sănătate → Fasting, respectiv fiecare activitate).</p>';
+}
+
+/* ============ ECRANUL „AZI" ============ */
+function tdRing(o){
+  const C=2*Math.PI*26,p=Math.max(0,Math.min(1,o.max?o.v/o.max:0));
+  return '<button class="tdring" onclick="'+o.go+'" aria-label="'+esc(o.l)+'"><span class="rg"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" class="tr"/><circle cx="32" cy="32" r="26" class="pr" style="stroke:'+o.c+';stroke-dasharray:'+C.toFixed(1)+';stroke-dashoffset:'+(C*(1-p)).toFixed(1)+'"/></svg><i data-lucide="'+o.ic+'"></i></span><b>'+o.val+'</b><span>'+o.l+'</span></button>';
+}
+function rToday(){
+  const sec=document.getElementById('v-today');if(!sec)return;
+  const mid=V4_ME(),m=memById(mid)||{},now=new Date(),h=now.getHours();
+  const nm=firstName(mid),sal=h<5?'Noapte liniștită':h<11?'Bună dimineața':h<18?'Bună ziua':'Bună seara';
+  const b=dayBudget(mid),wt=waterOf(mid),wg=waterGoalOf(mid),mv=moveToday(mid),f=S.diet.fasting,fa=fastAutoCfg();
+  const c=(function(){try{return msCtx();}catch(e){return {};}})();
+  const dateTxt=DAYS[now.getDay()].charAt(0).toUpperCase()+DAYS[now.getDay()].slice(1)+', '+now.getDate()+' '+MONTHS[now.getMonth()];
+  const streak=c.wStreak>=2?('<span class="tdh-pill"><i data-lucide="flame"></i>'+c.wStreak+' zile la rând</span>'):'';
+  let fr;
+  if(f.active&&f.start){const el=(Date.now()-new Date(f.start))/36e5;fr={v:el,max:Number(f.hours),val:Math.floor(el)+':'+pad(Math.floor(el%1*60)),l:'fasting',c:'#c7b8ff',ic:'timer',go:"go('health');dTab('fast')"};}
+  else{const fit=((S.diet.fitness||{})[mid]||[]).find(x=>x.d===todayStr());if(fit&&Number(fit.steps)>0)fr={v:Number(fit.steps),max:8000,val:fmtN(fit.steps),l:'pași',c:'#ffd27a',ic:'footprints',go:"go('health');dTab('fit')"};
+    else fr={v:0,max:1,val:fa.on?fa.at:'—',l:fa.on?'fasting automat':'fasting',c:'#c7b8ff',ic:'timer',go:"go('health');dTab('fast')"};}
+  document.getElementById('tdHero').innerHTML='<div class="tdhero">'+
+    '<div class="tdh-top"><span class="tdh-date">'+dateTxt+'</span>'+streak+'</div>'+
+    '<h1>'+sal+(nm?', '+esc(nm):'')+'</h1>'+
+    '<p class="tdh-msg">'+esc(cheerLine(mid))+'</p>'+
+    '<div class="tdrings">'+
+      tdRing({v:b.eaten,max:b.budget,val:fmtN(b.eaten),l:'din '+fmtN(b.budget)+' kcal',c:b.eaten>b.budget?'#ffb3c1':'#bff0a8',ic:'utensils',go:"go('meals')"})+
+      tdRing({v:wt,max:wg,val:wt<1000?(fmtN(wt)+' ml'):((Math.round(wt/100)/10).toString().replace('.',',')+' L'),l:'din '+(wg/1000).toFixed(1).replace('.',',')+' L apă',c:'#9fd3ff',ic:'glass-water',go:"go('meals')"})+
+      tdRing({v:mv,max:30,val:mv+' min',l:'mișcare',c:'#ffd27a',ic:'activity',go:"go('health');dTab('sport')"})+
+      tdRing(fr)+
+    '</div>'+
+    '<div class="tdh-left">'+(b.left>=0?('<i data-lucide="sparkles"></i><span>Mai ai ~<b>'+fmtN(b.left)+' kcal</b> azi'+(b.burned?(' (inclusiv '+fmtN(b.burned)+' din mișcare)'):'')+'</span>'):('<i data-lucide="heart"></i><span>Ești cu ~'+fmtN(-b.left)+' kcal peste azi — mâine o luăm de la capăt</span>'))+'</div>'+
+  '</div>'+v4WhatsNew();
+  /* acțiuni rapide — tot ce faci zilnic, la o atingere */
+  const lw=(S.diet.weights[mid]||[]).slice(-1)[0],wToday=lw&&lw.d===todayStr();
+  const qa=(cls,ic,t,s,on)=>'<button class="tdqa '+cls+'" onclick="'+on+'"><span class="ic"><i data-lucide="'+ic+'"></i></span><b>'+t+'</b><span>'+s+'</span></button>';
+  document.getElementById('tdQuick').innerHTML='<div class="tdq">'+
+    qa('q-water','glass-water','+250 ml apă',wt?(fmtN(wt)+' ml azi'):'primul pahar','tdWater(250)')+
+    qa('q-chat','message-circle-heart','Ce-am mâncat','spune-i asistentului',"askFill('Am mâncat ')")+
+    qa('q-photo','camera','Poză la masă','calorii din poză','go(\'meals\');setTimeout(()=>openCamera(),120)')+
+    qa('q-weigh','scale',wToday?'Cântărit ✓':'Cântărire',lw?(fmtH(lw.w)+' kg'+(wToday?' azi':' ultima dată')):'prima cântărire','tdWeigh()')+
+    qa('q-fast',f.active?'square':'timer',f.active?'Oprește fastingul':'Pornește fastingul',f.active?('de '+fmtH((Date.now()-new Date(f.start))/36e5)+' h'):(fa.on?('singur la '+fa.at):(Number(f.hours)||16)+' h'),'fastToggle()')+
+    qa('q-move','dumbbell','Mișcare',mv?(mv+' min azi'):'notează sport',"go('health');dTab('sport')")+
+  '</div>';
+  rTdFast();rTdCal();rTdFit();
+  document.getElementById('tdTip').innerHTML='<div class="tdtip"><i data-lucide="quote"></i><p>'+esc(pick(V4_TIPS,'tip2'+mid))+'</p><button class="btn sm ghost" onclick="go(\'health\');dTab(\'prog\')"><i data-lucide="trophy"></i>Progresul tău</button></div>';
+  LI();
+}
+function rTdFast(){
+  const el=document.getElementById('tdFast');if(!el)return;
+  const f=S.diet.fasting,a=fastAutoCfg(),H=Number(f.hours)||16;
+  if(!f.active&&!a.on&&!(f.history||[]).length){el.innerHTML='';el._h='';return;}
+  let html;
+  if(f.active&&f.start){
+    const st=new Date(f.start),el2=(Date.now()-st)/36e5,p=Math.min(1,el2/H),end=new Date(st.getTime()+H*36e5);
+    const stg=FAST_STAGES.filter(s=>el2>=s[0]).pop();
+    html='<div class="tdcard tdfast on"><div class="tdc-h"><span class="tdc-ic f"><i data-lucide="timer"></i></span><div><b>Fasting · '+Math.floor(el2)+' h '+pad(Math.floor(el2%1*60))+' min</b><span>'+(stg?esc(stg[1]+' — '+stg[3]):'')+'</span></div><span class="tdc-r">'+Math.round(p*100)+'%</span></div>'+
+      '<div class="tdbar"><i style="width:'+(p*100).toFixed(1)+'%"></i></div>'+
+      '<div class="tdc-f"><span><i data-lucide="utensils"></i>Poți mânca '+fmtDT(end)+'</span><span class="tdc-b"><button class="btn sm ghost" onclick="fastExtend(30)">+30 min</button><button class="btn sm sec" onclick="fastToggle()">Oprește</button></span></div>'+
+      (a.stopOnMeal!==false?'<p class="tdc-n">Se oprește singur când notezi prima masă'+(a.endAtGoal!==false?' sau când ajunge la țintă':'')+'.</p>':'')+'</div>';
+  }else{
+    const last=(f.history||[])[0];
+    html='<div class="tdcard tdfast"><div class="tdc-h"><span class="tdc-ic f"><i data-lucide="moon-star"></i></span><div><b>'+(a.on?('Fastingul pornește singur la '+esc(a.at)):'Fasting '+fmtH(H)+':'+fmtH(24-H))+'</b><span>'+(last?('Ultimul: '+fmtH(last.h)+' h'+(Number(last.h)>=Number(last.goal)?' — reușit':'')):'Pornește-l când vrei.')+'</span></div>'+
+      (a.on?'<button class="btn sm ghost" onclick="go(\'health\');dTab(\'fast\')">Setări</button>':'<button class="btn sm sec" onclick="setFastAuto(\'on\',true)"><i data-lucide="wand-sparkles"></i>Automat</button>')+'</div></div>';
+  }
+  if(el._h!==html){el._h=html;el.innerHTML=html;LI();}
+}
+function tdDone(id){const e=S.events.find(x=>x.id===id);if(!e)return;const d=todayStr();e.doneOn=e.doneOn||[];const i=e.doneOn.indexOf(d);if(i>=0)e.doneOn.splice(i,1);else e.doneOn.push(d);e.u=Date.now();save();rTdCal();LI();if(i<0)toast(pickR(['Bifat! Una mai puțin pe listă.','Gata cu asta. Bravo!','Făcut ✓']));}
+function rTdCal(){
+  const el=document.getElementById('tdCal');if(!el)return;
+  const t=todayStr(),evs=eventsOn(t),tm=new Date();tm.setDate(tm.getDate()+1);const nxt=eventsOn(dstr(tm));
+  el.innerHTML='<div class="tdcard"><div class="tdc-h"><span class="tdc-ic c"><i data-lucide="calendar-days"></i></span><div><b>Azi în calendar</b><span>'+(evs.length?(evs.length+(evs.length===1?' activitate':' activități')):'Zi liberă — bucură-te de ea')+'</span></div><button class="btn sm ghost" onclick="VD.d=todayStr();go(\'day\')">Vezi ziua</button></div>'+
+    (evs.length?('<div class="tdevs">'+evs.map(e=>{const done=e.doneOn&&e.doneOn.includes(t);return '<div class="tdev'+(done?' done':'')+'"><input type="checkbox" '+(done?'checked':'')+' onchange="tdDone(\''+e.id+'\')" aria-label="Făcut"><span class="dot" style="background:'+evColor(e)+'"></span><span class="tm">'+esc(evTimeLabel(e,t))+'</span><span class="ti" onclick="openEvent(\''+e.id+'\')">'+esc(e.title)+'</span></div>';}).join('')+'</div>'):'')+
+    (nxt.length?('<p class="tdc-n">Mâine: '+nxt.slice(0,3).map(e=>esc((e.time?e.time+' ':'')+e.title)).join(' · ')+(nxt.length>3?' …':'')+'</p>'):'')+
+    '<button class="tdadd" onclick="openEvent(null,todayStr())"><i data-lucide="plus"></i>Adaugă ceva azi</button></div>';
+}
+function rTdFit(){
+  const el=document.getElementById('tdFit');if(!el)return;
+  const mid=V4_ME(),fit=((S.diet.fitness||{})[mid]||[]).find(x=>x.d===todayStr());
+  const lastAuto=((S.diet.fitness||{})[mid]||[]).filter(x=>x.auto).slice(-1)[0];
+  if(fit){
+    const bits=[fit.steps?('<span><b>'+fmtN(fit.steps)+'</b> pași</span>'):'',fit.move?('<span><b>'+fmtN(fit.move)+'</b> kcal active</span>'):'',fit.exMin?('<span><b>'+fit.exMin+'</b> min exercițiu</span>'):'',fit.km?('<span><b>'+fmtH(fit.km)+'</b> km</span>'):''].filter(Boolean).join('');
+    el.innerHTML='<div class="tdcard"><div class="tdc-h"><span class="tdc-ic w"><i data-lucide="watch"></i></span><div><b>Din ceas, azi</b><span>'+(fit.auto?('adus automat'+(fit.at?' la '+fmtHM(new Date(fit.at)):'')):'importat din captură')+' · '+esc(fit.src||'')+'</span></div></div><div class="tdfit">'+bits+'</div></div>';
+  }else if(lastAuto){
+    el.innerHTML='<div class="tdcard slim"><div class="tdc-h"><span class="tdc-ic w"><i data-lucide="watch"></i></span><div><b>Datele din ceas vin singure</b><span>ultima dată: '+remDateLabel(lastAuto.d)+' — scurtătura trimite ziua de azi diseară</span></div><button class="btn sm ghost" onclick="fitAutoCheck()">Verifică</button></div></div>';
+  }else{
+    el.innerHTML='<button class="tdcard slim cta" onclick="go(\'health\');dTab(\'fit\');setTimeout(()=>{const g=document.getElementById(\'fitGuide\');if(g){g.open=true;g.scrollIntoView({behavior:\'smooth\',block:\'start\'});}},250)"><div class="tdc-h"><span class="tdc-ic w"><i data-lucide="zap"></i></span><div><b>Adu automat pașii și caloriile din ceas</b><span>o scurtătură pe iPhone, configurată o dată — apoi vin singure în fiecare seară</span></div><i data-lucide="chevron-right"></i></div></button>';
+  }
+}
+function tdWater(ml){logWater(ml);}
+/* deschide asistentul cu textul început — completezi doar ce ai mâncat */
+function askFill(txt){
+  const p=document.getElementById('askPanel');if(p&&!p.classList.contains('show'))toggleAsk();
+  setTimeout(()=>{const i=document.getElementById('askInput');if(!i)return;i.value=txt||'';i.focus();try{i.setSelectionRange(i.value.length,i.value.length);}catch(e){}if(typeof askBarSync==='function')askBarSync();if(typeof askGrow==='function')askGrow();},90);
+}
+/* cântărire rapidă: cifra scrisă sau poza cântarului */
+function tdWeigh(){
+  const mid=V4_ME(),lw=(S.diet.weights[mid]||[]).slice(-1)[0];
+  document.getElementById('qsTitle').innerHTML='<i data-lucide="scale"></i> Cântărire';
+  document.getElementById('qsSub').textContent=lw?('Ultima: '+fmtH(lw.w)+' kg ('+remDateLabel(lw.d)+'). Dimineața, înainte de micul dejun, e cel mai corect.'):'Prima cântărire — de aici încolo ține aplicația socoteala.';
+  document.getElementById('qsBody').innerHTML='<div class="tdweigh"><button type="button" onclick="tdWStep(-0.1)" aria-label="minus">−</button><input id="tdWKg" type="number" step="0.1" min="20" max="350" inputmode="decimal" value="'+(lw?lw.w:'')+'"><span>kg</span><button type="button" onclick="tdWStep(0.1)" aria-label="plus">+</button></div>'+
+    '<button class="btn" style="width:100%;margin-top:12px" onclick="tdWeighSave()"><i data-lucide="check"></i>Salvează</button>'+
+    '<button class="btn sec" style="width:100%;margin-top:8px" onclick="qsClose();go(\'health\');dTab(\'prof\');setTimeout(()=>openCamera(\'scale\'),200)"><i data-lucide="camera"></i>Fă o poză cântarului</button>';
+  document.getElementById('qsBack').classList.add('show');LI();
+  setTimeout(()=>{const i=document.getElementById('tdWKg');if(i)i.select();},120);
+}
+function tdWStep(d){const i=document.getElementById('tdWKg');if(!i)return;i.value=(Math.round(((Number(i.value)||0)+d)*10)/10).toFixed(1);}
+function tdWeighSave(){
+  const v=Number((document.getElementById('tdWKg')||{}).value);
+  if(!(v>=20&&v<=350))return toast('Scrie greutatea (20–350 kg)');
+  const mid=V4_ME(),ws=S.diet.weights[mid]||[],prev=ws.filter(x=>x.d<todayStr()).slice(-1)[0];
+  const _v=VIEW;VIEW='today';try{logWeightKg(Math.round(v*10)/10);}finally{VIEW=_v;}
+  qsClose();rToday();
+  const d=prev?Math.round((v-Number(prev.w))*10)/10:null;
+  toast(d==null?'Notat. De aici încolo vedem împreună cum evoluează.':d<0?pickR(['−'+fmtH(-d)+' kg față de data trecută. Bravo!','Ai coborât '+fmtH(-d)+' kg. Continuă tot așa!']):d>0?'Notat (+'+fmtH(d)+' kg). Apa și sarea mișcă cântarul — uită-te la linia pe două săptămâni.':'Notat — stabil. Constanța e partea grea, și tu o ai.');
+}
+/* „ce e nou" — o singură dată, pe ecranul Azi */
+function v4WhatsNew(){
+  try{if(localStorage.getItem('famlink_v4_seen'))return '';}catch(e){return '';}
+  return '<div class="tdnew" id="tdNew"><div class="tdn-h"><b><i data-lucide="gift"></i>FamLink 4.0 — mai simplu, mai automat</b><button onclick="v4SeenNew()" aria-label="Închide"><i data-lucide="x"></i></button></div><ul>'+
+    '<li><b>Azi</b> — tot ce contează pe un singur ecran, cu acțiunile de zi cu zi la o atingere.</li>'+
+    '<li><b>Mesele din chat se notează pe loc.</b> Ai mâncat mai mult, mai puțin sau încă ceva? Spune-i asistentului sau apasă pe porție.</li>'+
+    '<li><b>Fasting automat</b> — pornește seara, se oprește la prima masă sau la țintă.</li>'+
+    '<li><b>Notificări cu măsură</b> — doar când e cazul, cel mult 4 pe zi, niciodată noaptea.</li>'+
+    '<li><b>Pașii și caloriile din ceas vin singure</b>, printr-o scurtătură pe iPhone (Sănătate → Ceas).</li></ul></div>';
+}
+function v4SeenNew(){try{localStorage.setItem('famlink_v4_seen','1');}catch(e){}const el=document.getElementById('tdNew');if(el)el.remove();}
+
+/* ============ IMPORT AUTOMAT DIN APPLE HEALTH (scurtătură iPhone → gist privat → FamLink) ============ */
+/* cifrele vin formatate după limba telefonului: „8.123" (pași), „512,4" (kcal), „98,4 kg" */
+function parseLocNum(s,intLike){
+  s=String(s==null?'':s).replace(/[^\d.,\-]/g,'');if(!s||s==='-')return null;
+  const lc=s.lastIndexOf(','),ld=s.lastIndexOf('.');
+  if(lc>=0&&ld>=0){s=lc>ld?s.replace(/\./g,'').replace(',','.'):s.replace(/,/g,'');}
+  else if(lc>=0){s=/^\d{1,3}(,\d{3})+$/.test(s)&&intLike?s.replace(/,/g,''):s.replace(',','.');}
+  else if(ld>=0&&intLike&&/^\d{1,3}(\.\d{3})+$/.test(s))s=s.replace(/\./g,'');
+  const v=Number(s);return isFinite(v)?v:null;
+}
+function fitParsePayload(txt){
+  txt=String(txt||'').trim();let o={};
+  if(/^[A-Za-z0-9+/=]+$/.test(txt)&&txt.length>12){try{txt=decodeURIComponent(escape(atob(txt)));}catch(e){}}
+  if(txt.charAt(0)==='{'){try{o=JSON.parse(txt);}catch(e){o={};}}
+  else txt.split(/[;&\n]/).forEach(kv=>{const i=kv.indexOf('=');if(i>0){let v=kv.slice(i+1).trim();try{v=decodeURIComponent(v);}catch(e){}o[kv.slice(0,i).trim().toLowerCase()]=v;}});
+  return o;
+}
+function fitResolveMember(m){
+  m=String(m||'').trim();if(!m)return V4_ME();
+  if(memById(m))return m;
+  const byEm=S.members.find(x=>(x.email||'').toLowerCase()===m.toLowerCase());if(byEm)return byEm.id;
+  const byNm=memByNameLoose(m);return byNm?byNm.id:V4_ME();
+}
+function fitDateOf(d){
+  d=String(d||'').trim();
+  if(/^\d{4}-\d{2}-\d{2}/.test(d))return d.slice(0,10);
+  const m=d.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})/);if(m)return m[3]+'-'+pad(Number(m[2]))+'-'+pad(Number(m[1]));
+  return todayStr();
+}
+function fitImportPayload(o){
+  const mid=fitResolveMember(o.m||o.member||o.email),d=fitDateOf(o.d||o.date||o.zi);
+  const move=parseLocNum(o.move||o.active||o.activ,true),rest=parseLocNum(o.rest||o.repaus||o.basal,true);
+  const total=parseLocNum(o.total,true)||((move!=null&&rest!=null&&rest>0)?Math.round(move+rest):null);
+  const steps=parseLocNum(o.steps||o.pasi,true),ex=parseLocNum(o.ex||o.exercise||o.exercitiu,true),km=parseLocNum(o.km||o.dist);
+  const kg=parseLocNum(o.kg||o.weight||o.greutate);
+  const rec={move:move!=null?Math.round(move):null,total,steps:steps!=null?Math.round(steps):null,exMin:ex!=null?Math.round(ex):null,km:km!=null?Math.round(km*100)/100:null};
+  const has=Object.values(rec).some(v=>v!=null&&v>0);
+  S.diet.fitness=S.diet.fitness||{};const arr=S.diet.fitness[mid]=S.diet.fitness[mid]||[];
+  if(has){
+    let ex2=arr.find(x=>x.d===d);
+    if(!ex2){ex2={id:uid(),d,useMove:true};arr.push(ex2);}
+    for(const k in rec)if(rec[k]!=null&&rec[k]>0)ex2[k]=rec[k];
+    ex2.src=String(o.src||'Apple Health').slice(0,40);ex2.auto=true;ex2.at=Date.now();ex2.u=Date.now();
+    arr.sort((a,b)=>a.d<b.d?-1:1);
+  }
+  let kgOk=false;
+  if(kg!=null&&kg>=20&&kg<=350){S.diet.weights[mid]=S.diet.weights[mid]||[];const ws=S.diet.weights[mid],w=ws.find(x=>x.d===d);const v=Math.round(kg*10)/10;if(w)w.w=v;else ws.push({d,w:v});ws.sort((a,b)=>a.d<b.d?-1:1);kgOk=true;}
+  return {mid,d,has,kg:kgOk?Math.round(kg*10)/10:null,rec};
+}
+function fitImportDone(res,quiet){
+  if(!res.length)return;
+  save();if(typeof checkMilestones==='function')checkMilestones();
+  const me=res.filter(r=>r.mid===V4_ME()).sort((a,b)=>a.d<b.d?1:-1)[0];
+  if(me&&!quiet){const bits=[me.rec.steps?fmtN(me.rec.steps)+' pași':'',me.rec.move?fmtN(me.rec.move)+' kcal active':'',me.kg?fmtH(me.kg)+' kg':''].filter(Boolean);toast('Am adus din Apple Health'+(me.d!==todayStr()?' ('+remDateLabel(me.d)+')':'')+': '+(bits.join(' · ')||'ziua ta')+'.');}
+  try{if(VIEW==='health'&&dietTab==='fit'){rFit();rFitAuto();}else v4Refresh();}catch(e){}
+}
+/* fișierele fit-*.json lăsate de scurtătură în gist: le citim, le trecem în jurnal, apoi le ștergem */
+async function fitInboxFromGist(files){
+  const names=Object.keys(files||{}).filter(n=>/^fit-.*\.(json|txt)$/i.test(n));
+  if(!names.length)return 0;
+  const res=[],done=[];
+  for(const n of names){
+    let txt=files[n].content;
+    try{if(files[n].truncated&&files[n].raw_url)txt=await (await fetch(files[n].raw_url,{headers:ghHeaders()})).text();}catch(e){}
+    const o=fitParsePayload(txt);
+    if(!o.m){const mm=n.match(/^fit-(.+?)-(\d{4}-\d{2}-\d{2})/);if(mm){o.m=mm[1];if(!o.d)o.d=mm[2];}}
+    try{const r=fitImportPayload(o);if(r.has||r.kg)res.push(r);done.push(n);}catch(e){console.warn('fit import',n,e);}
+  }
+  fitImportDone(res,false);
+  if(done.length){const del={};done.forEach(n=>del[n]=null);
+    try{await fetch('https://api.github.com/gists/'+SYNC.gistId,{method:'PATCH',headers:ghHeaders(),body:JSON.stringify({files:del})});}catch(e){}}
+  try{localStorage.setItem('famlink_fit_check',String(Date.now()));}catch(e){}
+  return res.length;
+}
+/* varianta fără gist: scurtătura deschide FamLink cu #fit=… (merge când aplicația rulează în Safari/Chrome, nu de pe ecranul principal) */
+function handleFitHash(){
+  const h=location.hash||'';if(h.indexOf('#fit=')!==0)return false;
+  history.replaceState(null,'',location.pathname);
+  try{const r=fitImportPayload(fitParsePayload(h.slice(5)));fitImportDone((r.has||r.kg)?[r]:[],false);}catch(e){toast('Nu am putut citi datele din scurtătură');}
+  return true;
+}
+async function fitAutoCheck(){
+  if(!(SYNC.token&&SYNC.pass&&SYNC.gistId)){toast('Pentru import automat, pornește întâi Sincronizarea (Setări).');return;}
+  toast('Verific dacă au venit date din ceas…');
+  await syncPull(true);
+  const mid=V4_ME(),f=((S.diet.fitness||{})[mid]||[]).find(x=>x.d===todayStr());
+  if(!(f&&f.auto))toast('Încă nimic nou de la scurtătură. Dacă ai configurat-o, rulează-o o dată din Scurtături ca test.');
+  if(VIEW==='health'&&dietTab==='fit')rFitAuto();
+}
+function v4Copy(txt,lbl){(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>toast((lbl||'Text')+' copiat ✓')).catch(()=>{prompt('Copiază:',txt);});}
+function fitAutoBody(mid){return '{"files":{"fit-'+mid+'-[Zi].json":{"content":"m='+mid+';d=[Zi];move=[Active];rest=[Repaus];steps=[Pasi];ex=[Exercitiu];km=[Km];kg=[Kg]"}}}';}
+function rFitAuto(){
+  const el=document.getElementById('fitAutoBox');if(!el)return;
+  const mid=V4_ME(),me=(memById(mid)||{}).name||'tine';
+  const ok=!!(SYNC.token&&SYNC.pass&&SYNC.gistId);
+  const last=((S.diet.fitness||{})[mid]||[]).filter(x=>x.auto).slice(-1)[0];
+  const url=ok?('https://api.github.com/gists/'+SYNC.gistId):'';
+  const code=(t,lbl,key)=>'<div class="cpy"><code>'+esc(t)+'</code><button class="btn sm sec" onclick="v4Copy(_fitCopy[\''+key+'\'],\''+lbl+'\')"><i data-lucide="copy"></i>Copiază</button></div>';
+  window._fitCopy={url,auth:ok?('token '+SYNC.token):'',body:fitAutoBody(mid)};
+  el.innerHTML='<div class="fitauto">'+
+    '<div class="fa-h"><span class="fa-ic"><i data-lucide="zap"></i></span><div><b>Import automat din Apple Health</b><span>'+(last?('Merge ✓ — ultima zi adusă: '+remDateLabel(last.d)+(last.at?(' la '+fmtHM(new Date(last.at))):'')):'Pași, calorii active, minute de exercițiu și greutatea (de la cântarul inteligent), în fiecare seară, fără capturi.')+'</span></div></div>'+
+    (ok?('<div class="row" style="gap:8px;margin-top:10px"><button class="btn sm" onclick="fitAutoCheck()"><i data-lucide="refresh-cw"></i>Verifică acum</button></div>')
+      :('<p class="fa-warn"><i data-lucide="info"></i><span>Datele ajung în FamLink prin gistul tău privat de la <b>Sincronizare</b>. Pornește-o întâi (Setări → Sincronizare între dispozitive), apoi revino aici.</span></p><button class="btn sm sec" onclick="go(\'set\')"><i data-lucide="settings"></i>Deschide Setările</button>'))+
+    '<details class="fa-guide" id="fitGuide"><summary><i data-lucide="list-ordered"></i>Cum configurez scurtătura (o singură dată, ~5 minute)<span class="chev"><i data-lucide="chevron-down"></i></span></summary>'+
+    '<ol class="steps">'+
+      '<li>Pe iPhone deschide <b>Scurtături</b> (Shortcuts) → <b>Automatizare</b> → <b>+</b> → <b>Oră din zi</b> (Time of Day) → <b>21:30</b>, <b>Zilnic</b> → alege <b>Rulează imediat</b> (Run Immediately) → <b>Automatizare nouă, goală</b>.</li>'+
+      '<li>Adaugă <b>Găsește mostre de sănătate</b> (Find Health Samples): tip <b>Energie activă</b>, <b>Data începerii</b> este <b>Azi</b>. Sub ea, <b>Calculează statistici</b> (Calculate Statistics) → <b>Sumă</b>. Redenumește rezultatul <b>Active</b>.</li>'+
+      '<li>La fel pentru: <b>Pași</b> → <b>Pasi</b> · <b>Minute de exercițiu</b> → <b>Exercitiu</b> · <b>Energie în repaus</b> → <b>Repaus</b> · <b>Distanță mers și alergare</b> → <b>Km</b>.</li>'+
+      '<li>Opțional, greutatea de la cântarul inteligent: <b>Găsește mostre de sănătate</b> tip <b>Greutate</b>, sortează după dată, <b>cea mai recentă</b>, limită <b>1</b> → redenumește <b>Kg</b>.</li>'+
+      '<li><b>Formatează data</b> (Format Date): <b>Data curentă</b>, format personalizat <b>yyyy-MM-dd</b> → redenumește <b>Zi</b>.</li>'+
+      '<li>Adaugă <b>Text</b> și lipește șablonul de mai jos. Apoi înlocuiește fiecare <b>[Zi]</b>, <b>[Active]</b>, <b>[Repaus]</b>, <b>[Pasi]</b>, <b>[Exercitiu]</b>, <b>[Km]</b>, <b>[Kg]</b> cu variabila cu același nume (atingi cuvântul → <b>Selectează variabila</b>).'+code(window._fitCopy.body,'Șablonul','body')+'</li>'+
+      '<li>Adaugă <b>Obține conținutul URL-ului</b> (Get Contents of URL): URL-ul de mai jos, <b>Metodă: PATCH</b>, <b>Anteturi</b>: <b>Authorization</b> = valoarea de mai jos și <b>Content-Type</b> = <b>application/json</b>, <b>Corpul cererii: Fișier</b> (File) → alege <b>Text</b>-ul de la pasul anterior.'+(ok?(code(url,'URL-ul','url')+code('token ••••'+String(SYNC.token).slice(-4),'Antetul Authorization','auth')):'<p class="fa-warn" style="margin-top:6px">URL-ul și antetul apar aici după ce pornești Sincronizarea.</p>')+'</li>'+
+      '<li>Apasă ▶ o dată ca test, apoi aici <b>Verifică acum</b>. De acum, în fiecare seară ziua ta vine singură — și pe celelalte dispozitive ale familiei.</li>'+
+    '</ol>'+
+    '<p class="fa-note">Scurtătura e pentru <b>'+esc(me)+'</b>. Fiecare membru își face una pe telefonul lui, din contul lui din FamLink (șablonul are id-ul lui). Datele stau în gistul tău privat doar până le preia aplicația (câteva minute), apoi se șterg. Tokenul rămâne doar în scurtătura de pe telefonul tău.</p>'+
+    '<p class="fa-note"><b>Android:</b> browserul nu are acces la Health Connect. Trimite o captură din aplicația de fitness (mai sus sau în chat) — o citesc eu.</p>'+
+    '</details></div>';
+  LI();
+}
+
+/* ============ MESE DIN CHAT: notate pe loc, ajustate dintr-o atingere ============ */
+const _mr={};
+const MR_MULTS=[[0.5,'½'],[0.75,'¾'],[1,'1'],[1.25,'1¼'],[1.5,'1½'],[2,'2']];
+function mrSnap(m){return {cal:Number(m.cal)||0,g:Number(m.g)||0,p:Number(m.p)||0,c:Number(m.c)||0,f:Number(m.f)||0,comp:m.comp?JSON.parse(JSON.stringify(m.comp)):null,name:m.name,type:m.type};}
+function askMealReceipt(ids,opt){
+  opt=opt||{};ids=(ids||[]).filter(id=>mealById(id));if(!ids.length)return;
+  const rid='mr'+(_planN++),R=_mr[rid]={ids,base:{},mult:{},prev:{},title:opt.title||'Notat în mesele de azi',note:opt.note||''};
+  const eds={};(opt.edits||[]).forEach(e=>eds[e.id]=e.prev);
+  ids.forEach(id=>{const m=mealById(id);if(eds[id]){R.prev[id]=eds[id];R.base[id]=eds[id];R.mult[id]=eds[id].cal?(Number(m.cal)||0)/eds[id].cal:1;}else{R.base[id]=mrSnap(m);R.mult[id]=1;}});
+  const log=document.getElementById('askLog');if(!log)return;
+  const box=document.createElement('div');box.className='askcard mrc';box.id=rid;box.innerHTML=mrHtml(rid);log.appendChild(box);LI();log.scrollTop=log.scrollHeight;
+  _askHist.push({who:'bot',txt:'[Notat în mese: '+ids.map(id=>{const m=mealById(id);return m.type+': '+m.name+' '+m.cal+' kcal';}).join('; ')+']'});
+}
+function mrHtml(rid){
+  const R=_mr[rid];if(!R)return '';
+  if(R.undone)return '<h4><i data-lucide="undo-2"></i>Anulat</h4><p class="pdesc" style="margin:0">Am scos din jurnal ce notasem. Spune-mi din nou când vrei.</p>';
+  const rows=R.ids.map(id=>{const m=mealById(id);if(!m)return '';const cur=R.mult[id]||1;
+    return '<div class="mrrow"><div class="mr-top"><b class="mr-n">'+esc(m.name)+'</b><span class="mr-k"><input type="number" min="0" step="10" value="'+(Number(m.cal)||0)+'" onchange="mrCal(\''+rid+'\',\''+id+'\',this.value)" aria-label="kcal">kcal</span></div>'+
+      '<div class="mr-sub"><select onchange="mrType(\''+rid+'\',\''+id+'\',this.value)" aria-label="Tipul mesei">'+['Mic dejun','Prânz','Cină','Gustare'].map(t=>'<option'+(t===m.type?' selected':'')+'>'+t+'</option>').join('')+'</select>'+(Number(m.g)>0?'<span class="mr-g">≈ '+fmtN(m.g)+' g</span>':'')+'</div>'+
+      '<div class="pmult mr-mult"><span class="pml">Porția:</span>'+MR_MULTS.map(q=>'<button type="button" class="'+(Math.abs(cur-q[0])<0.03?'on':'')+'" onclick="mrMult(\''+rid+'\',\''+id+'\','+q[0]+')">'+q[1]+'</button>').join('')+'</div></div>';}).join('');
+  const b=dayBudget(dietMid());
+  return '<h4><i data-lucide="check-circle-2"></i>'+esc(R.title)+'</h4>'+rows+
+    '<div class="plantot"><span>Azi: '+fmtN(b.eaten)+' / '+fmtN(b.budget)+' kcal</span><span class="'+(b.left<0?'over':'ok')+'">'+(b.left>=0?('mai ai ~'+fmtN(b.left)):('peste cu '+fmtN(-b.left)))+'</span></div>'+
+    (R.note?'<p class="pdesc mr-note"><i data-lucide="timer"></i>'+esc(R.note)+'</p>':'')+
+    '<div class="mr-act"><span>A fost mai mult sau mai puțin? Apasă pe porție sau scrie-mi.</span><button class="btn sm ghost" onclick="mrUndo(\''+rid+'\')"><i data-lucide="undo-2"></i>Anulează</button></div>';
+}
+function mrPaint(rid){const el=document.getElementById(rid);if(el){el.innerHTML=mrHtml(rid);LI();}try{rMeals();v4Refresh();}catch(e){}}
+function mrScale(m,base,f){
+  m.cal=Math.round(base.cal*f);['g','p','c','f'].forEach(k=>{if(base[k]>0)m[k]=Math.round(base[k]*f);});
+  if(base.comp&&Array.isArray(m.comp))m.comp=base.comp.map(x=>Object.assign({},x,{grame:Math.round((Number(x.grame)||0)*f),kcal:Math.round((Number(x.kcal)||0)*f)}));
+  m.u=Date.now();
+}
+function mrMult(rid,id,f){const R=_mr[rid],m=mealById(id);if(!R||!m)return;mrScale(m,R.base[id],f);R.mult[id]=f;save();mrPaint(rid);}
+function mrCal(rid,id,v){const R=_mr[rid],m=mealById(id);if(!R||!m)return;const c=Math.max(0,Math.round(Number(v)||0)),b=R.base[id];const f=b.cal>0?c/b.cal:1;mrScale(m,b,f);m.cal=c;R.mult[id]=f;save();mrPaint(rid);}
+function mrType(rid,id,t){const m=mealById(id);if(!m)return;m.type=t;m.u=Date.now();save();mrPaint(rid);}
+function mrUndo(rid){
+  const R=_mr[rid];if(!R||R.undone)return;
+  R.ids.forEach(id=>{const m=mealById(id);if(!m)return;const pv=R.prev[id];
+    if(pv){m.cal=pv.cal;['g','p','c','f'].forEach(k=>{if(pv[k]>0)m[k]=pv[k];});if(pv.comp)m.comp=pv.comp;m.name=pv.name;m.type=pv.type;m.u=Date.now();}
+    else removeMeal(id);});
+  R.undone=true;save();mrPaint(rid);_askHist.push({who:'bot',txt:'[Utilizatorul a anulat ultimele mese notate]'});
+}
+/* cardul din meniu → notat direct; dacă fusese notat, înlocuim mesele (nu le dublăm) */
+function planCommit(id){
+  const p=_askPlans[id];if(!p)return;
+  const sel=(p.recomandari||[]).filter(x=>x._on);
+  if(!sel.length)return toast('Bifează întâi ce ai luat din meniu');
+  let replaced=false;(p._mealIds||[]).forEach(mid=>{if(mealById(mid)){removeMeal(mid);replaced=true;}});
+  window._fastNote='';
+  const ids=sel.map(x=>{const ex={};[['g','grame'],['p','proteine_g'],['c','carbohidrati_g'],['f','grasimi_g']].forEach(([k,s])=>{if(Number(x[s])>0)ex[k]=Math.round(Number(x[s]));});
+    const m=quickMeal((String(x.nume||'Masă').trim()||'Masă')+(x.cantitate?' — '+x.cantitate:''),Math.round(Number(x.kcal)||0),x.tip||p.tip_masa||mealTypeNow(),Object.keys(ex).length?ex:null,true);return m.id;});
+  p._mealIds=ids;p._added=true;p.mod='mancat';
+  if(typeof clearAskFiles==='function')clearAskFiles();
+  const el=document.getElementById('askPlan'+id);if(el){el.innerHTML=planHtml(id);LI();}
+  askMealReceipt(ids,{title:replaced?'Am actualizat masa notată':'Notat în mesele de azi',note:window._fastNote||''});window._fastNote='';
+}
+/* după un card din meniu, „am mâncat mai mult piure / doar jumătate / și murături" merge direct la card */
+function planRoute(text,wait){
+  const lp=window._lastPlan;if(!lp||!_askPlans[lp.id])return false;
+  const p=_askPlans[lp.id];
+  if(Date.now()-lp.ts>3*36e5)return false;
+  if(p._added&&Date.now()-lp.ts>90*6e4)return false;
+  if(!/\b(am|mi-am|n-am|nu am)\s+(mai\s+)?(m[âa]ncat|luat|pus|servit|terminat|gustat)|\bmai (mult|pu[țt]in)|jum[ăa]tate|dublu|un sfert|\btot(ul|\s|$)|f[ăa]r[ăa]\s|[îi]n loc de/i.test(text))return false;
+  if(/calendar|memento|aminte[șs]te|programeaz|m[âa]ine la|pahar|(^|\s)ap[ăa]($|\s|[,.!?])/i.test(text))return false;
+  askDropBubble(wait);
+  window._lastPlan.ts=Date.now();
+  planAdjust(lp.id,text,{auto:true});
+  return true;
+}
+
+/* ============ PORNIRE v4 ============ */
+function v4Boot(){
+  fastAutoCfg();
+  try{handleFitHash();}catch(e){}
+  try{fastAutoTick(Date.now(),true);}catch(e){console.warn(e);}
+  try{nfCfg();}catch(e){}
+  setTimeout(()=>{try{fastPushSync(false);}catch(e){}},5000);
+  /* Azi se reîmprospătează singur (inele, fasting, calendar) cât timp e deschis */
+  setInterval(()=>{if(VIEW==='today'&&document.visibilityState==='visible'){try{rTdFast();}catch(e){}}},20000);
+  setInterval(()=>{if(VIEW==='today'&&document.visibilityState==='visible'){try{rToday();}catch(e){}}},120000);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){try{fastAutoTick(Date.now(),false);if(VIEW==='today')rToday();if(VIEW==='rem')rNfTop();}catch(e){}}});
+  /* ce a adus scurtătura din Health, verificat și fără sincronizarea periodică pornită */
+  setTimeout(()=>{try{const lc=Number(localStorage.getItem('famlink_fit_check')||0);if(SYNC.token&&SYNC.pass&&SYNC.gistId&&!Number(SYNC.intervalMin)&&Date.now()-lc>30*6e4)syncPull(true);}catch(e){}},8000);
+}
+</script>
 <script>
 /* ============ GEMINI AI ============ */
 /* lanț de rezervă: dacă modelul ales atinge limita (429) sau nu e disponibil, încearcă automat următorul gratuit */
@@ -5070,6 +6033,10 @@ function mergeState(local,remote){
   // configurarea notificărilor pe email se propagă între dispozitive (câștigă cea mai nouă)
   const lp=m.settings.push,rp=rs.push;
   if(rp&&(!lp||((rp.u||0)>(lp.u||0))))m.settings.push=rp;
+  /* v4: „Notificări cu măsură" — per membru, câștigă varianta modificată cel mai recent */
+  const _ln=local.settings.nfBy||{},_rn=rs.nfBy||{},_nb={};
+  new Set([...Object.keys(_ln),...Object.keys(_rn)]).forEach(k=>{const x=_ln[k],y=_rn[k];_nb[k]=(!x||(y&&(y.u||0)>(x.u||0)))?y:x;});
+  m.settings.nfBy=_nb;
   return m;
 }
 async function syncPull(silent){
@@ -5085,7 +6052,9 @@ async function syncPull(silent){
       const firstTime=!SYNC.seeded;
       S=mergeState(S,obj);localStorage.setItem(KEY,JSON.stringify(S));
       if(!firstTime)notifyNewEvents(beforeIds);
-      SYNC.seeded=true;SYNC.last=new Date().toISOString();saveSync();rSyncUI();render();if(!silent)toast('Sincronizat ✓ (date combinate)');
+      SYNC.seeded=true;SYNC.last=new Date().toISOString();saveSync();rSyncUI();
+      if(typeof fitInboxFromGist==='function')try{await fitInboxFromGist(d.files||{});}catch(e){console.warn('fit inbox',e);}
+      render();if(!silent)toast('Sincronizat ✓ (date combinate)');
       if(typeof pushCronSync==='function')pushCronSync(); // ștergerile/edițiile de mementouri se propagă imediat pe server
       if(!syncPull._cu&&typeof pushCatchUp==='function'){syncPull._cu=1;pushCatchUp(true);} // programările pornesc din starea PROASPĂT sincronizată
     }
@@ -5210,7 +6179,7 @@ function fabRestore(){
 })();
 function toggleAsk(){const _b=document.getElementById('askFab');if(_b&&_b._justDragged)return;const p=document.getElementById('askPanel');const open=p.classList.toggle('show');if(open){askWelcome();LI();setTimeout(()=>document.getElementById('askInput').focus(),60);}else{resetAsk();}}
 /* La închiderea sesiunii (X) uităm conversația — data viitoare pornește curat, nu continuă ce a fost. Ce e durabil rămâne în memoria de lungă durată. */
-function resetAsk(){_askHist=[];clearAskFiles();Object.keys(_askPlans).forEach(k=>delete _askPlans[k]);const log=document.getElementById('askLog');if(log){log.innerHTML='';delete log.dataset.init;}}
+function resetAsk(){_askHist=[];window._lastPlan=null;clearAskFiles();Object.keys(_askPlans).forEach(k=>delete _askPlans[k]);const log=document.getElementById('askLog');if(log){log.innerHTML='';delete log.dataset.init;}}
 /* Memorie de lungă durată: fapte durabile despre utilizator, păstrate între sesiuni în localStorage. */
 function aiMemFor(mid){const by=S.settings.aiMemoryBy=S.settings.aiMemoryBy||{};mid=mid||S.settings.activeUser||(S.members[0]||{}).id;return by[mid]=by[mid]||[];}
 function rememberAI(facts){if(!Array.isArray(facts))return;const mem=aiMemFor();facts.forEach(f=>{f=String(f||'').trim();if(f.length<3)return;if(mem.some(x=>x.toLowerCase()===f.toLowerCase()))return;mem.push(f);});const by=S.settings.aiMemoryBy,mid=S.settings.activeUser||(S.members[0]||{}).id;if(mem.length>40)by[mid]=mem.slice(-40);save();}
@@ -5223,11 +6192,11 @@ function askWelcome(){
   const h=new Date().getHours();
   const sal=h<5?'Bună seara':h<12?'Neața':h<18?'Salut':'Bună seara';
   const me=(memById(S.settings.activeUser||S.members[0].id)||{}).name||'';
-  appendAsk('bot',sal+(me&&me!=='Eu'?', '+me:'')+'! Spune-mi ce ai mâncat sau băut, pune ceva în calendar sau întreabă-mă orice despre ziua ta. Poți să-mi trimiți și o poză: meniul zilei, o etichetă sau farfuria (îți spun ce să iei și cât), afișajul cântarului (îți notez kilogramele) sau o captură din aplicația de fitness (îți trec ziua în jurnal).');
+  appendAsk('bot',sal+(me&&me!=='Eu'?', '+me:'')+'! Spune-mi pur și simplu ce ai mâncat — „o ciorbă și două felii de pâine" — și îl notez pe loc; dacă a fost mai mult sau mai puțin, îmi zici după sau apeși pe porție. Pot să pun și ceva în calendar, să-ți spun câte calorii mai ai sau să citesc o poză: meniul zilei, farfuria, cântarul ori o captură din ceas.');
   const chips=document.createElement('div');chips.id='askChips';chips.className='askchips';
-  [['image','Poza cu meniul zilei','att'],['scale','Poza cu cântarul','att'],['watch','Captură din ceas','att'],['glass-water','Am băut un pahar de apă'],['flame','Câte calorii mai am azi?'],['calendar','Ce am mâine în calendar?']].forEach(p=>{
+  [['utensils','Am mâncat…','fill'],['image','Poza cu meniul zilei','att'],['glass-water','Am băut un pahar de apă'],['flame','Câte calorii mai am azi?'],['scale','Poza cu cântarul','att'],['watch','Captură din ceas','att'],['calendar','Ce am mâine în calendar?']].forEach(p=>{
     const b=document.createElement('button');b.className='askchip';b.innerHTML='<i data-lucide="'+p[0]+'"></i>'+p[1];
-    b.onclick=p[2]==='att'?(()=>askPickFile()):(()=>{document.getElementById('askInput').value=p[1];askSend();});
+    b.onclick=p[2]==='att'?(()=>askPickFile()):(p[2]==='fill'?(()=>askFill('Am mâncat ')):(()=>{document.getElementById('askInput').value=p[1];askSend();}));
     chips.appendChild(b);
   });
   log.appendChild(chips);LI();
@@ -5312,12 +6281,14 @@ function askCtx(){
   const meals=b.meals;
   const kcal=b.eaten;
   const mtxt=meals.map(m=>m.type+': '+m.name+' ('+m.cal+' kcal)').join('; ')||'nimic încă';
+  const _lm=(typeof lastMealToday==='function')?lastMealToday():null;
+  const lastTxt=_lm?(' ULTIMA MASĂ NOTATĂ (la ea se referă „am mâncat mai mult/mai puțin" fără alte detalii): '+_lm.type+': '+_lm.name+' ('+_lm.cal+' kcal).'):'';
   const t=todayStr();
   const evs=S.events.filter(e=>e.date>=t).sort((a,b)=>a.date<b.date?-1:(a.time<b.time?-1:1)).slice(0,6).map(e=>e.date+(e.time?' '+e.time:'')+' — '+e.title).join('; ')||'niciuna';
   const goals=S.goals.filter(g=>!g.done).slice(-5).map(g=>g.title+(g.memberId&&memById(g.memberId)?' (al lui '+memById(g.memberId).name+')':' (al familiei)')).join('; ')||'niciunul';
   const me=(memById(S.settings.activeUser||S.members[0].id)||{}).name||'utilizator';
   const ws=(S.diet.weights[dietMid()]||[]).slice(-5).map(x=>x.d+': '+x.w+' kg').join(', ');
-  return `Utilizator: ${me}. Profil: ${p.sex==='F'?'femeie':'bărbat'}, ${p.age||'?'} ani, ${p.h||'?'} cm, ${w||'?'} kg, țintă ${p.target||'?'} kg, necesar zilnic ${b.tgt} kcal${c?(' (TDEE '+c.tdee+')'):''}.${ws?(' Ultimele cântăriri: '+ws+'.'):''} BUGETUL DE AZI: țintă ${b.tgt} kcal${b.burned?(' + '+b.burned+' kcal arse la sport = buget '+b.budget+' kcal'):''}; a mâncat ${b.eaten} kcal; ${b.left>=0?('ÎI MAI RĂMÂN '+b.left+' kcal până diseară'):('a DEPĂȘIT bugetul cu '+(-b.left)+' kcal')}. Macro consumate azi: ${b.mac.p} g proteine, ${b.mac.c} g carbohidrați, ${b.mac.f} g grăsimi. Azi a mâncat: ${mtxt} — total ${kcal} kcal. Apă azi: ${waterToday()} ml. ${(function(){try{const f=fitForDay(todayStr());const c=msCtx();const bits=[];if(f)bits.push('Date din ceas pentru azi: '+[f.move?f.move+' kcal active':'',f.total?f.total+' kcal consum total':'',f.exMin?f.exMin+' min exercițiu':'',f.steps?f.steps+' pași':''].filter(Boolean).join(', ')+'.');if(c.lost)bits.push('A dat jos '+c.lost+' kg față de prima cântărire'+(c.wStreak>1?(', se cântărește de '+c.wStreak+' zile la rând'):'')+'.');const nx=msNext(c);if(nx)bits.push('Următorul reper: „'+nx.m.t+'" — '+Math.max(0,+(nx.m.n-msVal(nx.m,c)).toFixed(1))+(nx.m.u||'')+' de parcurs.');return bits.length?(' '+bits.join(' ')):'';}catch(e){return '';}})()} ${(typeof planCtxText==='function')?planCtxText():''} Fasting activ: ${S.diet.fasting.active?'da':'nu'} (schemă ${S.diet.fasting.hours||16}:${24-(S.diet.fasting.hours||16)}). Următoarele activități din calendar: ${evs}. Obiective active: ${goals}.`;
+  return `Utilizator: ${me}. Profil: ${p.sex==='F'?'femeie':'bărbat'}, ${p.age||'?'} ani, ${p.h||'?'} cm, ${w||'?'} kg, țintă ${p.target||'?'} kg, necesar zilnic ${b.tgt} kcal${c?(' (TDEE '+c.tdee+')'):''}.${ws?(' Ultimele cântăriri: '+ws+'.'):''} BUGETUL DE AZI: țintă ${b.tgt} kcal${b.burned?(' + '+b.burned+' kcal arse la sport = buget '+b.budget+' kcal'):''}; a mâncat ${b.eaten} kcal; ${b.left>=0?('ÎI MAI RĂMÂN '+b.left+' kcal până diseară'):('a DEPĂȘIT bugetul cu '+(-b.left)+' kcal')}. Macro consumate azi: ${b.mac.p} g proteine, ${b.mac.c} g carbohidrați, ${b.mac.f} g grăsimi. Azi a mâncat: ${mtxt} — total ${kcal} kcal.${lastTxt} Apă azi: ${waterToday()} ml. ${(function(){try{const f=fitForDay(todayStr());const c=msCtx();const bits=[];if(f)bits.push('Date din ceas pentru azi: '+[f.move?f.move+' kcal active':'',f.total?f.total+' kcal consum total':'',f.exMin?f.exMin+' min exercițiu':'',f.steps?f.steps+' pași':''].filter(Boolean).join(', ')+'.');if(c.lost)bits.push('A dat jos '+c.lost+' kg față de prima cântărire'+(c.wStreak>1?(', se cântărește de '+c.wStreak+' zile la rând'):'')+'.');const nx=msNext(c);if(nx)bits.push('Următorul reper: „'+nx.m.t+'" — '+Math.max(0,+(nx.m.n-msVal(nx.m,c)).toFixed(1))+(nx.m.u||'')+' de parcurs.');return bits.length?(' '+bits.join(' ')):'';}catch(e){return '';}})()} ${(typeof planCtxText==='function')?planCtxText():''} Fasting activ: ${S.diet.fasting.active?'da':'nu'} (schemă ${S.diet.fasting.hours||16}:${24-(S.diet.fasting.hours||16)}). Următoarele activități din calendar: ${evs}. Obiective active: ${goals}.`;
 }
 /* ============ ATAȘAMENTE ÎN ASISTENT (poza cu meniul zilei, eticheta, farfuria) ============ */
 const ASK_MAXF=3;
@@ -5440,6 +6411,7 @@ function renderPlan(p){
   const box=document.createElement('div');box.className='askplan';box.id='askPlan'+id;
   box.innerHTML=planHtml(id);log.appendChild(box);LI();log.scrollTop=log.scrollHeight;
   planHist(p);
+  window._lastPlan={id,ts:Date.now()};
 }
 function planHtml(id){
   const p=_askPlans[id],items=p.recomandari||[],b=askBudget();
@@ -5451,7 +6423,7 @@ function planHtml(id){
     +'<div class="plantot"><span>'+(p.mod==='mancat'?'Total':'Total selectat')+': '+tot+' kcal</span><span class="'+(left<0?'over':'ok')+'">'+(left>=0?('îți rămân '+left+' kcal'):('depășești cu '+(-left)+' kcal'))+'</span></div>'
     +((p.de_evitat||[]).length?('<div class="planavoid"><b>Mai bine sari peste:</b> '+p.de_evitat.map(x=>esc(x.nume)+(x.motiv?' ('+esc(x.motiv)+')':'')).join(', ')+'</div>'):'')
     +'<div class="row planfix"><input id="planFix'+id+'" placeholder="'+(p.mod==='mancat'?'Am mâncat mai mult / mai puțin / și altceva…':'Ce ai mâncat de fapt? ex: tot piureul, jumătate din tocană…')+'" onkeydown="if(event.key===\'Enter\')planAdjust('+id+')"><button class="btn sm sec" onclick="planAdjust('+id+')" title="Ajustează cu AI"><i data-lucide="wand-2"></i></button></div>'
-    +'<button class="btn sm" style="margin-top:8px;width:100%" onclick="planAdd('+id+')"><i data-lucide="plus"></i>'+(p._added?'Adaugă din nou la mese':'Adaugă la mesele de azi')+'</button>';
+    +'<button class="btn sm" style="margin-top:8px;width:100%" onclick="planAdd('+id+')"><i data-lucide="plus"></i>'+(p._added?'Actualizează masa notată':'Notează în mesele de azi')+'</button>';
 }
 function planMult(id,i,m){
   const p=_askPlans[id],x=p&&p.recomandari&&p.recomandari[i];if(!x)return;
@@ -5464,12 +6436,12 @@ function planMult(id,i,m){
   const el=document.getElementById('askPlan'+id);if(el){el.innerHTML=planHtml(id);LI();}
 }
 /* „am mâncat mai mult / mai puțin / și altceva" — AI-ul reface lista, cardul se actualizează pe loc */
-async function planAdjust(id){
-  const p=_askPlans[id];if(!p)return;
-  const inp=document.getElementById('planFix'+id),fix=((inp&&inp.value)||'').trim();
+async function planAdjust(id,txt,opt){
+  const p=_askPlans[id];if(!p)return;opt=opt||{};
+  const inp=document.getElementById('planFix'+id),fix=String(txt||((inp&&inp.value)||'')).trim();
   if(!fix)return toast('Scrie ce ai mâncat diferit, ex: „doar jumătate din pui și o felie de pâine"');
   if(!S.settings.geminiKey)return toast('Adaugă întâi cheia Gemini în Setări');
-  appendAsk('user',fix);_askHist.push({who:'user',txt:fix});if(inp)inp.value='';
+  if(!txt){appendAsk('user',fix);_askHist.push({who:'user',txt:fix});}if(inp)inp.value='';
   const wait=askTyping();
   try{
     const items=(p.recomandari||[]).map(x=>({nume:x.nume,cantitate:x.cantitate,grame:x.grame,kcal:x.kcal,proteine_g:x.proteine_g,carbohidrati_g:x.carbohidrati_g,grasimi_g:x.grasimi_g,bifat:!!x._on}));
@@ -5486,6 +6458,8 @@ async function planAdjust(id){
     const el=document.getElementById('askPlan'+id);if(el){el.innerHTML=planHtml(id);LI();}
     askSay(String(j.reply||'').trim()||('Am actualizat cardul: '+rec.reduce((a,x)=>a+(Number(x.kcal)||0),0)+' kcal în total.'));
     planHist(p);
+    /* v4: dacă a spus ce A MÂNCAT (trecut), notăm direct — iar dacă notasem deja cardul, înlocuim mesele, nu le dublăm */
+    if(typeof planCommit==='function'&&(p.mod==='mancat'||p._added))planCommit(id);
   }catch(e){wait.textContent='Nu am reușit: '+e.message;}
 }
 function planTog(id,i,on){
@@ -5493,15 +6467,7 @@ function planTog(id,i,on){
   p.recomandari[i]._on=on;
   const el=document.getElementById('askPlan'+id);if(el){el.innerHTML=planHtml(id);LI();}
 }
-function planAdd(id){
-  const p=_askPlans[id];if(!p)return;
-  const sel=(p.recomandari||[]).filter(x=>x._on);
-  if(!sel.length)return toast('Bifează întâi ce iei din meniu');
-  aiAddAsk(sel.map(x=>({kind:'meal',type:x.tip||p.tip_masa||mealTypeNow(),
-    name:(String(x.nume||'Masă').trim()||'Masă')+(x.cantitate?' — '+x.cantitate:''),
-    cal:Number(x.kcal)||0,g:Number(x.grame)||0,p:Number(x.proteine_g)||0,c:Number(x.carbohidrati_g)||0,f:Number(x.grasimi_g)||0})),
-    msg=>{appendAsk('bot',msg);_askHist.push({who:'bot',txt:msg});if(/^Adăugat/.test(msg)){p._added=true;clearAskFiles();const el=document.getElementById('askPlan'+id);if(el){el.innerHTML=planHtml(id);LI();}}});
-}
+function planAdd(id){if(typeof planCommit==='function')return planCommit(id);}
 /* corectarea unei mese deja notate azi („de fapt am mâncat doar jumătate din pui") */
 function findTodayMeal(q){
   q=_normRo(q);if(!q)return null;
@@ -5534,6 +6500,8 @@ async function askSend(){
   _askHist.push({who:'user',txt:text+(fresh.length?' [a trimis '+fresh.length+' atașament/atașamente]':'')});if(_askHist.length>30)_askHist=_askHist.slice(-30);
   /* atașamentul rămâne „prins" de discuție, ca răspunsurile la întrebările asistentului să se lege tot de poză */
   if(_askFiles.length)return askSendFiles(text,wait,hist);
+  /* v4: „am mâncat mai mult / doar jumătate / și murături" după un card din meniu → ajustăm cardul și notăm direct */
+  if(typeof planRoute==='function'&&planRoute(text,wait))return;
   try{
     const memTxt=aiMemFor().join(' | ')||'(nimic reținut încă)';
     const prompt=`Ești asistentul personal din aplicația FamLink (sănătate + calendar de familie). Vorbești în română, natural. Azi este ${DAYS[new Date().getDay()]}, ${todayStr()}, ora ${new Date().toTimeString().slice(0,5)}.
@@ -5545,8 +6513,8 @@ ${hist}
 MESAJUL NOU AL UTILIZATORULUI: "${text}"
 NUMELE MEMBRILOR sunt EXACT cele din listă și NU se modifică niciodată: dacă în mesaj apare o variantă fonetică, un diminutiv sau o anglicizare a unui nume de membru (ex. „Alice", „Alisei", „Aliza" pentru Alisa), tratează-l ca fiind ACEL membru și folosește DOAR forma exactă din listă în reply și în câmpul "who" (pune ID-ul). Nu angliciza și nu „corecta" numele românești. LIMBA: răspunde în limba în care scrie utilizatorul (română sau engleză) — implicit română.
 IMPORTANT: mesajul vine des prin DICTARE VOCALĂ, deci poate avea greșeli de scriere, gramatică, cuvinte lipite sau transcrise fonetic greșit. Înțelege ce a vrut să spună, corectează în minte și tratează-l ca și cum ar fi fost scris corect — nu-l certa pentru greșeli, iar când confirmi folosește exprimarea corectă. EXCEPȚIE FERMĂ: numele proprii, denumirile de firme/bănci/aplicații/produse și cuvintele străine (engleză) se păstrează EXACT cum apar — nu le înlocui cu cuvinte românești care sună asemănător și nu deduce altă activitate din ele; dacă un asemenea cuvânt e neclar și schimbă sensul, întreabă scurt în loc să ghicești.
-Răspunde DOAR cu JSON valid, fără markdown: {"actions":[{"action":"fasting_start|fasting_stop|water|drink|meal|sport|weight|motto|goal|reminder|event|done|meal_edit","ml":număr,"name":"","cal":număr,"factor":număr,"type":"Mic dejun|Prânz|Cină|Gustare","minutes":număr,"kg":număr,"scope":"month|year","label":"","time":"HH:MM","every":ore,"date":"YYYY-MM-DD (DOAR la reminder o singură dată)","who":"all sau id membru (la reminder și goal)","match":"","text":""}],"memory":["fapt nou durabil de reținut"],"reply":"răspunsul tău"}.
-Reguli acțiuni: "am băut apă/un pahar"→water cu ml (pahar=250, cană=300, sticlă mică=500, sticlă mare=750, "jumătate de litru"=500, "un litru"=1000); cafea/ceai/suc/bere→drink cu cal estimat (cafea simplă 2, cu lapte 60, suc 110, bere 150) și name; mâncare descrisă→meal cu cal estimat realist și type potrivit orei; "am alergat/mers/sală/înot X minute"→sport cu name și minutes; "am/cântărit X kg"→weight; CORECTAREA UNEI MESE DEJA NOTATE AZI (în „Azi a mâncat" din date): dacă spune că a mâncat MAI MULT / MAI PUȚIN / doar o parte dintr-o masă notată deja („de fapt am mâncat doar jumătate din tocană", „la paste a fost dublu", „prânzul a avut 800 de calorii, nu 540") → action="meal_edit" cu match=cuvinte-cheie din numele mesei și factor (0.5, 1.5, 2…) SAU cal (noul total) — NU crea o masă nouă; dacă a mâncat ceva ÎN PLUS față de ce e notat („și o felie de pâine", „am luat și murături") → action="meal" nouă doar cu ce a adăugat. Dacă în conversație e un [Card …] cu feluri și cantități și el spune ce a mâncat din el, folosește cifrele cardului scalate după ce spune. motto→motto cu text; obiectiv→goal cu name și scope, unde "name" = DOAR ținta pe scurt (ex: „10.000 pași/zi", „citește 12 cărți", „slăbește 5 kg"), NICIODATĂ comanda întreagă și fără cuvinte ca „adaugă", „pune ca obiectiv", „pentru toată familia" — cui îi aparține merge exclusiv în "who", nu în name; DISTINCȚIE memento↔calendar (FOARTE IMPORTANT): dacă apare o ZI sau DATĂ anume (azi, mâine, poimâine, o zi a săptămânii ca „miercuri", „pe 12", un weekend, o dată clară) → e EVENIMENT DE CALENDAR: action="event", text=comanda originală COMPLETĂ (păstrează ziua ȘI ora exact cum le-a spus, nu le scoate). Un memento (reminder) e o NOTIFICARE de reamintire: fie se REPETĂ („în fiecare zi la 9 ia pastila", „amintește-mi seara să…" → reminder cu label și time; „la fiecare 2 ore bea apă" → reminder cu label și every=ore), fie e O SINGURĂ DATĂ la o dată anume care NU se repetă („amintește-mi pe 20 la 9 să iau pastila", „pune-mi un reminder mâine la 8 să sun", „memento o singură dată pe 15 la 14") → reminder cu label, date=YYYY-MM-DD și time. DIFERENȚA față de event: dacă e o simplă reamintire/notificare (cuvintele „amintește-mi / memento / reminder / să nu uit / anunță-mă") chiar cu dată → reminder cu date; dacă e o activitate reală în agendă (întâlnire, cină, control, sport) cu dată → event. Sinonime de memento: „memento", „reminder", „amintește-mi", „adu-mi aminte", „să nu uit", „anunță-mă zilnic". CUI îi sună mementoul — câmpul "who": nespecificat / „amintește-MI" → id-ul utilizatorului conectat; „pentru toată familia", „tuturor", „nouă" → "all"; alt MEMBRU din listă („amintește-i Alisei", „pune-i Alisei memento") → id-ul acelui membru; un nume care NU e membru → id-ul utilizatorului conectat, iar numele intră în label („Sun-o pe mama"). ACELEAȘI reguli "who" și la OBIECTIVE (action="goal"): „obiectivul MEU" / nespecificat → id-ul conectat; „obiectiv pentru familie / al nostru / să ne propunem" → "all"; „obiectiv pentru Alisa" → id-ul Alisei. Label-ul = acțiunea de făcut, scurtă, fără numele membrului în el. LA FEL pentru activități de calendar (action="event"): dacă e menționat alt membru sau familia, PĂSTREAZĂ acele cuvinte în text (nu le scoate) — ele decid ai cui e activitatea. Regulă: o zi/dată anume pentru o ACTIVITATE ⇒ event; o zi/dată anume pentru o REAMINTIRE („amintește-mi", „memento", „reminder") ⇒ reminder cu date (o singură dată); niciun reper de dată, doar un obicei repetat ⇒ reminder cu time sau every. TERMINAT/BIFARE: dacă utilizatorul spune că a TERMINAT sau a făcut deja o activitate EXISTENTĂ din calendar („am terminat X", „gata cu X", „am făcut deja X", „bifează X") → action="done", match=cuvinte-cheie din numele activității; NU crea eveniment nou și NU o șterge — doar o marchezi ca terminată. Dacă mesajul conține mai multe lucruri, pune mai multe acțiuni în array. Dacă e doar o întrebare sau conversație (ex: "câte calorii mai am azi?", "ce am mâine în calendar?", "ce să mănânc la cină?") → "actions":[] și răspunzi din datele de mai sus.
+Răspunde DOAR cu JSON valid, fără markdown: {"actions":[{"action":"fasting_start|fasting_stop|water|drink|meal|sport|weight|motto|goal|reminder|event|done|meal_edit","ml":număr,"name":"","cal":număr,"g":"grame (la meal, estimat)","p":"proteine g","c":"carbohidrați g","f":"grăsimi g","factor":număr,"type":"Mic dejun|Prânz|Cină|Gustare","minutes":număr,"kg":număr,"scope":"month|year","label":"","time":"HH:MM","every":ore,"date":"YYYY-MM-DD (DOAR la reminder o singură dată)","who":"all sau id membru (la reminder și goal)","match":"","text":""}],"memory":["fapt nou durabil de reținut"],"reply":"răspunsul tău"}.
+Reguli acțiuni: "am băut apă/un pahar"→water cu ml (pahar=250, cană=300, sticlă mică=500, sticlă mare=750, "jumătate de litru"=500, "un litru"=1000); cafea/ceai/suc/bere→drink cu cal estimat (cafea simplă 2, cu lapte 60, suc 110, bere 150) și name; mâncare descrisă→meal cu cal estimat realist și type potrivit orei; "am alergat/mers/sală/înot X minute"→sport cu name și minutes; "am/cântărit X kg"→weight; CORECTAREA UNEI MESE DEJA NOTATE AZI (în „Azi a mâncat" din date): dacă spune că a mâncat MAI MULT / MAI PUȚIN / doar o parte dintr-o masă notată deja („de fapt am mâncat doar jumătate din tocană", „la paste a fost dublu", „prânzul a avut 800 de calorii, nu 540") → action="meal_edit" cu match=cuvinte-cheie din numele mesei și factor (0.5, 1.5, 2…) SAU cal (noul total) — NU crea o masă nouă; dacă a mâncat ceva ÎN PLUS față de ce e notat („și o felie de pâine", „am luat și murături", „am mai mâncat și…") → action="meal" nouă doar cu ce a adăugat. Când spune VAG „am mâncat mai mult"/„mai puțin"/„o porție mai mare" fără să numească masa → meal_edit pe ULTIMA MASĂ NOTATĂ (match=numele ei) cu factor: „puțin mai mult" 1.25, „mai mult"/„o porție mare" 1.5, „dublu"/„două porții" 2, „mai puțin"/„o porție mică" 0.75, „jumătate" 0.5, „un sfert" 0.25 — fără întrebări în plus. Mesele și băuturile se notează IMEDIAT (el le poate ajusta apoi din card), deci nu cere confirmare: la „meal" pune nume scurt și clar (ex. „Ciorbă de fasole cu pâine"), cal realist pentru porția spusă sau pentru o porție obișnuită dacă nu spune, plus g/p/c/f estimate; type după ce spune el („la prânz", „aseară"), altfel după ora curentă. Dacă în conversație e un [Card …] cu feluri și cantități și el spune ce a mâncat din el, folosește cifrele cardului scalate după ce spune. motto→motto cu text; obiectiv→goal cu name și scope, unde "name" = DOAR ținta pe scurt (ex: „10.000 pași/zi", „citește 12 cărți", „slăbește 5 kg"), NICIODATĂ comanda întreagă și fără cuvinte ca „adaugă", „pune ca obiectiv", „pentru toată familia" — cui îi aparține merge exclusiv în "who", nu în name; DISTINCȚIE memento↔calendar (FOARTE IMPORTANT): dacă apare o ZI sau DATĂ anume (azi, mâine, poimâine, o zi a săptămânii ca „miercuri", „pe 12", un weekend, o dată clară) → e EVENIMENT DE CALENDAR: action="event", text=comanda originală COMPLETĂ (păstrează ziua ȘI ora exact cum le-a spus, nu le scoate). Un memento (reminder) e o NOTIFICARE de reamintire: fie se REPETĂ („în fiecare zi la 9 ia pastila", „amintește-mi seara să…" → reminder cu label și time; „la fiecare 2 ore bea apă" → reminder cu label și every=ore), fie e O SINGURĂ DATĂ la o dată anume care NU se repetă („amintește-mi pe 20 la 9 să iau pastila", „pune-mi un reminder mâine la 8 să sun", „memento o singură dată pe 15 la 14") → reminder cu label, date=YYYY-MM-DD și time. DIFERENȚA față de event: dacă e o simplă reamintire/notificare (cuvintele „amintește-mi / memento / reminder / să nu uit / anunță-mă") chiar cu dată → reminder cu date; dacă e o activitate reală în agendă (întâlnire, cină, control, sport) cu dată → event. Sinonime de memento: „memento", „reminder", „amintește-mi", „adu-mi aminte", „să nu uit", „anunță-mă zilnic". CUI îi sună mementoul — câmpul "who": nespecificat / „amintește-MI" → id-ul utilizatorului conectat; „pentru toată familia", „tuturor", „nouă" → "all"; alt MEMBRU din listă („amintește-i Alisei", „pune-i Alisei memento") → id-ul acelui membru; un nume care NU e membru → id-ul utilizatorului conectat, iar numele intră în label („Sun-o pe mama"). ACELEAȘI reguli "who" și la OBIECTIVE (action="goal"): „obiectivul MEU" / nespecificat → id-ul conectat; „obiectiv pentru familie / al nostru / să ne propunem" → "all"; „obiectiv pentru Alisa" → id-ul Alisei. Label-ul = acțiunea de făcut, scurtă, fără numele membrului în el. LA FEL pentru activități de calendar (action="event"): dacă e menționat alt membru sau familia, PĂSTREAZĂ acele cuvinte în text (nu le scoate) — ele decid ai cui e activitatea. Regulă: o zi/dată anume pentru o ACTIVITATE ⇒ event; o zi/dată anume pentru o REAMINTIRE („amintește-mi", „memento", „reminder") ⇒ reminder cu date (o singură dată); niciun reper de dată, doar un obicei repetat ⇒ reminder cu time sau every. TERMINAT/BIFARE: dacă utilizatorul spune că a TERMINAT sau a făcut deja o activitate EXISTENTĂ din calendar („am terminat X", „gata cu X", „am făcut deja X", „bifează X") → action="done", match=cuvinte-cheie din numele activității; NU crea eveniment nou și NU o șterge — doar o marchezi ca terminată. Dacă mesajul conține mai multe lucruri, pune mai multe acțiuni în array. Dacă e doar o întrebare sau conversație (ex: "câte calorii mai am azi?", "ce am mâine în calendar?", "ce să mănânc la cină?") → "actions":[] și răspunzi din datele de mai sus.
 REGULĂ DE AUR: execută DOAR ce a cerut utilizatorul explicit, exact cum a cerut — nu adăuga acțiuni în plus, nu schimba cantități, ore sau tipuri din proprie inițiativă. Dacă mesajul e ambiguu sau nu ești sigur ce a vrut (ce acțiune, ce cantitate, ce oră) → "actions":[] și pune în reply o întrebare scurtă de clarificare, în loc să ghicești. ATENȚIE SPECIALĂ la mesajele TĂIATE sau INCOMPLETE (dictarea se oprește des la mijloc): dacă mesajul se termină brusc în „să", „la", „cu", „despre" sau lipsește CE anume trebuie făcut/amintit/adăugat (are doar ora/data, fără subiect) → NU crea nimic, NU inventa titluri generice (gen „Reminder") — "actions":[] și întreabă natural ce lipsește (ex: „Ce să-ți amintesc mâine la 3:00?"). Nu fi însă exagerat de prudent: dacă intenția e clară chiar și cu mici greșeli de dictare, execută. În reply spune mereu EXACT ce ai notat (nume, cantitate, oră), ca utilizatorul să vadă imediat dacă ai înțeles greșit.
 MEMORIE — în "memory" pune DOAR informații durabile despre utilizator, care merită ținute minte pe termen lung (preferințe alimentare, alergii/intoleranțe, cine e în familie și detalii despre ei, obiective de fond, obiceiuri, cum îi place să-i vorbești). NU pune lucruri de moment (că a băut apă azi, caloriile de azi) — alea se salvează deja separat. Nu repeta ce e deja în MEMORIE. Dacă nu e nimic nou durabil, pune "memory":[].
 Reguli pentru "reply" — cele mai importante: vorbește ca un om real, cald și direct, la persoana a doua, nu ca un robot și nu ca un raport. Fii PRECIS: folosește cifrele reale din date (kcal rămase = necesar zilnic minus total mâncat, apă, kilograme, ce urmează în calendar). La întrebări răspunde la obiect în 1-3 fraze; la acțiuni confirmă scurt și natural, eventual cu o observație utilă legată de datele lui. Ține cont de conversația de până acum (referiri la mesaje anterioare). Fără liste, fără markdown, fără formule de salut repetate, fără clișee motivaționale.`;
@@ -5558,14 +6526,20 @@ Reguli pentru "reply" — cele mai importante: vorbește ca un om real, cald și
     const evAct=acts.find(x=>x&&x.action==='event');
     // aproape tot ce vrea AI-ul să adauge se confirmă (editabil) — instant rămân doar apa, fastingul și bifarea
     const toConfirm=[];let _meNote='';
+    /* v4: mesele, băuturile și corecturile se notează IMEDIAT — ajustezi apoi din cardul din chat (porție, kcal, tip) sau anulezi */
+    const _mNew=[],_mEd=[];window._fastNote='';
     acts.filter(x=>x&&x.action&&x.action!=='event'&&x.action!=='reply').forEach(x=>{
-      if(x.action==='meal'||x.action==='drink')toConfirm.push({kind:'meal',type:x.type||mealTypeNow(),name:x.name||(x.action==='drink'?'Băutură':'Masă'),cal:Number(x.cal)||0});
+      if(x.action==='meal'||x.action==='drink'){const _ex={};['g','p','c','f'].forEach(k=>{if(Number(x[k])>0)_ex[k]=Math.round(Number(x[k]));});
+        const _m=quickMeal(capFirst(String(x.name||(x.action==='drink'?'Băutură':'Masă')).trim())||'Masă',Math.max(0,Math.round(Number(x.cal)||0)),['Mic dejun','Prânz','Cină','Gustare'].includes(x.type)?x.type:mealTypeNow(),Object.keys(_ex).length?_ex:null,true);
+        if(_m)_mNew.push(_m.id);}
       else if(x.action==='reminder'){const _rd=/^\d{4}-\d{2}-\d{2}$/.test(x.date||'')?x.date:'';toConfirm.push({kind:'rem',label:capFirst(x.label||x.name)||'Memento',time:x.time||'',every:Number(x.every)||0,who:resolveWho(x.who),once:!!_rd&&!Number(x.every),date:_rd});}
       else if(x.action==='goal')toConfirm.push({kind:'goal',name:capFirst(x.name||x.text)||goalAutoTitle(text),scope:/an|year/i.test(x.scope||'')?'year':'month',who:resolveWho(x.who)});
       else if(x.action==='motto')toConfirm.push({kind:'motto',text:x.text||x.name||''});
       else if(x.action==='sport')toConfirm.push({kind:'sport',name:x.name||'Sport',minutes:Number(x.minutes)||0,cal:Number(x.cal)||0});
       else if(x.action==='weight')toConfirm.push({kind:'weight',kg:Number(x.kg)||0});
-      else if(x.action==='meal_edit'){const m=findTodayMeal(x.match||x.name);const f=Number(x.factor)||0;if(m)toConfirm.push({kind:'mealedit',id:m.id,name:m.name,cal0:Number(m.cal)||0,cal:Number(x.cal)>0?Math.round(Number(x.cal)):Math.round((Number(m.cal)||0)*(f>0?f:1))});else _meNote='N-am găsit azi o masă notată care să semene cu „'+(x.match||x.name||'')+'" — spune-mi ce ai mâncat și o notez.';}
+      else if(x.action==='meal_edit'){const m=findTodayMeal(x.match||x.name)||((!(x.match||x.name)&&typeof lastMealToday==='function')?lastMealToday():null);const f=Number(x.factor)||0;
+        if(m){const _prev=mrSnap(m),_cal=Number(x.cal)>0?Math.round(Number(x.cal)):Math.round((Number(m.cal)||0)*(f>0?f:1));applyMealEdit(m.id,_cal);_mEd.push({id:m.id,prev:_prev});}
+        else _meNote='N-am găsit azi o masă notată care să semene cu „'+(x.match||x.name||'')+'" — spune-mi ce ai mâncat și o notez.';}
       else execAction(x);
     });
     if(_meNote)a.reply=((a.reply||'')+' '+_meNote).trim();
@@ -5574,9 +6548,14 @@ Reguli pentru "reply" — cele mai importante: vorbește ca un om real, cald și
       aiAddAsk(toConfirm,msg=>{const full=(prevMsg?prevMsg+' · ':'')+msg;appendAsk('bot',msg);_askHist.push({who:'bot',txt:full});});
       return true;
     };
-    if(evAct){addEventsFromText(evAct.text||text,false,msg=>{done(msg);askConfirm(msg);});return;}
-    if(toConfirm.length){done(a.reply||'Am pregătit ce mi-ai spus — confirmă mai jos.');askConfirm('');return;}
-    done(a.reply||'Gata ✓');
+    const _receipts=()=>{
+      if(_mEd.length)askMealReceipt(_mEd.map(e=>e.id),{title:'Am corectat masa',edits:_mEd});
+      if(_mNew.length)askMealReceipt(_mNew,{title:_mNew.length>1?'Am notat în mesele de azi':'Notat în mesele de azi',note:window._fastNote||''});
+      window._fastNote='';
+    };
+    if(evAct){addEventsFromText(evAct.text||text,false,msg=>{done(msg);_receipts();askConfirm(msg);});return;}
+    if(toConfirm.length){done(a.reply||'Am pregătit ce mi-ai spus — confirmă mai jos.');_receipts();askConfirm('');return;}
+    done(a.reply||'Gata ✓');_receipts();
   }catch(e){wait.textContent='Nu am reușit: '+e.message;}
 }
 /* ============ v3.12 — asistentul citește și cântarul, și capturile din ceas ============ */
@@ -5710,7 +6689,8 @@ function askGrow(){const i=document.getElementById('askInput');if(!i)return;i.st
 /* ============ INIT ============ */
 applyTheme();
 applyPage();
-go('month');
+if(typeof v4Boot==='function')try{v4Boot();}catch(e){console.warn('v4Boot',e);}
+go('today');
 fabRestore();
 // reține cine e conectat — întreabă doar dacă nu există un membru activ salvat
 if(!S.settings.activeUser||!memById(S.settings.activeUser))askUser();
@@ -5728,6 +6708,7 @@ window.addEventListener('load',()=>{LI();fabRestore();});
 /* la revenirea în prim-plan (iPhone: aplicația „înghețată"): retrimite coada, verifică mementourile, reîmprospătează ziua */
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){try{flushPush();tick();if(typeof fcmRegister==='function')fcmRegister(false);if(typeof nudgeSchedule==='function')nudgeSchedule();}catch(e){}}});
 console.info('%cFamLink v'+APP_VER,'font-weight:bold;color:#2c7a5f',
+'\n• v4.0: ecranul Azi (inele pentru calorii/apă/mișcare/fasting, acțiuni rapide, calendarul zilei); fasting automat (pornește seara, se oprește la prima masă sau la țintă, cu „Anulează"); notificări cu măsură (plafon pe zi, liniște noaptea, doar când e cazul); import automat din Apple Health printr-o scurtătură iPhone; mesele spuse în chat se notează pe loc și se ajustează din card.'+
 '\n• Notificări: ștergerea unui memento/eveniment anulează și notificările programate pe server (pe toate dispozitivele, la prima sincronizare); fără dubluri local+push; handler FCM legat o singură dată.'+
 '\n• Acțiuni rapide din notificări: apă (100/250/500/750 ml/1 L/altă cantitate), fasting (Finalizează/+30 min/+1 h), calendar (Finalizat/Amână/Editează).'+
 '\n• Asistent: buton mutabil cu poziție memorată; memorie separată per membru; nume canonice (Alice→Alisa); obiectivele au mereu titlu, cu literă mare.'+

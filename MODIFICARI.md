@@ -374,3 +374,64 @@ Cazul concret: poza cu **meniul zilei** de la cantină. Asistentul propune „c�
 - Planul: fără dată → opțiuni; „sănătos" → 20 noiembrie, 2.010 kcal/zi, ritm real 0,74 „în grafic". Notificări: lista de azi (apă 1250/2500, mese 860/2010, mișcare 35/150) și declanșarea locală din `tick()`.
 - Cache PWA: `famlink-v48`.
 
+
+---
+
+## v4.0.0 — mai simplu, mai automat, mai puține notificări (2026-09-24)
+
+Cererea: fastingul să se închidă și să se reia singur, mesaje de susținere normale, calde, datele de fitness să vină automat, aplicația să fie mai ușor de folosit (mai ales mesele prin chat — „uneori el sugerează, dar eu am mâncat mai mult sau mai puțin, sau încă ceva"), mai puține notificări (apa!) și o grafică mai frumoasă.
+
+### Ecranul „Azi" (`#v-today`, `rToday`)
+
+- Filă nouă, prima din meniu și ecranul de pornire (logo-ul duce tot aici). Meniul are acum 5 file, cu indicator sub cea activă.
+- Hero cu salutul după oră și numele, o frază construită din datele reale (`cheerLine`: ai coborât față de cântărirea trecută, fasting aproape gata, apa bifată, seria de zile, kg de la start — altfel un gând pentru azi, stabil pe zi), 4 inele (calorii din buget, apă, minute de mișcare, fasting în curs sau pași din ceas) și „mai ai ~X kcal azi".
+- Acțiuni rapide: +250 ml, „Ce-am mâncat" (deschide asistentul cu „Am mâncat " completat — `askFill`), poză la masă, cântărire (foaie rapidă cu −/+ și „Fă o poză cântarului" — `tdWeigh`), pornește/oprește fastingul, mișcare.
+- Carduri: fastingul (bară, etapa, „poți mânca la…", +30 min / Oprește; se reîmprospătează la 20 s), calendarul zilei cu bifă (`tdDone`) și ce e mâine, datele din ceas (sau invitația la importul automat), un gând pentru azi. Un card „ce e nou" apare o singură dată.
+- `dietMid()` întoarce membrul activ pe Azi; `dayBudget(mid)` calculează bugetul pentru un membru anume, independent de ecran.
+
+### Mesele din chat, fără pași în plus
+
+- `meal`/`drink` din asistent se notează **imediat** (`quickMeal(..., silent)` întoarce acum masa), fără modalul de confirmare. Sub răspuns: `askMealReceipt` — card cu porția (½ · ¾ · 1 · 1¼ · 1½ · 2, scalată de la porția inițială, cu gramaj, macro și componente), kcal editabile, tipul mesei, bugetul zilei și „Anulează" (șterge masa cu tombstone sau, la corecturi, restaurează varianta dinainte).
+- `meal_edit` se aplică imediat, cu card „Am corectat masa". Promptul primește **ultima masă notată** (`lastMealToday`) și reguli pentru vag: „puțin mai mult" 1,25 · „mai mult" 1,5 · „dublu" 2 · „mai puțin" 0,75 · „jumătate" 0,5; „am mai mâncat și…" = masă nouă. Asistentul cere și g/p/c/f la mese.
+- Cardul din meniu: „Notează în mesele de azi" scrie direct (`planCommit`). După card, un mesaj despre ce ai mâncat („am mâncat tot piureul, jumătate din tocană și murături") e trimis la `planAdjust` (`planRoute`, 3 h după card), iar dacă e la trecut cardul devine „Ce ai în farfurie" și se notează; o a doua corectură **înlocuiește** mesele notate din card, nu le dublează.
+- Mese: buton mare „Spune-i asistentului" deasupra formularului. Chips de bun venit în chat: „Am mâncat…" completează câmpul.
+
+### Fasting automat (`fastAutoCfg`, `fastAutoTick`, `fastOnMeal`)
+
+- `S.diet.fasting.auto = {on, at, stopOnMeal, endAtGoal, handled}` (rămâne pe dispozitiv, ca și cronometrul). Cine are deja istoric de fasting îl primește pornit, cu ora de start = mediana orelor de start din istoric (rotunjită la 15 min); `handled` se fixează la activare, deci nu apar porniri retroactive.
+- **Pornire**: la ora aleasă (fereastra de mâncat afișată: ex. 12:00 – 20:00). La deschidere recuperează ce s-a întâmplat cât aplicația a fost închisă: mesele notate după ora de start mută startul (dacă erau la mai puțin de 40% din țintă) sau încheie postul la ora mesei.
+- **Oprire la masă** (orice masă ≥ 50 kcal a membrului activ, azi): sub 40% din țintă → fastingul se reia de la ora mesei; altfel se încheie la ora mesei. Mesaj cu „Anulează" (`toastAct`, `fastUndoEnd`).
+- **Închidere la țintă** (implicit pornit) și plasă de siguranță: un post uitat pornit peste 24 h după țintă se închide la țintă.
+- Istoricul marchează `auto: 'meal'|'goal'`. Toate căile (buton, notificare, asistent, automat) trec prin `fastStart`/`fastEnd`.
+- Push: „Fasting reușit" pentru postul în curs sau, în modul automat, pentru următorul — pe slotul emailului (`fast_<slot>`), nu pe dispozitiv, ca două dispozitive să nu dubleze; programarea veche `fast_<DID>` se șterge o dată.
+
+### Notificări cu măsură (`nfPlan`, `_nudgeSchedule`, `rNfTop`)
+
+- Un singur planificator pentru cântărire, apă, mesele de seară, mesele la oră (din mementourile vechi „Mic dejun/Prânz/Cină"), mișcare, bilanțul de duminică și „Ne-ai lipsit" (o dată, după 2 zile fără deschidere). Setările sunt **per membru** (`S.settings.nfBy`, sincronizate — câștigă varianta cea mai nouă).
+- Mod: Liniștit (max 2/zi, apa o dată, 3 h între) · Echilibrat (implicit: 4/zi, apa de 2 ori, 2 h între) · Mai des (7/zi). Ore de liniște (implicit 21:30–08:00) pentru tot ce e automat.
+- Apa: sloturi fixe sau la intervalul mementoului vechi, dar vine doar dacă ești în urmă cu ≥ 300 ml față de ritmul zilei și nu ai băut în ultimele 2 ore (ora ultimului pahar: `famlink_water_at`). Mesele de la oră nu vin dacă masa e deja notată sau dacă ești în fasting la ora aceea.
+- Plafonul ține cont de ce s-a trimis deja azi (`famlink_nf_log`).
+- Mementourile vechi de apă / cântărire / mese (`remHK`) **nu mai pleacă la oră fixă** (scoase din cron și din `tick()`); le preia planificatorul. Lista „Mementourile tale" arată doar mementourile personale, cu presetări noi (vitamine, medicamente, plimbare, somn).
+- **Bug reparat**: în v3.13 cheile notificărilor erau în afara prefixului grupului (`hn_weigh_…` vs. prefix `hn_em_…`), deci reprogramarea nu ștergea nimic de pe server — notificările rămâneau programate chiar după ce beai apa sau te cântăreai. Acum cheile sunt sub prefix, iar cele vechi se curăță o dată.
+- Ecranul Mementouri arată „Azi te mai anunț": ora și titlul fiecărei notificări rămase.
+- Texte calde, variate (alese stabil pe zi), cu cifrele tale. Service worker-ul deduce tipul din titlu (apă, cântar, masă, mișcare, fasting, „acasă") și deschide locul potrivit; doar notificările legate de o oră (calendar, fasting) mai rămân fixate pe ecran.
+
+### Import automat din Apple Health (`rFitAuto`, `fitInboxFromGist`)
+
+- O automatizare din Scurtături (zilnic, 21:30, „Rulează imediat") citește din Health energia activă și în repaus, pașii, minutele de exercițiu, distanța și greutatea, și scrie un fișier `fit-<membru>-<zi>.json` în gistul privat de sincronizare (PATCH la API-ul GitHub cu tokenul de sync). Ghid pas cu pas în Sănătate → Ceas, cu șablonul, URL-ul și antetul gata de copiat.
+- La fiecare sincronizare FamLink citește fișierele `fit-*`, le trece în `diet.fitness` (inclusiv caloriile active în bugetul zilei și consumul total pentru calibrare) și greutatea în jurnal, apoi le șterge din gist. Numerele se citesc indiferent de formatul telefonului („8.123", „512,4", „98,4 kg" — `parseLocNum`).
+- Alternativ, `#fit=m=…;d=…;steps=…` în URL (pentru cine folosește aplicația în browser, nu de pe ecranul principal).
+- Android: browserul nu are acces la Health Connect — rămâne importul din captură.
+
+### Grafică
+
+- Meniu cu blur, indicator sub fila activă; toast-uri tip pastilă, cu buton („Anulează"); carduri noi (Azi, Fasting automat, Import automat, Notificări cu măsură, cardul de masă din chat), toate cu temă întunecată.
+
+### Testat
+
+- Fasting (scenarii în browser): pornire automată la ora trecută, reluare la gustare după 2 h, încheiere la masă după 10 h, anulare, închidere la țintă după 17 h, fără repornire după închidere, recuperare la deschidere (masă la 9 h după start → post de 9 h).
+- Chat cu Gemini simulat: „o ciorbă de fasole și două felii de pâine" → 2 mese notate, card; ×1,5 → 480 kcal / 600 g; kcal 400; „am mâncat mai mult" → ultima masă ×1,5; anulări. Card din meniu → „am mâncat tot piureul, jumătate din tocană și murături" → 3 mese; a doua corectură → 4 mese, cele vechi șterse.
+- Notificări: plan Echilibrat/Liniștit/Mai des, condiții (apă, mese, mișcare), grupuri push cu chei sub prefix, cron fără mementourile de sănătate.
+- Import: gist simulat cu două fișiere (două formate, doi membri) → zilele și greutatea importate, fișierele șterse.
+- Toate ecranele: mobil 375 px și desktop, temă luminoasă și întunecată, utilizator nou fără date — fără erori în consolă.
+- Cache PWA: `famlink-v49`.

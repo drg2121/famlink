@@ -16,9 +16,14 @@ var messaging = firebase.messaging();
 function famlinkKind(d) {
   if (d.kind) return d.kind;
   var t = String(d.title || ''), b = String(d.body || '');
-  if (/^Fasting/i.test(t)) return 'fast';
-  if (/^Memento:/i.test(t) && /ap[ăa]|water/i.test(t)) return 'water';
+  /* v4: serverul nu transmite tipul — titlurile notificărilor îl spun singure */
   if (/^Memento:/i.test(t) && /Începe/i.test(b)) return 'event';
+  if (/fasting/i.test(t)) return 'fast';
+  if (/(^|[^\p{L}])ap[ăa]([^\p{L}]|$)|water/iu.test(t)) return 'water';
+  if (/c[âa]nt[ăa]r/i.test(t)) return 'weigh';
+  if (/m[âa]nc|mesele|dejun|pr[âa]nz|(^|\s)cin[ae]/i.test(t)) return 'meal';
+  if (/plimbare|mi[șs]care|mi[șs]c[ăa]/i.test(t)) return 'move';
+  if (/s[ăa]pt[ăa]m[âa]n|lipsit|ziua ta/i.test(t)) return 'home';
   if (/^Memento:/i.test(t)) return 'rem';
   return '';
 }
@@ -28,6 +33,8 @@ function famlinkActions(kind) {
   if (kind === 'water') return [{ action: 'water:250', title: '+250 ml' }, { action: 'qs:water', title: 'Altă cantitate…' }];
   if (kind === 'fast') return [{ action: 'fast:stop', title: 'Finalizează' }, { action: 'fast:ext30', title: '+30 min' }];
   if (kind === 'event') return [{ action: 'ev:done', title: 'Finalizat ✓' }, { action: 'ev:snooze', title: 'Amână 15 min' }];
+  if (kind === 'weigh') return [{ action: 'open', title: 'Notez greutatea' }];
+  if (kind === 'meal') return [{ action: 'open', title: 'Spun ce am mâncat' }];
   return [{ action: 'open', title: 'Deschide FamLink' }];
 }
 function famlinkNotifOptions(d) {
@@ -43,7 +50,7 @@ function famlinkNotifOptions(d) {
        nu se mai șterg una pe alta cum se întâmpla când toate aveau tag-ul 'fl-rem'. */
     tag: kind === 'event' ? ('fl-ev-' + (d.evId || d.title || '')) : (kind ? ('fl-' + kind + '-' + String(d.title || '')) : (d.tag || undefined)),
     renotify: true,
-    requireInteraction: true,          // rămâne pe ecran până o închizi (desktop)
+    requireInteraction: kind === 'event' || kind === 'fast', // v4: doar ce ține de o oră anume rămâne pe ecran; restul pleacă singure
     vibrate: [90, 40, 90],             // vibrează pe telefon
     timestamp: Date.now(),
     actions: famlinkActions(kind)
@@ -143,7 +150,7 @@ self.addEventListener('notificationclick', function (event) {
    CDN-urile cunoscute, ca FamLink să pornească și fără internet.
    Strategie: network-first pentru pagină (update-urile ajung imediat, cache doar
    ca fallback offline); cache-first pentru CDN-uri (librării versionate). */
-var CACHE = 'famlink-v48';
+var CACHE = 'famlink-v49';
 var ASSETS = ['./', 'index.html', 'manifest.json', 'firebase-config.js',
               'apple-touch-icon.png', 'icon-512.png'];
 var CDN_HOSTS = ['cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'www.gstatic.com'];

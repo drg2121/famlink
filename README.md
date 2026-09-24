@@ -2,7 +2,16 @@
 
 Aplicație într-un singur fișier (`index.html`), pe modelul ArhiLink: fără server, datele stau local în browser (localStorage), backup/restore JSON.
 
-**Module:** Calendar (Lună / An / Zi / Obiective, recurențe, notificări, motto-ul lunii, print A3/A4 landscape, export .ics pentru iPhone) și Sănătate (profil + IMC/BMR/TDEE, jurnal greutate cu grafic, fasting cu contor și notificări, mese + calorii, analiză foto și meniuri cu Gemini AI).
+**Module:** Azi (ecranul zilei), Calendar (Lună / An / Zi / Obiective, recurențe, notificări, motto-ul lunii, print A3/A4 landscape, export .ics pentru iPhone) și Sănătate (profil + IMC/BMR/TDEE, jurnal greutate cu grafic, fasting cu contor și notificări, mese + calorii, analiză foto și meniuri cu Gemini AI).
+
+## Noutăți v4.0 — mai simplu, mai automat
+
+- **Ecranul „Azi"** (prima filă, se deschide implicit): salut cu o frază de susținere construită din cifrele tale, inele pentru calorii, apă, mișcare și fasting/pași, câte calorii mai ai, șase acțiuni rapide (+250 ml, „Ce-am mâncat" în chat, poză la masă, cântărire, fasting, mișcare), fastingul în curs, calendarul zilei cu bifă și datele din ceas.
+- **Mesele din chat se notează pe loc**, fără fereastra de confirmare. Sub răspuns apare un card cu porția (½ · ¾ · 1 · 1¼ · 1½ · 2), kcal editabile, tipul mesei și „Anulează". „Am mâncat mai mult / mai puțin" corectează ultima masă; „am mai mâncat și…" adaugă una nouă. După un card din meniu, „am mâncat tot piureul și jumătate din tocană" reface cardul și îl notează direct (a doua corectură înlocuiește mesele, nu le dublează).
+- **Fasting automat**: pornește singur seara la ora aleasă (sau de la ultima masă, dacă mănânci după), se oprește când notezi prima masă (dacă abia începuse, îl reia de la ora mesei), se închide singur la țintă. Recuperează corect și ce s-a întâmplat cât aplicația a stat închisă. Tot ce face singur apare într-un mesaj cu „Anulează".
+- **Notificări cu măsură** (Mementouri): un singur planificator pentru cântărire, apă, mese, mișcare, bilanț și „te așteptăm înapoi". Fiecare vine doar dacă mai are rost, cu plafon pe zi (Liniștit 2 · Echilibrat 4 · Mai des 7), la distanță una de alta și niciodată în orele de liniște. Apa vine doar când rămâi în urmă față de ritmul zilei și niciodată la mai puțin de 2 ore după un pahar. Ecranul arată exact ce mai urmează azi. Texte calde, cu cifrele tale, în loc de „E momentul!".
+- **Import automat din Apple Health** (Sănătate → Ceas): o scurtătură pe iPhone trimite în fiecare seară pașii, caloriile active și în repaus, minutele de exercițiu, distanța și greutatea (de la cântarul inteligent) în gistul privat de sincronizare; FamLink le preia la următoarea sincronizare și șterge fișierul. Ghid pas cu pas în aplicație, cu butoane de copiere.
+- Grafică: meniu cu 5 file și indicator, mesaje (toast) cu buton de acțiune, carduri noi pe Azi, Mementouri și Fasting, temă întunecată pentru tot ce e nou.
 
 ## Noutăți v3.13
 
