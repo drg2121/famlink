@@ -464,3 +464,8 @@ Cererea: fastingul să se închidă și să se reia singur, mesaje de susținere
 
 - Curățarea automată ține minte valoarea scoasă (`kgIn` pe ziua respectivă), iar verificarea fără dată compară și cu ziua curentă. Așa, o scurtătură fără `kgd` care rulează din nou azi sau mâine nu mai pune la loc aceeași greutate veche; o cântărire nouă, cu altă valoare, intră normal.
 - Testat pe cazul real: greutate veche pusă azi, curățare, rulare din nou azi și mâine cu scurtătura veche, cântărire nouă mâine, scurtătura nouă (greutatea ajunge la data ei), sincronizare cu un dispozitiv pe versiunea veche. Cache PWA: `famlink-v53`.
+
+## v4.0.5 — scurtătura merge cap-coadă (2026-09-24)
+
+- Primul import real de pe iPhone: `steps=3134; move=198; rest=454; ex=3; km=2.33; kg=105.1; kgd=2025-11-21`. Pașii și caloriile au intrat, iar greutatea din noiembrie 2025 a fost ignorată (mai veche de 60 de zile), cum trebuia.
+- „Describe a shortcut” adăugase un antet gol (Key / Text), din care ieșea eroarea „cannot parse response”. Descrierea cere acum exact două antete, iar ghidul spune să ștergi rândul gol dacă apare. Cache PWA: `famlink-v54`.

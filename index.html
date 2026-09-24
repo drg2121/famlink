@@ -1825,7 +1825,7 @@ html[data-theme="dark"] .mealchat{background:linear-gradient(135deg,#2a211a,#241
 <script>
 /* ============ FamLink v1.0 — arhitectură ArhiLink (single-file, localStorage) ============ */
 const KEY='famlink_v1';
-const APP_VER='4.0.4';
+const APP_VER='4.0.5';
 /* prima literă mare (titluri de obiective, etichete de mementouri, titluri AI) */
 const capFirst=s=>{s=String(s||'').trim();return s?s.charAt(0).toLocaleUpperCase('ro-RO')+s.slice(1):s;};
 /* curăță titlul unui obiectiv: scoate din față formulările de COMANDĂ
@@ -5280,7 +5280,7 @@ function fitAiPrompt(mid,url){
     '8. Format Date: Current Date with custom format yyyy-MM-dd. Set Variable "Zi" to the formatted date.\n'+
     '9. A Text action with this single line, where each [Name] (brackets included) is replaced by the variable with that name, and everything else stays literal text:\n'+
     fitAutoLine(mid)+'\n'+
-    '10. Get Contents of URL: URL '+url+' , Method PATCH. Headers: "Authorization" = "PASTE_TOKEN_HERE" and "Content-Type" = "application/json". Request Body: JSON, with one field "files" of type Dictionary. Inside "files", one field of type Dictionary whose key is the text fit-'+mid+'- followed by the variable Zi followed by .json (for example fit-'+mid+'-'+todayStr()+'.json). Inside that, one field "content" of type Text, set to the Text from step 9.';
+    '10. Get Contents of URL: URL '+url+' , Method PATCH. Headers: exactly these two and no other header rows (no empty ones): "Authorization" = "PASTE_TOKEN_HERE" and "Content-Type" = "application/json". Request Body: JSON, with one field "files" of type Dictionary. Inside "files", one field of type Dictionary whose key is the text fit-'+mid+'- followed by the variable Zi followed by .json (for example fit-'+mid+'-'+todayStr()+'.json). Inside that, one field "content" of type Text, set to the Text from step 9.';
 }
 function rFitAuto(){
   const el=document.getElementById('fitAutoBox');if(!el)return;
@@ -5299,7 +5299,7 @@ function rFitAuto(){
     (ok?('<ol class="steps">'+
       '<li>Copiază descrierea de mai jos. E în engleză și are deja id-ul tău și adresa gistului. Dacă ai deja o scurtătură „FamLink Health”, șterge-o întâi.'+code(window._fitCopy.ai,'Descrierea','ai','tall')+'</li>'+
       '<li>În <b>Scurtături</b> apasă <b>+</b>, apoi <b>Describe a shortcut</b> (Descrie o scurtătură) și lipește textul.</li>'+
-      '<li>În scurtătura creată, la <b>Get Contents of URL</b> → <b>Headers</b>, înlocuiește <b>PASTE_TOKEN_HERE</b> cu antetul de mai jos. Tokenul nu stă în descriere, ca să nu ajungă la modelul care construiește scurtătura.'+code(authShow,'Antetul Authorization','auth')+'</li>'+
+      '<li>În scurtătura creată, la <b>Get Contents of URL</b> → <b>Headers</b>, înlocuiește <b>PASTE_TOKEN_HERE</b> cu antetul de mai jos. Dacă acolo mai apare un rând gol (<b>Key / Text</b>), șterge-l: altfel iese eroarea „cannot parse response”. Tokenul nu stă în descriere, ca să nu ajungă la modelul care construiește scurtătura.'+code(authShow,'Antetul Authorization','auth')+'</li>'+
       '<li>Apasă ▶ o dată. Când te întreabă, apasă <b>Allow Access</b> la fiecare tip din Health (altfel câmpul acela vine gol). Apoi aici, <b>Verifică acum</b>.</li>'+
       '<li>Ca să ruleze singură: <b>Automatizare</b> → <b>+</b> → <b>Oră din zi</b> → <b>21:30</b>, <b>Zilnic</b> → <b>Rulează imediat</b> → alege <b>FamLink Health</b>.</li>'+
     '</ol>'+'<p class="fa-note">Greutatea ajunge la data la care te-ai cântărit, nu la data rulării. O cântărire veche nu se mai trece ca fiind de azi, iar ce notezi tu de mână într-o zi are prioritate.</p>'):'<p class="fa-warn" style="margin-top:6px">Descrierea apare aici după ce pornești Sincronizarea.</p>')+
