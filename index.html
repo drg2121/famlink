@@ -1825,7 +1825,7 @@ html[data-theme="dark"] .mealchat{background:linear-gradient(135deg,#2a211a,#241
 <script>
 /* ============ FamLink v1.0 — arhitectură ArhiLink (single-file, localStorage) ============ */
 const KEY='famlink_v1';
-const APP_VER='4.0.2';
+const APP_VER='4.0.3';
 /* prima literă mare (titluri de obiective, etichete de mementouri, titluri AI) */
 const capFirst=s=>{s=String(s||'').trim();return s?s.charAt(0).toLocaleUpperCase('ro-RO')+s.slice(1):s;};
 /* curăță titlul unui obiectiv: scoate din față formulările de COMANDĂ
@@ -2848,7 +2848,7 @@ function saveProfile(){
   const p={sex:document.getElementById('pSex').value,age:Number(document.getElementById('pAge').value)||null,h:Number(document.getElementById('pH').value)||null,target:Number(document.getElementById('pT').value)||null,targetDate:/^\d{4}-\d{2}-\d{2}$/.test(td)?td:null,activity:document.getElementById('pAct').value,waterGoal:Number(document.getElementById('pWater').value)||null,kcalGoal:Number(document.getElementById('pKcal').value)||null};
   S.diet.profiles[mid]=Object.assign(getProf(),p);
   const w=Number(document.getElementById('pW').value);
-  if(w){S.diet.weights[mid]=S.diet.weights[mid]||[];const ws=S.diet.weights[mid];const t=todayStr();const ex=ws.find(x=>x.d===t);if(ex)ex.w=w;else ws.push({d:t,w});ws.sort((a,b)=>a.d<b.d?-1:1);}
+  if(w){S.diet.weights[mid]=S.diet.weights[mid]||[];const ws=S.diet.weights[mid];const t=todayStr();const ex=ws.find(x=>x.d===t);if(ex){if(ex.w!==w||ex.src){ex.w=w;ex.u=Date.now();delete ex.src;}}else ws.push({d:t,w,u:Date.now()});ws.sort((a,b)=>a.d<b.d?-1:1);}
   save();rHealthAll();toast('Profil salvat'); // v3.8.2: recalculează tot, nu doar statisticile + graficul; v3.11: + verificarea reperelor
 }
 let _wRange=90;
@@ -5166,17 +5166,48 @@ function fitResolveMember(m){
   const byEm=S.members.find(x=>(x.email||'').toLowerCase()===m.toLowerCase());if(byEm)return byEm.id;
   const byNm=memByNameLoose(m);return byNm?byNm.id:V4_ME();
 }
-function fitDateOf(d){
-  d=String(d||'').trim();
+function fitDateStrict(d){
+  d=String(d||'').trim();if(!d)return null;
   if(/^\d{4}-\d{2}-\d{2}/.test(d))return d.slice(0,10);
   const m=d.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})/);if(m)return m[3]+'-'+pad(Number(m[2]))+'-'+pad(Number(m[1]));
-  return todayStr();
+  const t=Date.parse(d.replace(/\s(at|la)\s/i,' '));return isNaN(t)?null:dstr(new Date(t));
+}
+function fitDateOf(d){return fitDateStrict(d)||todayStr();}
+/* greutatea din Health merge la data cântăririi (kgd), nu la data rulării; fără kgd, o valoare care se repetă e veche și n-o mai notăm */
+function fitWeightIn(mid,d,v,kgdRaw){
+  S.diet.weights[mid]=S.diet.weights[mid]||[];const ws=S.diet.weights[mid];
+  const wd=fitDateStrict(kgdRaw);
+  if(wd){
+    if(wd>d||(fromStr(d)-fromStr(wd))/864e5>60)return {skip:'old'};
+  }else{
+    const prevW=ws.filter(x=>x.d<d).slice(-1)[0];
+    const prevIn=((S.diet.fitness||{})[mid]||[]).filter(x=>x.d<d&&x.kgIn!=null).slice(-1)[0];
+    if((prevW&&Math.abs(Number(prevW.w)-v)<0.05)||(prevIn&&Math.abs(Number(prevIn.kgIn)-v)<0.05))return {skip:'stale'};
+  }
+  const at=wd||d,ex=ws.find(x=>x.d===at);
+  if(ex&&ex.src!=='h')return {skip:'manual',at};   // ce ai notat tu în ziua aceea rămâne
+  if(ex){if(Math.abs(Number(ex.w)-v)<0.05)return {kg:v,at,same:true};ex.w=v;ex.u=Date.now();}
+  else{ws.push({d:at,w:v,src:'h',u:Date.now()});ws.sort((a,b)=>a.d<b.d?-1:1);}
+  return {kg:v,at};
+}
+/* v4.0.3: până acum ultima greutate din Health se punea la data rulării, chiar dacă era veche. O scoatem o dată (și pe celelalte dispozitive, prin tomb). */
+function fitMigWeights403(){
+  try{if(localStorage.getItem('famlink_mig403'))return;localStorage.setItem('famlink_mig403','1');}catch(e){return;}
+  let n=0;
+  for(const mid in (S.diet.fitness||{})){
+    const days=new Set((S.diet.fitness[mid]||[]).filter(x=>x.auto&&x.d<='2026-09-24').map(x=>x.d));
+    const ws=(S.diet.weights||{})[mid]||[];
+    for(let i=ws.length-1;i>=0;i--){const w=ws[i];if(days.has(w.d)&&!w.src&&!w.u){ws.splice(i,1);tombstone('w:'+mid+':'+w.d);n++;}}
+  }
+  if(n)save();
 }
 function fitImportPayload(o){
   const mid=fitResolveMember(o.m||o.member||o.email),d=fitDateOf(o.d||o.date||o.zi);
   const move=parseLocNum(o.move||o.active||o.activ,true),rest=parseLocNum(o.rest||o.repaus||o.basal,true);
   const total=parseLocNum(o.total,true)||((move!=null&&rest!=null&&rest>0)?Math.round(move+rest):null);
-  const steps=parseLocNum(o.steps||o.pasi,true),ex=parseLocNum(o.ex||o.exercise||o.exercitiu,true),km=parseLocNum(o.km||o.dist);
+  const steps=parseLocNum(o.steps||o.pasi,true);let ex=parseLocNum(o.ex||o.exercise||o.exercitiu,true),km=parseLocNum(o.km||o.dist);
+  if(km!=null&&km>150)km=km/1000;   // a venit în metri
+  if(ex!=null&&ex>1440)ex=ex/60;    // a venit în secunde
   const kg=parseLocNum(o.kg||o.weight||o.greutate);
   const rec={move:move!=null?Math.round(move):null,total,steps:steps!=null?Math.round(steps):null,exMin:ex!=null?Math.round(ex):null,km:km!=null?Math.round(km*100)/100:null};
   const has=Object.values(rec).some(v=>v!=null&&v>0);
@@ -5186,17 +5217,17 @@ function fitImportPayload(o){
     if(!ex2){ex2={id:uid(),d,useMove:true};arr.push(ex2);}
     for(const k in rec)if(rec[k]!=null&&rec[k]>0)ex2[k]=rec[k];
     ex2.src=String(o.src||'Apple Health').slice(0,40);ex2.auto=true;ex2.at=Date.now();ex2.u=Date.now();
+    if(kg!=null&&kg>=20&&kg<=350)ex2.kgIn=Math.round(kg*10)/10;
     arr.sort((a,b)=>a.d<b.d?-1:1);
   }
-  let kgOk=false;
-  if(kg!=null&&kg>=20&&kg<=350){S.diet.weights[mid]=S.diet.weights[mid]||[];const ws=S.diet.weights[mid],w=ws.find(x=>x.d===d);const v=Math.round(kg*10)/10;if(w)w.w=v;else ws.push({d,w:v});ws.sort((a,b)=>a.d<b.d?-1:1);kgOk=true;}
-  return {mid,d,has,kg:kgOk?Math.round(kg*10)/10:null,rec};
+  const W=(kg!=null&&kg>=20&&kg<=350)?fitWeightIn(mid,d,Math.round(kg*10)/10,o.kgd||o.kgdate):{};
+  return {mid,d,has,kg:(W.kg&&!W.same)?W.kg:null,kgAt:W.at||null,rec};
 }
 function fitImportDone(res,quiet){
   if(!res.length)return;
   save();if(typeof checkMilestones==='function')checkMilestones();
   const me=res.filter(r=>r.mid===V4_ME()).sort((a,b)=>a.d<b.d?1:-1)[0];
-  if(me&&!quiet){const bits=[me.rec.steps?fmtN(me.rec.steps)+' pași':'',me.rec.move?fmtN(me.rec.move)+' kcal active':'',me.kg?fmtH(me.kg)+' kg':''].filter(Boolean);toast('Am adus din Apple Health'+(me.d!==todayStr()?' ('+remDateLabel(me.d)+')':'')+': '+(bits.join(' · ')||'ziua ta')+'.');}
+  if(me&&!quiet){const bits=[me.rec.steps?fmtN(me.rec.steps)+' pași':'',me.rec.move?fmtN(me.rec.move)+' kcal active':'',me.kg?(fmtH(me.kg)+' kg'+(me.kgAt&&me.kgAt!==me.d?' (cântărirea din '+remDateLabel(me.kgAt)+')':'')):''].filter(Boolean);toast('Am adus din Apple Health'+(me.d!==todayStr()?' ('+remDateLabel(me.d)+')':'')+': '+(bits.join(' · ')||'ziua ta')+'.');}
   try{if(VIEW==='health'&&dietTab==='fit'){rFit();rFitAuto();}else v4Refresh();}catch(e){}
 }
 /* fișierele fit-*.json lăsate de scurtătură în gist: le citim, le trecem în jurnal, apoi le ștergem */
@@ -5233,17 +5264,23 @@ async function fitAutoCheck(){
   if(VIEW==='health'&&dietTab==='fit')rFitAuto();
 }
 function v4Copy(txt,lbl){(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>toast((lbl||'Text')+' copiat ✓')).catch(()=>{prompt('Copiază:',txt);});}
-function fitAutoBody(mid){return '{"files":{"fit-'+mid+'-[Zi].json":{"content":"m='+mid+';d=[Zi];move=[Active];rest=[Repaus];steps=[Pasi];ex=[Exercitiu];km=[Km];kg=[Kg]"}}}';}
+function fitAutoLine(mid){return 'm='+mid+';d=[Zi];move=[Active];rest=[Repaus];steps=[Pasi];ex=[Exercitiu];km=[Km];kg=[Kg];kgd=[KgZi]';}
+function fitAutoBody(mid){return '{"files":{"fit-'+mid+'-[Zi].json":{"content":"'+fitAutoLine(mid)+'"}}}';}
 /* descrierea în engleză pentru „Describe a shortcut" din Scurtături: iPhone-ul construiește singur acțiunile; tokenul rămâne în afara textului */
 function fitAiPrompt(mid,url){
+  const T=t=>'Find Health Samples where Type is '+t+' and Start Date is today. Calculate Statistics: Sum of those samples.';
   return 'Create a shortcut named "FamLink Health" that sends today\'s Apple Health totals to FamLink. It must run silently: no alerts, no notifications, no questions. Build exactly these actions, in this order:\n\n'+
-    '1. Find Health Samples where Type is Active Energy and Start Date is today. Then Calculate Statistics: Sum of the found samples. Call the result "Active".\n'+
-    '2. Do the same (Find Health Samples for today + Calculate Statistics Sum) for Steps (result "Pasi"), Exercise Minutes (result "Exercitiu"), Resting Energy (result "Repaus") and Walking + Running Distance in kilometers (result "Km").\n'+
-    '3. Find Health Samples where Type is Weight in kilograms, sorted by Start Date, Latest First, Limit 1. Call the result "Kg".\n'+
-    '4. Format Date: Current Date with custom format "yyyy-MM-dd". Call the result "Zi".\n'+
-    '5. A Text action with exactly the content below. Every name in square brackets ([Zi], [Active], [Repaus], [Pasi], [Exercitiu], [Km], [Kg]) must be replaced by the variable with that name; everything else stays literal text. Use single curly braces exactly as written: the text starts with {"files":{ and ends with "}}} — never double or escape the braces:\n'+
-    fitAutoBody(mid)+'\n'+
-    '6. Get Contents of URL: URL '+url+' , Method PATCH, Headers "Authorization" = "PASTE_TOKEN_HERE" and "Content-Type" = "application/json", Request Body: File, set to the Text from step 5.';
+    '1. '+T('Active Energy')+' Set Variable "Active" to the sum.\n'+
+    '2. '+T('Resting Energy')+' Set Variable "Repaus" to the sum.\n'+
+    '3. '+T('Steps')+' Set Variable "Pasi" to the sum.\n'+
+    '4. '+T('Exercise Minutes')+' Set Variable "Exercitiu" to the sum.\n'+
+    '5. '+T('Walking + Running Distance in kilometers')+' Set Variable "Km" to the sum.\n'+
+    '6. Find Health Samples where Type is Weight in kilograms, sorted by Start Date, Latest First, Limit 1. Set Variable "Kg" to that sample.\n'+
+    '7. Get Details of Health Samples: the Start Date of Kg. Format Date: that start date with custom format yyyy-MM-dd. Set Variable "KgZi" to the formatted date.\n'+
+    '8. Format Date: Current Date with custom format yyyy-MM-dd. Set Variable "Zi" to the formatted date.\n'+
+    '9. A Text action with this single line, where each [Name] (brackets included) is replaced by the variable with that name, and everything else stays literal text:\n'+
+    fitAutoLine(mid)+'\n'+
+    '10. Get Contents of URL: URL '+url+' , Method PATCH. Headers: "Authorization" = "PASTE_TOKEN_HERE" and "Content-Type" = "application/json". Request Body: JSON, with one field "files" of type Dictionary. Inside "files", one field of type Dictionary whose key is the text fit-'+mid+'- followed by the variable Zi followed by .json (for example fit-'+mid+'-'+todayStr()+'.json). Inside that, one field "content" of type Text, set to the Text from step 9.';
 }
 function rFitAuto(){
   const el=document.getElementById('fitAutoBox');if(!el)return;
@@ -5260,22 +5297,21 @@ function rFitAuto(){
       :('<p class="fa-warn"><i data-lucide="info"></i><span>Datele ajung în FamLink prin gistul tău privat de la <b>Sincronizare</b>. Pornește-o întâi (Setări → Sincronizare între dispozitive), apoi revino aici.</span></p><button class="btn sm sec" onclick="go(\'set\')"><i data-lucide="settings"></i>Deschide Setările</button>'))+
     '<details class="fa-guide" id="fitGuideAi"><summary><i data-lucide="sparkles"></i>Varianta rapidă: o descrii, iPhone-ul o construiește (~2 minute)<span class="chev"><i data-lucide="chevron-down"></i></span></summary>'+
     (ok?('<ol class="steps">'+
-      '<li>Copiază descrierea de mai jos. E în engleză și are deja id-ul tău și adresa gistului.'+code(window._fitCopy.ai,'Descrierea','ai','tall')+'</li>'+
+      '<li>Copiază descrierea de mai jos. E în engleză și are deja id-ul tău și adresa gistului. Dacă ai deja o scurtătură „FamLink Health”, șterge-o întâi.'+code(window._fitCopy.ai,'Descrierea','ai','tall')+'</li>'+
       '<li>În <b>Scurtături</b> apasă <b>+</b>, apoi <b>Describe a shortcut</b> (Descrie o scurtătură) și lipește textul.</li>'+
       '<li>În scurtătura creată, la <b>Get Contents of URL</b> → <b>Headers</b>, înlocuiește <b>PASTE_TOKEN_HERE</b> cu antetul de mai jos. Tokenul nu stă în descriere, ca să nu ajungă la modelul care construiește scurtătura.'+code(authShow,'Antetul Authorization','auth')+'</li>'+
-      '<li>Verifică acțiunea <b>Text</b>: trebuie să înceapă cu <b>{"files":{"fit-</b> și să se termine cu <b>"}}}</b>. Dacă vezi acolade dublate (<b>{{</b>, <b>}}}}}}</b>), șterge-le pe cele în plus. Locul lui [Zi], [Active], [Pasi] și al celorlalte trebuie să fie ținut de bule colorate (variabile), nu de text scris.</li>'+
+      '<li>Apasă ▶ o dată. Când te întreabă, apasă <b>Allow Access</b> la fiecare tip din Health (altfel câmpul acela vine gol). Apoi aici, <b>Verifică acum</b>.</li>'+
       '<li>Ca să ruleze singură: <b>Automatizare</b> → <b>+</b> → <b>Oră din zi</b> → <b>21:30</b>, <b>Zilnic</b> → <b>Rulează imediat</b> → alege <b>FamLink Health</b>.</li>'+
-      '<li>Apasă ▶ o dată ca test, apoi aici <b>Verifică acum</b>.</li>'+
-    '</ol>'):'<p class="fa-warn" style="margin-top:6px">Descrierea apare aici după ce pornești Sincronizarea.</p>')+
+    '</ol>'+'<p class="fa-note">Greutatea ajunge la data la care te-ai cântărit, nu la data rulării. O cântărire veche nu se mai trece ca fiind de azi, iar ce notezi tu de mână într-o zi are prioritate.</p>'):'<p class="fa-warn" style="margin-top:6px">Descrierea apare aici după ce pornești Sincronizarea.</p>')+
     '</details>'+
     '<details class="fa-guide" id="fitGuide"><summary><i data-lucide="list-ordered"></i>Pas cu pas, manual (o singură dată, ~5 minute)<span class="chev"><i data-lucide="chevron-down"></i></span></summary>'+
     '<ol class="steps">'+
       '<li>Pe iPhone deschide <b>Scurtături</b> (Shortcuts) → <b>Automatizare</b> → <b>+</b> → <b>Oră din zi</b> (Time of Day) → <b>21:30</b>, <b>Zilnic</b> → alege <b>Rulează imediat</b> (Run Immediately) → <b>Automatizare nouă, goală</b>.</li>'+
       '<li>Adaugă <b>Găsește mostre de sănătate</b> (Find Health Samples): tip <b>Energie activă</b>, <b>Data începerii</b> este <b>Azi</b>. Sub ea, <b>Calculează statistici</b> (Calculate Statistics) → <b>Sumă</b>. Redenumește rezultatul <b>Active</b>.</li>'+
       '<li>La fel pentru: <b>Pași</b> → <b>Pasi</b> · <b>Minute de exercițiu</b> → <b>Exercitiu</b> · <b>Energie în repaus</b> → <b>Repaus</b> · <b>Distanță mers și alergare</b> → <b>Km</b>.</li>'+
-      '<li>Opțional, greutatea de la cântarul inteligent: <b>Găsește mostre de sănătate</b> tip <b>Greutate</b>, sortează după dată, <b>cea mai recentă</b>, limită <b>1</b> → redenumește <b>Kg</b>.</li>'+
+      '<li>Opțional, greutatea de la cântarul inteligent: <b>Găsește mostre de sănătate</b> tip <b>Greutate</b>, sortează după dată, <b>cea mai recentă</b>, limită <b>1</b> → redenumește <b>Kg</b>. Apoi <b>Formatează data</b>: <b>Data începerii</b> a lui Kg, format <b>yyyy-MM-dd</b> → redenumește <b>KgZi</b> (așa greutatea ajunge la ziua cântăririi).</li>'+
       '<li><b>Formatează data</b> (Format Date): <b>Data curentă</b>, format personalizat <b>yyyy-MM-dd</b> → redenumește <b>Zi</b>.</li>'+
-      '<li>Adaugă <b>Text</b> și lipește șablonul de mai jos. Apoi înlocuiește fiecare <b>[Zi]</b>, <b>[Active]</b>, <b>[Repaus]</b>, <b>[Pasi]</b>, <b>[Exercitiu]</b>, <b>[Km]</b>, <b>[Kg]</b> cu variabila cu același nume (atingi cuvântul → <b>Selectează variabila</b>).'+code(window._fitCopy.body,'Șablonul','body')+'</li>'+
+      '<li>Adaugă <b>Text</b> și lipește șablonul de mai jos. Apoi înlocuiește fiecare <b>[Zi]</b>, <b>[Active]</b>, <b>[Repaus]</b>, <b>[Pasi]</b>, <b>[Exercitiu]</b>, <b>[Km]</b>, <b>[Kg]</b>, <b>[KgZi]</b> cu variabila cu același nume (atingi cuvântul → <b>Selectează variabila</b>).'+code(window._fitCopy.body,'Șablonul','body')+'</li>'+
       '<li>Adaugă <b>Obține conținutul URL-ului</b> (Get Contents of URL): URL-ul de mai jos, <b>Metodă: PATCH</b>, <b>Anteturi</b>: <b>Authorization</b> = valoarea de mai jos și <b>Content-Type</b> = <b>application/json</b>, <b>Corpul cererii: Fișier</b> (File) → alege <b>Text</b>-ul de la pasul anterior.'+(ok?(code(url,'URL-ul','url')+code(authShow,'Antetul Authorization','auth')):'<p class="fa-warn" style="margin-top:6px">URL-ul și antetul apar aici după ce pornești Sincronizarea.</p>')+'</li>'+
       '<li>Apasă ▶ o dată ca test, apoi aici <b>Verifică acum</b>. De acum, în fiecare seară ziua ta vine singură — și pe celelalte dispozitive ale familiei.</li>'+
     '</ol>'+
@@ -5358,6 +5394,7 @@ function planRoute(text,wait){
 /* ============ PORNIRE v4 ============ */
 function v4Boot(){
   fastAutoCfg();
+  try{fitMigWeights403();}catch(e){console.warn(e);}
   try{handleFitHash();}catch(e){}
   try{fastAutoTick(Date.now(),true);}catch(e){console.warn(e);}
   try{nfCfg();}catch(e){}
@@ -6021,7 +6058,7 @@ function mergeById(a,b){
 }
 function mergeTomb(a,b){const out=Object.assign({},b||{});for(const id in (a||{}))out[id]=Math.max(out[id]||0,a[id]);return out;}
 function applyTomb(arr,tomb){return (arr||[]).filter(x=>{const t=(tomb||{})[x.id];if(!t)return true;return (x.u||0)>t;});}
-function mergeWeights(a,b){const out={};const mids=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);mids.forEach(mid=>{const map={};(((b||{})[mid])||[]).forEach(w=>map[w.d]=w);(((a||{})[mid])||[]).forEach(w=>map[w.d]=w);out[mid]=Object.values(map).sort((x,y)=>x.d<y.d?-1:1);});return out;}
+function mergeWeights(a,b,tomb){const out={};const mids=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);mids.forEach(mid=>{const map={};(((b||{})[mid])||[]).forEach(w=>map[w.d]=w);(((a||{})[mid])||[]).forEach(w=>{const o=map[w.d];if(!o||(w.u||0)>=(o.u||0))map[w.d]=w;});out[mid]=Object.values(map).filter(w=>{const t=(tomb||{})['w:'+mid+':'+w.d];return !t||(w.u||0)>t;}).sort((x,y)=>x.d<y.d?-1:1);});return out;}
 function mergeWater(a,b){const out={};const mids=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);mids.forEach(mid=>{out[mid]={};const days=new Set([...Object.keys((a||{})[mid]||{}),...Object.keys((b||{})[mid]||{})]);days.forEach(d=>{out[mid][d]=Math.max(((a||{})[mid]||{})[d]||0,((b||{})[mid]||{})[d]||0);});});return out;}
 function mergeState(local,remote){
   const R=Object.assign(defState(),remote);R.diet=Object.assign(defState().diet,remote.diet||{});
@@ -6034,7 +6071,7 @@ function mergeState(local,remote){
   m.mottos=Object.assign({},R.mottos||{},local.mottos||{});
   m.diet.meals=applyTomb(mergeById(local.diet.meals,R.diet.meals),m.tomb);
   m.diet.sports=applyTomb(mergeById(local.diet.sports,R.diet.sports),m.tomb);
-  m.diet.weights=mergeWeights(local.diet.weights,R.diet.weights);
+  m.diet.weights=mergeWeights(local.diet.weights,R.diet.weights,m.tomb);
   m.diet.profiles=Object.assign({},R.diet.profiles||{},local.diet.profiles||{});
   m.diet.water=mergeWater(local.diet.water,R.diet.water);
   m.diet.fitness=mergeFitness(local.diet.fitness,R.diet.fitness,m.tomb); // v3.11: zilele importate din ceas
@@ -6238,7 +6275,7 @@ function appendAsk(who,txt){
   }
   log.scrollTop=log.scrollHeight;return bubble;
 }
-function logWeightKg(kg,day){const mid=dietMid();S.diet.weights[mid]=S.diet.weights[mid]||[];const ws=S.diet.weights[mid],t=day||todayStr();const ex=ws.find(x=>x.d===t);if(ex)ex.w=kg;else ws.push({d:t,w:kg});ws.sort((a,b)=>a.d<b.d?-1:1);save();if(typeof checkMilestones==='function')checkMilestones();if(VIEW==='health')rDiet();}
+function logWeightKg(kg,day){const mid=dietMid();S.diet.weights[mid]=S.diet.weights[mid]||[];const ws=S.diet.weights[mid],t=day||todayStr();const ex=ws.find(x=>x.d===t);if(ex){ex.w=kg;ex.u=Date.now();delete ex.src;}else ws.push({d:t,w:kg,u:Date.now()});ws.sort((a,b)=>a.d<b.d?-1:1);save();if(typeof checkMilestones==='function')checkMilestones();if(VIEW==='health')rDiet();}
 function setMottoCore(text){S.mottos[curYm()]=String(text||'').trim();save();rMotto();}
 function addGoalCore(title,scope,who,ctx){const n=new Date();const k=(/an|year/i.test(scope||''))?String(n.getFullYear()):(n.getFullYear()+'-'+pad(n.getMonth()+1));
   const memberId=who==='all'?null:(memById(who)?who:(S.settings.activeUser||null));

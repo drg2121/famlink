@@ -449,3 +449,13 @@ Cererea: fastingul să se închidă și să se reia singur, mesaje de susținere
 ## v4.0.2 — descrierea cere acolade simple (2026-09-24)
 
 - La primul test, „Describe a shortcut” a dublat acoladele în acțiunea Text (`{{"files":{{…"}}}}}}`), deci JSON-ul trimis la GitHub era invalid. Descrierea spune acum explicit să folosească acolade simple, iar pasul de verificare din ghid arată cum trebuie să înceapă și să se termine textul. Cache PWA: `famlink-v51`.
+
+## v4.0.3 — greutatea din Health, la ziua cântăririi (2026-09-24)
+
+- **Problema:** scurtătura trimite ultima greutate din Health, chiar dacă e de acum două săptămâni, iar FamLink o trecea ca fiind cântărirea de azi.
+- **Acum** (`fitWeightIn`): scurtătura trimite și data cântăririi (`kgd`), iar greutatea ajunge la ziua aceea. Cântăririle mai vechi de 60 de zile se ignoră; ce ai notat de mână într-o zi are prioritate față de Health. Fără `kgd` (scurtături vechi), o valoare egală cu ultima din jurnal sau cu ultima primită din Health e considerată veche și nu se mai notează.
+- **Curățenie automată, o singură dată** (`fitMigWeights403`): greutățile puse de import la data rulării, până la 24.09.2026, se scot și primesc tombstone (`w:<membru>:<zi>`), ca să nu revină prin sincronizare de pe alt dispozitiv.
+- **Sincronizare:** `mergeWeights` respectă tombstone-urile și păstrează intrarea cea mai nouă (`u`) pentru fiecare zi. Cântăririle de mână primesc `u`, iar cele din Health primesc și `src:'h'`.
+- Descrierea în engleză are pașii care au mers pe iPhone (fără acolade; corpul cererii e JSON pe câmpuri), plus data cântăririi. Ghidul manual are pasul `KgZi`.
+- Unități: distanța venită în metri (> 150) se împarte la 1000, iar minutele venite în secunde (> 1440) la 60.
+- Testat în browser: curățare + idempotență, sincronizare cu intrarea veche pe alt dispozitiv, greutate repetată fără dată, cântărire de acum 3 zile, format lung de dată iOS, prioritatea notării de mână, cântărire veche de 100 de zile, unități, mesajul afișat. Mobil 375 px, fără erori în consolă. Cache PWA: `famlink-v52`.
