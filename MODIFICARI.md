@@ -507,3 +507,9 @@ Cererea: fastingul să se închidă și să se reia singur, mesaje de susținere
 - Sănătate → Ceas → Import automat: explicația de mai sus e vizibilă direct pe card (nu mai e ascunsă în „Varianta rapidă”).
 - **Reperele de pași se pot retrage** (`revoke` pe `st-10k` și `st-7`): dacă cifra din ceas se corectează sub prag, reperul „10.000 de pași” câștigat pe cifra dublată dispare. Retragerea se sincronizează (`_rev` în `mergeBadges`), iar un reper câștigat din nou după retragere rămâne.
 - Testat: 10.840 → 6.320 pași, reperul scos și nereadus de o copie veche; apoi 12.000 pași, reperul câștigat din nou și păstrat la sync. Mobil 375 px, fără erori. Cache PWA: `famlink-v56`.
+
+## v4.1.2 — kcal active citite de 1000 de ori mai mari (2026-09-24)
+
+- Scurtătura trimite zecimale cu punct („444.394” = 444 kcal), iar importul le lua drept separator de mii (444.394 kcal), ceea ce strica și bugetul zilei. `fitNumIn` alege citirea plauzibilă pe câmp (kcal: zecimală; pași și minute: întreg).
+- `fitSane` repară zilele deja salvate, la pornire și la sincronizare.
+- Mesajul despre pașii dublați e scurtat la un rând. Cache PWA: `famlink-v57`.

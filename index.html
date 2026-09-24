@@ -1834,7 +1834,7 @@ html[data-theme="dark"] .mealchat{background:linear-gradient(135deg,#2a211a,#241
 <script>
 /* ============ FamLink v1.0 — arhitectură ArhiLink (single-file, localStorage) ============ */
 const KEY='famlink_v1';
-const APP_VER='4.1.1';
+const APP_VER='4.1.2';
 /* prima literă mare (titluri de obiective, etichete de mementouri, titluri AI) */
 const capFirst=s=>{s=String(s||'').trim();return s?s.charAt(0).toLocaleUpperCase('ro-RO')+s.slice(1):s;};
 /* curăță titlul unui obiectiv: scoate din față formulările de COMANDĂ
@@ -3801,7 +3801,7 @@ function burnToday(){
 }
 function mergeFitness(a,b,tomb){
   const out={},mids=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);
-  mids.forEach(mid=>{out[mid]=fitDedupe(applyTomb(mergeById((a||{})[mid]||[],(b||{})[mid]||[]),tomb),mid,tomb);});
+  mids.forEach(mid=>{out[mid]=fitDedupe(applyTomb(mergeById((a||{})[mid]||[],(b||{})[mid]||[]),tomb),mid,tomb);if(typeof fitSane==='function')out[mid].forEach(fitSane);});
   return out;
 }
 /* v4.1: o singură zi din ceas pe membru. Înainte, fiecare dispozitiv al familiei care citea fișierul din gist
@@ -5196,6 +5196,29 @@ function parseLocNum(s,intLike){
   else if(ld>=0&&intLike&&/^\d{1,3}(\.\d{3})+$/.test(s))s=s.replace(/\./g,'');
   const v=Number(s);return isFinite(v)?v:null;
 }
+/* v4.1.2: Scurtăturile trimit zecimalele cu punct, fără separator de mii: „444.394" la kcal înseamnă 444,4 kcal, nu 444.394.
+   La pași și minute, „10.577" rămâne 10.577. Când ambele citiri sunt posibile, alegem după cât e plauzibil pentru câmp. */
+function fitNumIn(s,max,preferInt,minDec){
+  const d=parseLocNum(s,false),g=parseLocNum(s,true);
+  if(d==null||g==null||d===g)return d!=null?d:g;
+  if(preferInt)return g<=max?g:d;
+  return (d<(minDec||0)&&g<=max)?g:d;
+}
+const FIT_MAX={move:8000,rest:6000,total:14000};
+/* repară zilele importate cu kcal înmulțite cu 1000 (v4.0–v4.1.1) */
+function fitSane(r){
+  if(!r)return false;let ch=false;
+  ['move','rest'].forEach(k=>{const v=Number(r[k]);if(v>FIT_MAX[k]&&v/1000<=FIT_MAX[k]){r[k]=Math.round(v/1000);ch=true;}});
+  const t=Number(r.total);
+  if(t>FIT_MAX.total){r.total=(Number(r.rest)>0&&Number(r.move)>=0&&Number(r.move)<=FIT_MAX.move)?Math.round(Number(r.move)+Number(r.rest)):(t/1000<=FIT_MAX.total?Math.round(t/1000):null);ch=true;}
+  return ch;
+}
+function fitSaneAll(){
+  let ch=false;const F=S.diet.fitness||{};
+  for(const mid in F)(F[mid]||[]).forEach(r=>{if(fitSane(r)){r.u=Date.now();ch=true;}});
+  if(ch){save();try{v4Refresh();}catch(e){}}
+  return ch;
+}
 function fitParsePayload(txt){
   txt=String(txt||'').trim();let o={};
   if(/^[A-Za-z0-9+/=]+$/.test(txt)&&txt.length>12){try{txt=decodeURIComponent(escape(atob(txt)));}catch(e){}}
@@ -5246,9 +5269,9 @@ function fitMigWeights403(){
 }
 function fitImportPayload(o){
   const mid=fitResolveMember(o.m||o.member||o.email),d=fitDateOf(o.d||o.date||o.zi);
-  const move=parseLocNum(o.move||o.active||o.activ,true),rest=parseLocNum(o.rest||o.repaus||o.basal,true);
-  const total=parseLocNum(o.total,true)||((move!=null&&rest!=null&&rest>0)?Math.round(move+rest):null);
-  const steps=parseLocNum(o.steps||o.pasi,true);let ex=parseLocNum(o.ex||o.exercise||o.exercitiu,true),km=parseLocNum(o.km||o.dist);
+  const move=fitNumIn(o.move||o.active||o.activ,FIT_MAX.move,false,10),rest=fitNumIn(o.rest||o.repaus||o.basal,FIT_MAX.rest,false,30);
+  const total=fitNumIn(o.total,FIT_MAX.total,false,50)||((move!=null&&rest!=null&&rest>0)?Math.round(move+rest):null);
+  const steps=fitNumIn(o.steps||o.pasi,150000,true);let ex=fitNumIn(o.ex||o.exercise||o.exercitiu,1440,true),km=parseLocNum(o.km||o.dist);
   if(km!=null&&km>150)km=km/1000;   // a venit în metri
   if(ex!=null&&ex>1440)ex=ex/60;    // a venit în secunde
   const kg=parseLocNum(o.kg||o.weight||o.greutate);
@@ -5336,7 +5359,7 @@ function rFitAuto(){
   const authShow=ok?('token ••••'+String(SYNC.token).slice(-4)):'';
   el.innerHTML='<div class="fitauto">'+
     '<div class="fa-h"><span class="fa-ic"><i data-lucide="zap"></i></span><div><b>Import automat din Apple Health</b><span>'+(last?('Merge ✓ — ultima zi adusă: '+remDateLabel(last.d)+(last.at?(' la '+fmtHM(new Date(last.at))):'')):'Pași, calorii active, minute de exercițiu și greutatea (de la cântarul inteligent), în fiecare seară, fără capturi.')+'</span></div></div>'+
-    (ok?('<div class="row" style="gap:8px;margin-top:10px"><button class="btn sm" onclick="fitAutoCheck()"><i data-lucide="refresh-cw"></i>Verifică acum</button></div>'+(last?'<p class="fa-warn"><i data-lucide="footprints"></i><span><b>Pașii ies mai mulți decât pe ceas?</b> Scurtătura adună pașii din iPhone și pe cei din ceas, deși sunt aceiași pași. Aplicația Sănătate îi numără o singură dată. Nu trebuie refăcută: deschide <b>FamLink Health</b> și la fiecare <b>Find Health Samples</b> (Găsește mostre de sănătate) apasă <b>Show More</b> → <b>Group By</b> (Grupează după) → <b>Day</b> (Zi). Asta nu înseamnă o rulare pe zi: o poți rula de câte ori vrei, fiecare rulare înlocuiește totalul zilei. Apasă ▶ o dată și cifra de azi se corectează.</span></p>':''))
+    (ok?('<div class="row" style="gap:8px;margin-top:10px"><button class="btn sm" onclick="fitAutoCheck()"><i data-lucide="refresh-cw"></i>Verifică acum</button></div>'+(last?'<p class="fa-warn"><i data-lucide="footprints"></i><span><b>Pași dublați?</b> În scurtătură, la fiecare Find Health Samples: <b>Group By → Day</b>. Apoi ▶.</span></p>':''))
       :('<p class="fa-warn"><i data-lucide="info"></i><span>Datele ajung în FamLink prin gistul tău privat de la <b>Sincronizare</b>. Pornește-o întâi (Setări → Sincronizare între dispozitive), apoi revino aici.</span></p><button class="btn sm sec" onclick="go(\'set\')"><i data-lucide="settings"></i>Deschide Setările</button>'))+
     '<details class="fa-guide" id="fitGuideAi"><summary><i data-lucide="sparkles"></i>Varianta rapidă: o descrii, iPhone-ul o construiește (~2 minute)<span class="chev"><i data-lucide="chevron-down"></i></span></summary>'+
     (ok?('<ol class="steps">'+
@@ -5439,6 +5462,7 @@ function v4Boot(){
   fastAutoCfg();
   try{fitMigWeights403();}catch(e){console.warn(e);}
   try{fitDedupeAll();}catch(e){console.warn(e);}
+  try{fitSaneAll();}catch(e){console.warn(e);}
   try{handleFitHash();}catch(e){}
   try{fastAutoTick(Date.now(),true);}catch(e){console.warn(e);}
   try{nfCfg();}catch(e){}
