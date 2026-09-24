@@ -1834,7 +1834,7 @@ html[data-theme="dark"] .mealchat{background:linear-gradient(135deg,#2a211a,#241
 <script>
 /* ============ FamLink v1.0 — arhitectură ArhiLink (single-file, localStorage) ============ */
 const KEY='famlink_v1';
-const APP_VER='4.1.2';
+const APP_VER='4.1.3';
 /* prima literă mare (titluri de obiective, etichete de mementouri, titluri AI) */
 const capFirst=s=>{s=String(s||'').trim();return s?s.charAt(0).toLocaleUpperCase('ro-RO')+s.slice(1):s;};
 /* curăță titlul unui obiectiv: scoate din față formulările de COMANDĂ
@@ -3581,7 +3581,12 @@ async function resetPushCron(){
 }
 function pushInit(){
   // înregistrăm SW-ul mereu (nu doar pentru push) — ține aplicația în cache pentru modul offline
-  if('serviceWorker' in navigator)navigator.serviceWorker.register('firebase-messaging-sw.js').catch(()=>{});
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('firebase-messaging-sw.js',{updateViaCache:'none'}).then(r=>{try{r.update();}catch(e){}}).catch(()=>{});
+    /* versiune nouă a SW-ului chiar la deschidere → reîncărcăm o dată, ca pagina nouă să apară fără încă o repornire */
+    const _t0=Date.now(),_had=!!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{if(_had&&Date.now()-_t0<15000&&!sessionStorage.getItem('fl_swr')){try{sessionStorage.setItem('fl_swr','1');}catch(e){}location.reload();}});
+  }
   fcmRegister(false);
   if(!pushReady())return;
   setTimeout(flushPush,1200);

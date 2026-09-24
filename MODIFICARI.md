@@ -513,3 +513,9 @@ Cererea: fastingul să se închidă și să se reia singur, mesaje de susținere
 - Scurtătura trimite zecimale cu punct („444.394” = 444 kcal), iar importul le lua drept separator de mii (444.394 kcal), ceea ce strica și bugetul zilei. `fitNumIn` alege citirea plauzibilă pe câmp (kcal: zecimală; pași și minute: întreg).
 - `fitSane` repară zilele deja salvate, la pornire și la sincronizare.
 - Mesajul despre pașii dublați e scurtat la un rând. Cache PWA: `famlink-v57`.
+
+## v4.1.3 — versiunile noi ajung imediat pe telefon (2026-09-24)
+
+- GitHub Pages trimite `max-age=600`, așa că service worker-ul primea pagina veche din cache-ul HTTP încă 10 minute după publicare. Acum cere pagina cu `cache: 'no-cache'` (revalidare), iar SW-ul se înregistrează cu `updateViaCache: 'none'` și verifică singur dacă există o versiune nouă.
+- Dacă un SW nou preia controlul chiar la deschidere, pagina se reîncarcă o singură dată.
+- Testat: versiune nouă publicată → apare la următoarea deschidere; offline → pagina vine din cache. Cache PWA: `famlink-v58`.

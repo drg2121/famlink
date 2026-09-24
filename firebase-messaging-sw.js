@@ -150,7 +150,7 @@ self.addEventListener('notificationclick', function (event) {
    CDN-urile cunoscute, ca FamLink să pornească și fără internet.
    Strategie: network-first pentru pagină (update-urile ajung imediat, cache doar
    ca fallback offline); cache-first pentru CDN-uri (librării versionate). */
-var CACHE = 'famlink-v57';
+var CACHE = 'famlink-v58';
 var ASSETS = ['./', 'index.html', 'manifest.json', 'firebase-config.js',
               'apple-touch-icon.png', 'icon-512.png'];
 var CDN_HOSTS = ['cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'www.gstatic.com'];
@@ -178,8 +178,10 @@ self.addEventListener('fetch', function (e) {
   }
   // alte origini (API-uri: Gemini, GitHub, FCM…) — nu ne atingem de ele
   if (u.origin !== self.location.origin) return;
-  // pagina + assets locale: network-first, fallback pe cache când ești offline
-  e.respondWith(fetch(req).then(function (r) {
+  // pagina + assets locale: network-first, fallback pe cache când ești offline.
+  // no-cache: GitHub Pages trimite max-age=600, iar fără asta telefonul primea pagina veche încă 10 minute după o versiune nouă
+  var net = req.mode === 'navigate' ? fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' }) : fetch(req, { cache: 'no-cache' });
+  e.respondWith(net.then(function (r) {
     if (r && r.ok) { var cp = r.clone(); caches.open(CACHE).then(function (c) { c.put(req, cp); }); }
     return r;
   }).catch(function () {
