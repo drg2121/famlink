@@ -1834,7 +1834,7 @@ html[data-theme="dark"] .mealchat{background:linear-gradient(135deg,#2a211a,#241
 <script>
 /* ============ FamLink v1.0 — arhitectură ArhiLink (single-file, localStorage) ============ */
 const KEY='famlink_v1';
-const APP_VER='4.1.5';
+const APP_VER='4.1.6';
 /* prima literă mare (titluri de obiective, etichete de mementouri, titluri AI) */
 const capFirst=s=>{s=String(s||'').trim();return s?s.charAt(0).toLocaleUpperCase('ro-RO')+s.slice(1):s;};
 /* curăță titlul unui obiectiv: scoate din față formulările de COMANDĂ
@@ -4476,9 +4476,12 @@ function saveFitRecords(zile,forMid){
       exMin:fitNum(z.exercitiu_min),exGoal:fitNum(z.exercitiu_goal),moveMin:fitNum(z.miscare_min),
       stand:fitNum(z.stand_ore),standGoal:fitNum(z.stand_goal),
       steps:fitNum(z.pasi),km:fitNum(z.distanta_km),floors:fitNum(z.etaje)};
+    /* v4.1.6: pașii și km citiți din captură au prioritate în ziua lor — importul automat din Health (care îi poate dubla) nu-i mai înlocuiește și nu-i șterge.
+       Kcal active și minutele rămân pe import: vin doar din ceas, sunt corecte și cresc în timpul zilei. */
+    const man={};['steps','km'].forEach(k=>{if(rec[k]!=null&&rec[k]!=='')man[k]=1;});
     const ex=arr.find(x=>x.d===rec.d);
-    if(ex){for(const k in rec){if(rec[k]!=null&&rec[k]!=='')ex[k]=rec[k];}ex.u=Date.now();if(ex.useMove==null)ex.useMove=true;}
-    else arr.push(Object.assign({id:fitDayId(mid,rec.d),u:Date.now(),useMove:true},rec));
+    if(ex){for(const k in rec){if(rec[k]!=null&&rec[k]!=='')ex[k]=rec[k];}ex.man=Object.assign({},ex.man||{},man);ex.u=Date.now();if(ex.useMove==null)ex.useMove=true;}
+    else arr.push(Object.assign({id:fitDayId(mid,rec.d),u:Date.now(),useMove:true,man},rec));
     n++;
   });
   arr.sort((a,b)=>a.d<b.d?-1:1);
@@ -5289,7 +5292,8 @@ function fitImportPayload(o){
     if(!ex2){ex2={id:fitDayId(mid,d),d,useMove:true};arr.push(ex2);}
     /* v4.1.5: ultima rulare e adevărul zilei — un câmp trimis gol (ex. pașii după filtrul Source) scoate cifra veche, nu o lasă să rămână */
     const inO=(...ks)=>ks.some(q=>Object.prototype.hasOwnProperty.call(o,q)),sent={move:inO('move','active','activ'),steps:inO('steps','pasi'),exMin:inO('ex','exercise','exercitiu'),km:inO('km','dist')};
-    for(const k in rec){if(rec[k]!=null&&rec[k]>0)ex2[k]=rec[k];else if(sent[k])delete ex2[k];}
+    const man=ex2.man||{};
+    for(const k in rec){if(man[k])continue;if(rec[k]!=null&&rec[k]>0)ex2[k]=rec[k];else if(sent[k])delete ex2[k];}
     ex2.src=String(o.src||'Apple Health').slice(0,40);ex2.auto=true;ex2.at=Date.now();ex2.u=Date.now();
     if(kg!=null&&kg>=20&&kg<=350)ex2.kgIn=Math.round(kg*10)/10;
     arr.sort((a,b)=>a.d<b.d?-1:1);
@@ -5344,9 +5348,9 @@ function fitAiPrompt(mid,url){
   /* v4.1.5: Group By = Day NU elimină dublura (testat: tot 14.197 pași față de 7.609 în Fitness).
      Pașii și distanța se citesc doar de la ceas (filtrul Source contains Watch), altfel iPhone-ul îi mai adaugă o dată. */
   const T=t=>'Find Health Samples where Type is '+t+' and Start Date is today. Under Show More set Group By to Day and turn Fill Missing off. Then Calculate Statistics: Sum of those samples.';
-  const TW=t=>'Find Health Samples where Type is '+t+' and Start Date is today and Source contains "Watch" (add this Source filter with Add Filter, so only the Apple Watch is counted). Under Show More leave Group By at None. Then Calculate Statistics: Sum of those samples.';
+  const TW=t=>'Find Health Samples where Type is '+t+' and Start Date is today and Source contains Watch (add this Source filter with Add Filter; type the word Watch as plain text, without quotes, so only the Apple Watch is counted). Under Show More leave Group By at None. Then Calculate Statistics: Sum of those samples.';
   return 'Create a shortcut named "FamLink Health" that sends today\'s Apple Health totals to FamLink. It must run silently: no alerts, no notifications, no questions. Build exactly these actions, in this order.\n\n'+
-    'IMPORTANT: steps 3 and 5 (Steps and Walking + Running Distance) must have the filter Source contains "Watch". The iPhone and the Apple Watch both record the same steps, and without this filter the sum counts them twice (Group By Day does not fix it).\n\n'+
+    'IMPORTANT: steps 3 and 5 (Steps and Walking + Running Distance) must have the filter Source contains Watch (plain text, no quotes). The iPhone and the Apple Watch both record the same steps, and without this filter the sum counts them twice (Group By Day does not fix it).\n\n'+
     '1. '+T('Active Energy')+' Set Variable "Active" to the sum.\n'+
     '2. '+T('Resting Energy')+' Set Variable "Repaus" to the sum.\n'+
     '3. '+TW('Steps')+' Set Variable "Pasi" to the sum.\n'+
@@ -5377,7 +5381,7 @@ function rFitAuto(){
       '<li>Copiază descrierea de mai jos. E în engleză și are deja id-ul tău și adresa gistului. Dacă ai deja o scurtătură „FamLink Health”, șterge-o întâi, împreună cu automatizarea care o pornea.'+code(window._fitCopy.ai,'Descrierea','ai','tall')+'</li>'+
       '<li>În <b>Scurtături</b> apasă <b>+</b>, apoi <b>Describe a shortcut</b> (Descrie o scurtătură) și lipește textul.</li>'+
       '<li>În scurtătura creată, la <b>Get Contents of URL</b> → <b>Headers</b>, înlocuiește <b>PASTE_TOKEN_HERE</b> cu antetul de mai jos. Dacă acolo mai apare un rând gol (<b>Key / Text</b>), șterge-l: altfel iese eroarea „cannot parse response”. Tokenul nu stă în descriere, ca să nu ajungă la modelul care construiește scurtătura.'+code(authShow,'Antetul Authorization','auth')+'</li>'+
-      '<li><b>Verifică setările</b>: la Find Health Samples cu <b>Steps</b> și cu <b>Walking + Running Distance</b> trebuie să existe filtrul <b>Source contains Watch</b> (dacă lipsește: <b>Add Filter</b> → <b>Source</b> → <b>contains</b> → scrie <b>Watch</b>), cu <b>Group By = None</b>. iPhone-ul și ceasul notează aceiași pași, iar fără filtru se adună de două ori; Group By Day nu ajută. Descrierea cere filtrul, dar iPhone-ul îl mai sare. <b>Fără Apple Watch</b>, nu pune filtrul.</li>'+
+      '<li><b>Verifică setările</b>: la Find Health Samples cu <b>Steps</b> și cu <b>Walking + Running Distance</b> trebuie să existe filtrul <b>Source contains Watch</b> (dacă lipsește: <b>Add Filter</b> → <b>Source</b> → <b>contains</b> → scrie <b>Watch</b>, fără ghilimele), cu <b>Group By = None</b>. Dacă pașii vin goi, ceasul tău are alt nume: îl vezi în <b>Sănătate → Pași → Surse de date și acces</b> și scrii în filtru o bucată din el. iPhone-ul și ceasul notează aceiași pași, iar fără filtru se adună de două ori; Group By Day nu ajută. Descrierea cere filtrul, dar iPhone-ul îl mai sare. <b>Fără Apple Watch</b>, nu pune filtrul.</li>'+
       '<li>Apasă ▶ o dată. Când te întreabă, apasă <b>Allow Access</b> la fiecare tip din Health (altfel câmpul acela vine gol). Apoi aici, <b>Verifică acum</b>, și compară pașii cu aplicația Fitness: trebuie să fie aproape la fel. Dacă aici sunt aproape dublu, lipsește filtrul Source la Steps sau la Distance.</li>'+
       '<li>Ca să ruleze singură: <b>Automatizare</b> → <b>+</b> → <b>Oră din zi</b> → <b>21:30</b>, <b>Zilnic</b> → <b>Rulează imediat</b> → alege <b>FamLink Health</b>.</li>'+
     '</ol>'+'<p class="fa-note">Greutatea ajunge la data la care te-ai cântărit, nu la data rulării. O cântărire veche nu se mai trece ca fiind de azi, iar ce notezi tu de mână într-o zi are prioritate. Poți rula scurtătura de câte ori vrei într-o zi: ziua se actualizează, nu se dublează.</p>'):'<p class="fa-warn" style="margin-top:6px">Descrierea apare aici după ce pornești Sincronizarea.</p>')+
@@ -5387,7 +5391,7 @@ function rFitAuto(){
       '<li>Pe iPhone deschide <b>Scurtături</b> (Shortcuts) → <b>Automatizare</b> → <b>+</b> → <b>Oră din zi</b> (Time of Day) → <b>21:30</b>, <b>Zilnic</b> → alege <b>Rulează imediat</b> (Run Immediately) → <b>Automatizare nouă, goală</b>.</li>'+
       '<li>Adaugă <b>Găsește mostre de sănătate</b> (Find Health Samples): tip <b>Energie activă</b>, <b>Data începerii</b> este <b>Azi</b>, apoi <b>Show More</b>: <b>Group By = Day</b> și <b>Fill Missing</b> oprit. Sub ea, <b>Calculează statistici</b> (Calculate Statistics) → <b>Sumă</b>. Redenumește rezultatul <b>Active</b>.</li>'+
       '<li>La fel pentru <b>Minute de exercițiu</b> → <b>Exercitiu</b> și <b>Energie în repaus</b> → <b>Repaus</b>.</li>'+
-      '<li>Pentru <b>Pași</b> → <b>Pasi</b> și <b>Distanță mers și alergare</b> → <b>Km</b>: tot așa, dar adaugă și <b>Add Filter</b> → <b>Source</b> → <b>contains</b> → <b>Watch</b>, cu <b>Group By = None</b>. iPhone-ul și ceasul notează aceiași pași; fără filtru se adună de două ori (Group By Day nu ajută). <b>Fără Apple Watch</b>, nu pune filtrul.</li>'+
+      '<li>Pentru <b>Pași</b> → <b>Pasi</b> și <b>Distanță mers și alergare</b> → <b>Km</b>: tot așa, dar adaugă și <b>Add Filter</b> → <b>Source</b> → <b>contains</b> → <b>Watch</b> (fără ghilimele), cu <b>Group By = None</b>. Dacă pașii vin goi, scrie o bucată din numele ceasului, așa cum apare în <b>Sănătate → Pași → Surse de date și acces</b>. iPhone-ul și ceasul notează aceiași pași; fără filtru se adună de două ori (Group By Day nu ajută). <b>Fără Apple Watch</b>, nu pune filtrul.</li>'+
       '<li>Opțional, greutatea de la cântarul inteligent: <b>Găsește mostre de sănătate</b> tip <b>Greutate</b>, sortează după dată, <b>cea mai recentă</b>, limită <b>1</b>, <b>fără</b> Group By (None) → redenumește <b>Kg</b>. Apoi <b>Formatează data</b>: <b>Data începerii</b> a lui Kg, format <b>yyyy-MM-dd</b> → redenumește <b>KgZi</b> (așa greutatea ajunge la ziua cântăririi).</li>'+
       '<li><b>Formatează data</b> (Format Date): <b>Data curentă</b>, format personalizat <b>yyyy-MM-dd</b> → redenumește <b>Zi</b>.</li>'+
       '<li>Adaugă <b>Text</b> și lipește șablonul de mai jos. Apoi înlocuiește fiecare <b>[Zi]</b>, <b>[Active]</b>, <b>[Repaus]</b>, <b>[Pasi]</b>, <b>[Exercitiu]</b>, <b>[Km]</b>, <b>[Kg]</b>, <b>[KgZi]</b> cu variabila cu același nume (atingi cuvântul → <b>Selectează variabila</b>).'+code(window._fitCopy.body,'Șablonul','body')+'</li>'+

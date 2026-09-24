@@ -534,3 +534,9 @@ Cererea: fastingul să se închidă și să se reia singur, mesaje de susținere
 - **Soluția:** la Steps și la Walking + Running Distance se adaugă filtrul `Source contains "Watch"`, cu Group By = None, așa că se numără doar ceasul. Descrierea pentru „Describe a shortcut”, pasul „Verifică setările”, ghidul manual și mesajul de pe card spun asta. Fără Apple Watch, filtrul nu se pune.
 - **Import:** ultima rulare e adevărul zilei. Un câmp trimis gol (pași, km, kcal active, minute) scoate cifra veche în loc s-o lase pe loc. Așa, cifra dublată nu rămâne afișată dacă filtrul nou nu întoarce nimic. O rulare complet goală nu șterge nimic.
 - Testat: 14.197 → 7.512 după filtru; pași goi → cifra veche dispare; rulare goală → ziua rămâne; placeholder nesubstituit `[Pasi]` → scos. Mobil 375 px, temă întunecată, fără erori JS. Cache PWA: `famlink-v60`.
+
+## v4.1.6 — pașii din captură rămân; filtrul Source explicat (2026-09-24)
+
+- **Pașii citiți din captură nu mai sunt înlocuiți.** Rularea de la 23:21 a trimis `steps=;km=`, pentru că filtrul Source nu găsea ceasul, iar din v4.1.5 un câmp gol scoate cifra zilei, inclusiv pe cea citită din captura din Fitness. Acum pașii și km citiți dintr-o captură (Sănătate → Ceas sau în chat) sunt marcați (`man`) și au prioritate în ziua lor. Importul automat nu-i mai înlocuiește și nu-i mai șterge. Kcal active și minutele rămân pe import, pentru că vin doar din ceas și cresc în timpul zilei.
+- **Filtrul Source:** descrierea cere `Watch` ca text simplu, fără ghilimele. Ghidul arată unde se vede numele exact al ceasului (Sănătate → Pași → Surse de date și acces), pentru cazul în care pașii vin goi.
+- Testat: auto 14.197 → captură 7.609 → auto cu pași goi (rămân 7.609, kcal 590) → auto dublat din nou (rămân 7.609, kcal 600); o zi fără captură se importă normal; `man` se păstrează la sync. Fără erori JS. Cache PWA: `famlink-v61`.
