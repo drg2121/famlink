@@ -499,3 +499,11 @@ Cererea: fastingul să se închidă și să se reia singur, mesaje de susținere
 - Poza din Mese cu Gemini simulat: farfurie → masă notată (520 kcal); ½ → aceeași masă 260 kcal / 175 g; „Analizează din nou” și „Corectează” → tot o masă; „Anulează” → 0 mese și butonul „Adaugă”; redenumire → masa redenumită; meniu → asistentul se deschide cu poza și dă cardul „Cât să-ți pui”, nimic notat.
 - Chat: poza unei farfurii fără text → 2 mese notate, card „Notat în mesele de azi”, atașamentul scos.
 - Mobil 375 px, temă luminoasă și întunecată, fără scroll orizontal, fără erori în consolă. Cache PWA: `famlink-v55`.
+
+## v4.1.1 — pașii din telefon + ceas, și reperul câștigat pe cifra greșită (2026-09-24)
+
+- **Cauza:** pe ceas erau ~6.000 de pași, în FamLink peste 10.000. Nu de la rulările repetate: de la v4.1 fiecare rulare înlocuiește totalul zilei. Problema e că scurtătura adună toate mostrele de pași din Health, adică și pe cele din iPhone, și pe cele din ceas, pentru aceiași pași. Aplicația Sănătate alege o singură sursă pe fiecare interval.
+- **Ce faci pe iPhone:** în scurtătura existentă, la fiecare Find Health Samples: Show More → Group By → Day. Rulările de mai multe ori pe zi merg în continuare. Rulezi o dată și cifra de azi se corectează.
+- Sănătate → Ceas → Import automat: explicația de mai sus e vizibilă direct pe card (nu mai e ascunsă în „Varianta rapidă”).
+- **Reperele de pași se pot retrage** (`revoke` pe `st-10k` și `st-7`): dacă cifra din ceas se corectează sub prag, reperul „10.000 de pași” câștigat pe cifra dublată dispare. Retragerea se sincronizează (`_rev` în `mergeBadges`), iar un reper câștigat din nou după retragere rămâne.
+- Testat: 10.840 → 6.320 pași, reperul scos și nereadus de o copie veche; apoi 12.000 pași, reperul câștigat din nou și păstrat la sync. Mobil 375 px, fără erori. Cache PWA: `famlink-v56`.
