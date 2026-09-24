@@ -1834,7 +1834,7 @@ html[data-theme="dark"] .mealchat{background:linear-gradient(135deg,#2a211a,#241
 <script>
 /* ============ FamLink v1.0 — arhitectură ArhiLink (single-file, localStorage) ============ */
 const KEY='famlink_v1';
-const APP_VER='4.1.0';
+const APP_VER='4.1.1';
 /* prima literă mare (titluri de obiective, etichete de mementouri, titluri AI) */
 const capFirst=s=>{s=String(s||'').trim();return s?s.charAt(0).toLocaleUpperCase('ro-RO')+s.slice(1):s;};
 /* curăță titlul unui obiectiv: scoate din față formulările de COMANDĂ
@@ -3835,8 +3835,11 @@ function fitDedupeAll(){
 function mergeBadges(a,b){
   const out={},mids=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);
   mids.forEach(mid=>{
-    const m=Object.assign({},(b||{})[mid]||{}),la=(a||{})[mid]||{};
-    for(const k in la){const e=m[k];if(!e||(la[k].t||0)<(e.t||0))m[k]=la[k];}
+    const m=Object.assign({},(b||{})[mid]||{}),la=(a||{})[mid]||{},lb=(b||{})[mid]||{};
+    for(const k in la){if(k==='_rev')continue;const e=m[k];if(!e||(la[k].t||0)<(e.t||0))m[k]=la[k];}
+    /* v4.1.1: reperele retrase (pași numărați dublu de scurtătură) nu revin de pe alt dispozitiv; unul câștigat din nou, după retragere, rămâne */
+    const rev=Object.assign({},lb._rev||{});for(const k in (la._rev||{}))rev[k]=Math.max(rev[k]||0,la._rev[k]);
+    if(Object.keys(rev).length){m._rev=rev;for(const k in rev){const ok=[la[k],lb[k]].filter(x=>x&&(x.t||0)>rev[k]).sort((x,y)=>(x.t||0)-(y.t||0))[0];if(ok)m[k]=ok;else delete m[k];}}
     out[mid]=m;
   });
   return out;
@@ -3930,8 +3933,8 @@ const MILES=[
  {k:'sp-50', g:'Mișcare',ic:'flame',t:'50 de antrenamente',d:'50 de sesiuni de sport',n:50,u:'',v:c=>c.sportN},
  {k:'sp-100',g:'Mișcare',ic:'flame',t:'100 de antrenamente',d:'100 de sesiuni de sport',n:100,u:'',v:c=>c.sportN},
  {k:'sp-150',g:'Mișcare',ic:'activity',t:'150 min într-o săptămână',d:'Recomandarea OMS de mișcare moderată, bifată',n:150,u:' min',v:c=>c.wkSportMin},
- {k:'st-10k',g:'Mișcare',ic:'footprints',t:'10.000 de pași',d:'O zi cu 10.000 de pași, citită din ceas',n:10000,u:' pași',v:c=>c.stepsBest,rel:c=>c.fitN>0},
- {k:'st-7',  g:'Mișcare',ic:'footprints',t:'7 zile active',d:'7 zile la rând cu peste 8.000 de pași',n:7,u:' zile',v:c=>c.stepStreak,rel:c=>c.fitN>0},
+ {k:'st-10k',g:'Mișcare',ic:'footprints',t:'10.000 de pași',d:'O zi cu 10.000 de pași, citită din ceas',n:10000,u:' pași',v:c=>c.stepsBest,rel:c=>c.fitN>0,revoke:true},
+ {k:'st-7',  g:'Mișcare',ic:'footprints',t:'7 zile active',d:'7 zile la rând cu peste 8.000 de pași',n:7,u:' zile',v:c=>c.stepStreak,rel:c=>c.fitN>0,revoke:true},
 
  {k:'f-1',   g:'Fasting',ic:'timer',t:'Primul fasting',d:'Ai dus la capăt primul post intermitent',n:1,u:'',v:c=>c.fastOk},
  {k:'f-5',   g:'Fasting',ic:'timer',t:'5 fasting-uri',d:'5 posturi duse la capăt',n:5,u:'',v:c=>c.fastOk},
@@ -3960,14 +3963,16 @@ function checkMilestones(silent){
 function _checkMilestones(silent){
   const bag=msBag(),c=msCtx(),t=todayStr(),now=Date.now();
   const seeding=!bag._seed;
-  const fresh=[];
+  const fresh=[];let revoked=false;
+  /* reperele de pași vin din ceas: dacă cifra s-a corectat (ex. telefon + ceas adunate de scurtătură), reperul se retrage */
+  MILES.forEach(m=>{if(m.revoke&&bag[m.k]&&!msDone(m,c)){bag._rev=bag._rev||{};bag._rev[m.k]=now;delete bag[m.k];revoked=true;}});
   MILES.forEach(m=>{
     if(bag[m.k])return;
     if(m.rel&&!m.rel(c))return;
     if(msDone(m,c)){bag[m.k]={d:t,t:now};if(!seeding)fresh.push(m);}
   });
   if(seeding)bag._seed={d:t,t:now};
-  if(fresh.length||seeding)save();
+  if(fresh.length||seeding||revoked)save();
   if(fresh.length&&!silent)celebrate(fresh,c);
   return fresh;
 }
@@ -5331,7 +5336,7 @@ function rFitAuto(){
   const authShow=ok?('token ••••'+String(SYNC.token).slice(-4)):'';
   el.innerHTML='<div class="fitauto">'+
     '<div class="fa-h"><span class="fa-ic"><i data-lucide="zap"></i></span><div><b>Import automat din Apple Health</b><span>'+(last?('Merge ✓ — ultima zi adusă: '+remDateLabel(last.d)+(last.at?(' la '+fmtHM(new Date(last.at))):'')):'Pași, calorii active, minute de exercițiu și greutatea (de la cântarul inteligent), în fiecare seară, fără capturi.')+'</span></div></div>'+
-    (ok?('<div class="row" style="gap:8px;margin-top:10px"><button class="btn sm" onclick="fitAutoCheck()"><i data-lucide="refresh-cw"></i>Verifică acum</button></div>')
+    (ok?('<div class="row" style="gap:8px;margin-top:10px"><button class="btn sm" onclick="fitAutoCheck()"><i data-lucide="refresh-cw"></i>Verifică acum</button></div>'+(last?'<p class="fa-warn"><i data-lucide="footprints"></i><span><b>Pașii ies mai mulți decât pe ceas?</b> Scurtătura adună pașii din iPhone și pe cei din ceas, deși sunt aceiași pași. Aplicația Sănătate îi numără o singură dată. Nu trebuie refăcută: deschide <b>FamLink Health</b> și la fiecare <b>Find Health Samples</b> (Găsește mostre de sănătate) apasă <b>Show More</b> → <b>Group By</b> (Grupează după) → <b>Day</b> (Zi). Asta nu înseamnă o rulare pe zi: o poți rula de câte ori vrei, fiecare rulare înlocuiește totalul zilei. Apasă ▶ o dată și cifra de azi se corectează.</span></p>':''))
       :('<p class="fa-warn"><i data-lucide="info"></i><span>Datele ajung în FamLink prin gistul tău privat de la <b>Sincronizare</b>. Pornește-o întâi (Setări → Sincronizare între dispozitive), apoi revino aici.</span></p><button class="btn sm sec" onclick="go(\'set\')"><i data-lucide="settings"></i>Deschide Setările</button>'))+
     '<details class="fa-guide" id="fitGuideAi"><summary><i data-lucide="sparkles"></i>Varianta rapidă: o descrii, iPhone-ul o construiește (~2 minute)<span class="chev"><i data-lucide="chevron-down"></i></span></summary>'+
     (ok?('<ol class="steps">'+
@@ -5340,7 +5345,7 @@ function rFitAuto(){
       '<li>În scurtătura creată, la <b>Get Contents of URL</b> → <b>Headers</b>, înlocuiește <b>PASTE_TOKEN_HERE</b> cu antetul de mai jos. Dacă acolo mai apare un rând gol (<b>Key / Text</b>), șterge-l: altfel iese eroarea „cannot parse response”. Tokenul nu stă în descriere, ca să nu ajungă la modelul care construiește scurtătura.'+code(authShow,'Antetul Authorization','auth')+'</li>'+
       '<li>Apasă ▶ o dată. Când te întreabă, apasă <b>Allow Access</b> la fiecare tip din Health (altfel câmpul acela vine gol). Apoi aici, <b>Verifică acum</b>.</li>'+
       '<li>Ca să ruleze singură: <b>Automatizare</b> → <b>+</b> → <b>Oră din zi</b> → <b>21:30</b>, <b>Zilnic</b> → <b>Rulează imediat</b> → alege <b>FamLink Health</b>.</li>'+
-    '</ol>'+'<p class="fa-note">Greutatea ajunge la data la care te-ai cântărit, nu la data rulării. O cântărire veche nu se mai trece ca fiind de azi, iar ce notezi tu de mână într-o zi are prioritate. Poți rula scurtătura de câte ori vrei într-o zi: ziua se actualizează, nu se dublează.</p><p class="fa-note">Pașii sau distanța ies cam dublu față de aplicația Sănătate? Scurtătura adună și telefonul, și ceasul. Refă-o din descrierea de mai sus, care cere acum <b>Group By Day</b>.</p>'):'<p class="fa-warn" style="margin-top:6px">Descrierea apare aici după ce pornești Sincronizarea.</p>')+
+    '</ol>'+'<p class="fa-note">Greutatea ajunge la data la care te-ai cântărit, nu la data rulării. O cântărire veche nu se mai trece ca fiind de azi, iar ce notezi tu de mână într-o zi are prioritate. Poți rula scurtătura de câte ori vrei într-o zi: ziua se actualizează, nu se dublează.</p>'):'<p class="fa-warn" style="margin-top:6px">Descrierea apare aici după ce pornești Sincronizarea.</p>')+
     '</details>'+
     '<details class="fa-guide" id="fitGuide"><summary><i data-lucide="list-ordered"></i>Pas cu pas, manual (o singură dată, ~5 minute)<span class="chev"><i data-lucide="chevron-down"></i></span></summary>'+
     '<ol class="steps">'+
