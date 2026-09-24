@@ -527,3 +527,10 @@ Cererea: fastingul să se închidă și să se reia singur, mesaje de susținere
 - **Ghidul rapid:** la refacere se șterge și automatizarea veche. E un pas nou, „Verifică setările”: deschizi cele 5 acțiuni și confirmi Group By = Day, fiindcă iPhone-ul mai sare setarea. După ▶ compari pașii cu aplicația Fitness.
 - **Ghidul manual:** Group By = Day și Fill Missing oprit la fiecare tip, greutatea fără Group By, plus comparația cu Fitness la final. Mesajul de pe card spune acum „Pași sau km dublați?”.
 - Testat: descrierea și ghidurile afișate corect, mobil 375 px, temă luminoasă și întunecată, fără scroll orizontal, fără erori JS. Cache PWA: `famlink-v59`.
+
+## v4.1.5 — pașii și km doar de la ceas (2026-09-24)
+
+- **Group By = Day nu elimină dublura.** Scurtătura refăcută, cu Group By = Day verificat pe telefon, a trimis tot `steps=14197;km=10.70` (istoricul gistului, 23:08). În Fitness erau 7.609 pași și 5,75 km. Gruparea doar adună pe zi mostrele din iPhone și din ceas.
+- **Soluția:** la Steps și la Walking + Running Distance se adaugă filtrul `Source contains "Watch"`, cu Group By = None, așa că se numără doar ceasul. Descrierea pentru „Describe a shortcut”, pasul „Verifică setările”, ghidul manual și mesajul de pe card spun asta. Fără Apple Watch, filtrul nu se pune.
+- **Import:** ultima rulare e adevărul zilei. Un câmp trimis gol (pași, km, kcal active, minute) scoate cifra veche în loc s-o lase pe loc. Așa, cifra dublată nu rămâne afișată dacă filtrul nou nu întoarce nimic. O rulare complet goală nu șterge nimic.
+- Testat: 14.197 → 7.512 după filtru; pași goi → cifra veche dispare; rulare goală → ziua rămâne; placeholder nesubstituit `[Pasi]` → scos. Mobil 375 px, temă întunecată, fără erori JS. Cache PWA: `famlink-v60`.
