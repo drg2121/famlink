@@ -445,3 +445,7 @@ Cererea: fastingul să se închidă și să se reia singur, mesaje de susținere
 - Automatizarea zilnică (21:30) rămâne de făcut de mână — 5 atingeri, doar alegi scurtătura „FamLink Health”.
 - Ghidul vechi rămâne ca „Pas cu pas, manual”.
 - Testat: mobil 375 px, temă luminoasă și întunecată, cu și fără Sincronizare, fără erori în consolă. Cache PWA: `famlink-v50`.
+
+## v4.0.2 — descrierea cere acolade simple (2026-09-24)
+
+- La primul test, „Describe a shortcut” a dublat acoladele în acțiunea Text (`{{"files":{{…"}}}}}}`), deci JSON-ul trimis la GitHub era invalid. Descrierea spune acum explicit să folosească acolade simple, iar pasul de verificare din ghid arată cum trebuie să înceapă și să se termine textul. Cache PWA: `famlink-v51`.

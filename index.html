@@ -1825,7 +1825,7 @@ html[data-theme="dark"] .mealchat{background:linear-gradient(135deg,#2a211a,#241
 <script>
 /* ============ FamLink v1.0 — arhitectură ArhiLink (single-file, localStorage) ============ */
 const KEY='famlink_v1';
-const APP_VER='4.0.1';
+const APP_VER='4.0.2';
 /* prima literă mare (titluri de obiective, etichete de mementouri, titluri AI) */
 const capFirst=s=>{s=String(s||'').trim();return s?s.charAt(0).toLocaleUpperCase('ro-RO')+s.slice(1):s;};
 /* curăță titlul unui obiectiv: scoate din față formulările de COMANDĂ
@@ -5241,7 +5241,7 @@ function fitAiPrompt(mid,url){
     '2. Do the same (Find Health Samples for today + Calculate Statistics Sum) for Steps (result "Pasi"), Exercise Minutes (result "Exercitiu"), Resting Energy (result "Repaus") and Walking + Running Distance in kilometers (result "Km").\n'+
     '3. Find Health Samples where Type is Weight in kilograms, sorted by Start Date, Latest First, Limit 1. Call the result "Kg".\n'+
     '4. Format Date: Current Date with custom format "yyyy-MM-dd". Call the result "Zi".\n'+
-    '5. A Text action with exactly the content below. Every name in square brackets ([Zi], [Active], [Repaus], [Pasi], [Exercitiu], [Km], [Kg]) must be replaced by the variable with that name; everything else stays literal text:\n'+
+    '5. A Text action with exactly the content below. Every name in square brackets ([Zi], [Active], [Repaus], [Pasi], [Exercitiu], [Km], [Kg]) must be replaced by the variable with that name; everything else stays literal text. Use single curly braces exactly as written: the text starts with {"files":{ and ends with "}}} — never double or escape the braces:\n'+
     fitAutoBody(mid)+'\n'+
     '6. Get Contents of URL: URL '+url+' , Method PATCH, Headers "Authorization" = "PASTE_TOKEN_HERE" and "Content-Type" = "application/json", Request Body: File, set to the Text from step 5.';
 }
@@ -5263,7 +5263,7 @@ function rFitAuto(){
       '<li>Copiază descrierea de mai jos. E în engleză și are deja id-ul tău și adresa gistului.'+code(window._fitCopy.ai,'Descrierea','ai','tall')+'</li>'+
       '<li>În <b>Scurtături</b> apasă <b>+</b>, apoi <b>Describe a shortcut</b> (Descrie o scurtătură) și lipește textul.</li>'+
       '<li>În scurtătura creată, la <b>Get Contents of URL</b> → <b>Headers</b>, înlocuiește <b>PASTE_TOKEN_HERE</b> cu antetul de mai jos. Tokenul nu stă în descriere, ca să nu ajungă la modelul care construiește scurtătura.'+code(authShow,'Antetul Authorization','auth')+'</li>'+
-      '<li>Verifică acțiunea <b>Text</b>: [Zi], [Active], [Repaus], [Pasi], [Exercitiu], [Km], [Kg] trebuie să fie bule colorate (variabile), nu text scris. Dacă vreuna a rămas text, atinge-o → <b>Selectează variabila</b>.</li>'+
+      '<li>Verifică acțiunea <b>Text</b>: trebuie să înceapă cu <b>{"files":{"fit-</b> și să se termine cu <b>"}}}</b>. Dacă vezi acolade dublate (<b>{{</b>, <b>}}}}}}</b>), șterge-le pe cele în plus. Locul lui [Zi], [Active], [Pasi] și al celorlalte trebuie să fie ținut de bule colorate (variabile), nu de text scris.</li>'+
       '<li>Ca să ruleze singură: <b>Automatizare</b> → <b>+</b> → <b>Oră din zi</b> → <b>21:30</b>, <b>Zilnic</b> → <b>Rulează imediat</b> → alege <b>FamLink Health</b>.</li>'+
       '<li>Apasă ▶ o dată ca test, apoi aici <b>Verifică acum</b>.</li>'+
     '</ol>'):'<p class="fa-warn" style="margin-top:6px">Descrierea apare aici după ce pornești Sincronizarea.</p>')+
