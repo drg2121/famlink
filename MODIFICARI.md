@@ -459,3 +459,8 @@ Cererea: fastingul să se închidă și să se reia singur, mesaje de susținere
 - Descrierea în engleză are pașii care au mers pe iPhone (fără acolade; corpul cererii e JSON pe câmpuri), plus data cântăririi. Ghidul manual are pasul `KgZi`.
 - Unități: distanța venită în metri (> 150) se împarte la 1000, iar minutele venite în secunde (> 1440) la 60.
 - Testat în browser: curățare + idempotență, sincronizare cu intrarea veche pe alt dispozitiv, greutate repetată fără dată, cântărire de acum 3 zile, format lung de dată iOS, prioritatea notării de mână, cântărire veche de 100 de zile, unități, mesajul afișat. Mobil 375 px, fără erori în consolă. Cache PWA: `famlink-v52`.
+
+## v4.0.4 — nici scurtătura veche nu mai aduce greutatea veche (2026-09-24)
+
+- Curățarea automată ține minte valoarea scoasă (`kgIn` pe ziua respectivă), iar verificarea fără dată compară și cu ziua curentă. Așa, o scurtătură fără `kgd` care rulează din nou azi sau mâine nu mai pune la loc aceeași greutate veche; o cântărire nouă, cu altă valoare, intră normal.
+- Testat pe cazul real: greutate veche pusă azi, curățare, rulare din nou azi și mâine cu scurtătura veche, cântărire nouă mâine, scurtătura nouă (greutatea ajunge la data ei), sincronizare cu un dispozitiv pe versiunea veche. Cache PWA: `famlink-v53`.

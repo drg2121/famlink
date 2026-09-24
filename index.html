@@ -1825,7 +1825,7 @@ html[data-theme="dark"] .mealchat{background:linear-gradient(135deg,#2a211a,#241
 <script>
 /* ============ FamLink v1.0 — arhitectură ArhiLink (single-file, localStorage) ============ */
 const KEY='famlink_v1';
-const APP_VER='4.0.3';
+const APP_VER='4.0.4';
 /* prima literă mare (titluri de obiective, etichete de mementouri, titluri AI) */
 const capFirst=s=>{s=String(s||'').trim();return s?s.charAt(0).toLocaleUpperCase('ro-RO')+s.slice(1):s;};
 /* curăță titlul unui obiectiv: scoate din față formulările de COMANDĂ
@@ -5181,7 +5181,7 @@ function fitWeightIn(mid,d,v,kgdRaw){
     if(wd>d||(fromStr(d)-fromStr(wd))/864e5>60)return {skip:'old'};
   }else{
     const prevW=ws.filter(x=>x.d<d).slice(-1)[0];
-    const prevIn=((S.diet.fitness||{})[mid]||[]).filter(x=>x.d<d&&x.kgIn!=null).slice(-1)[0];
+    const prevIn=((S.diet.fitness||{})[mid]||[]).filter(x=>x.d<=d&&x.kgIn!=null).slice(-1)[0];
     if((prevW&&Math.abs(Number(prevW.w)-v)<0.05)||(prevIn&&Math.abs(Number(prevIn.kgIn)-v)<0.05))return {skip:'stale'};
   }
   const at=wd||d,ex=ws.find(x=>x.d===at);
@@ -5195,9 +5195,9 @@ function fitMigWeights403(){
   try{if(localStorage.getItem('famlink_mig403'))return;localStorage.setItem('famlink_mig403','1');}catch(e){return;}
   let n=0;
   for(const mid in (S.diet.fitness||{})){
-    const days=new Set((S.diet.fitness[mid]||[]).filter(x=>x.auto&&x.d<='2026-09-24').map(x=>x.d));
+    const recs=(S.diet.fitness[mid]||[]).filter(x=>x.auto&&x.d<='2026-09-24');
     const ws=(S.diet.weights||{})[mid]||[];
-    for(let i=ws.length-1;i>=0;i--){const w=ws[i];if(days.has(w.d)&&!w.src&&!w.u){ws.splice(i,1);tombstone('w:'+mid+':'+w.d);n++;}}
+    for(let i=ws.length-1;i>=0;i--){const w=ws[i],r=recs.find(x=>x.d===w.d);if(r&&!w.src&&!w.u){ws.splice(i,1);tombstone('w:'+mid+':'+w.d);r.kgIn=Number(w.w);r.u=Date.now();n++;}}
   }
   if(n)save();
 }
@@ -5212,6 +5212,7 @@ function fitImportPayload(o){
   const rec={move:move!=null?Math.round(move):null,total,steps:steps!=null?Math.round(steps):null,exMin:ex!=null?Math.round(ex):null,km:km!=null?Math.round(km*100)/100:null};
   const has=Object.values(rec).some(v=>v!=null&&v>0);
   S.diet.fitness=S.diet.fitness||{};const arr=S.diet.fitness[mid]=S.diet.fitness[mid]||[];
+  const W=(kg!=null&&kg>=20&&kg<=350)?fitWeightIn(mid,d,Math.round(kg*10)/10,o.kgd||o.kgdate):{};
   if(has){
     let ex2=arr.find(x=>x.d===d);
     if(!ex2){ex2={id:uid(),d,useMove:true};arr.push(ex2);}
@@ -5220,7 +5221,6 @@ function fitImportPayload(o){
     if(kg!=null&&kg>=20&&kg<=350)ex2.kgIn=Math.round(kg*10)/10;
     arr.sort((a,b)=>a.d<b.d?-1:1);
   }
-  const W=(kg!=null&&kg>=20&&kg<=350)?fitWeightIn(mid,d,Math.round(kg*10)/10,o.kgd||o.kgdate):{};
   return {mid,d,has,kg:(W.kg&&!W.same)?W.kg:null,kgAt:W.at||null,rec};
 }
 function fitImportDone(res,quiet){
