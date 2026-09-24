@@ -519,3 +519,11 @@ Cererea: fastingul să se închidă și să se reia singur, mesaje de susținere
 - GitHub Pages trimite `max-age=600`, așa că service worker-ul primea pagina veche din cache-ul HTTP încă 10 minute după publicare. Acum cere pagina cu `cache: 'no-cache'` (revalidare), iar SW-ul se înregistrează cu `updateViaCache: 'none'` și verifică singur dacă există o versiune nouă.
 - Dacă un SW nou preia controlul chiar la deschidere, pagina se reîncarcă o singură dată.
 - Testat: versiune nouă publicată → apare la următoarea deschidere; offline → pagina vine din cache. Cache PWA: `famlink-v58`.
+
+## v4.1.4 — scurtătura Health refăcută: pașii și km nu se mai adună de două ori (2026-09-24)
+
+- **Cauza, confirmată pe capturi:** FamLink arăta 14.197 pași și 10,7 km, iar Fitness 7.609 pași și 5,75 km. Kcal active (576) și minutele (13) erau corecte, pentru că le scrie doar ceasul. Scurtătura aduna mostrele brute de pași și distanță din iPhone și din ceas. Aplicația nu adună nimic: sincronizarea (două dispozitive, adăugare în timpul sync-ului) și rulările repetate au fost testate, fără dubluri.
+- **Descrierea pentru „Describe a shortcut”:** un paragraf IMPORTANT la început, iar la fiecare Find Health Samples (pașii 1–5) scrie explicit Show More → Group By = Day și Fill Missing oprit. La greutate (pasul 6), Group By rămâne None.
+- **Ghidul rapid:** la refacere se șterge și automatizarea veche. E un pas nou, „Verifică setările”: deschizi cele 5 acțiuni și confirmi Group By = Day, fiindcă iPhone-ul mai sare setarea. După ▶ compari pașii cu aplicația Fitness.
+- **Ghidul manual:** Group By = Day și Fill Missing oprit la fiecare tip, greutatea fără Group By, plus comparația cu Fitness la final. Mesajul de pe card spune acum „Pași sau km dublați?”.
+- Testat: descrierea și ghidurile afișate corect, mobil 375 px, temă luminoasă și întunecată, fără scroll orizontal, fără erori JS. Cache PWA: `famlink-v59`.
