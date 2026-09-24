@@ -4,6 +4,12 @@ Aplicație într-un singur fișier (`index.html`), pe modelul ArhiLink: fără s
 
 **Module:** Azi (ecranul zilei), Calendar (Lună / An / Zi / Obiective, recurențe, notificări, motto-ul lunii, print A3/A4 landscape, export .ics pentru iPhone) și Sănătate (profil + IMC/BMR/TDEE, jurnal greutate cu grafic, fasting cu contor și notificări, mese + calorii, analiză foto și meniuri cu Gemini AI).
 
+## Noutăți v4.1
+
+- **Poza farfuriei se notează singură** (Mese, „Poză la masă” sau în chat): caloriile se calculează și masa intră direct în jurnal, cu porție ajustabilă și „Anulează”.
+- **Poza meniului primește sugestii**: asistentul îți spune direct ce și cât să-ți pui, fără întrebări în plus.
+- **Import din Apple Health fără dubluri**: ziua are un singur rând, oricâte dispozitive ale familiei o citesc și de câte ori rulează scurtătura. Dublurile vechi se curăță singure.
+
 ## Noutăți v4.0 — mai simplu, mai automat
 
 - **Ecranul „Azi"** (prima filă, se deschide implicit): salut cu o frază de susținere construită din cifrele tale, inele pentru calorii, apă, mișcare și fasting/pași, câte calorii mai ai, șase acțiuni rapide (+250 ml, „Ce-am mâncat" în chat, poză la masă, cântărire, fasting, mișcare), fastingul în curs, calendarul zilei cu bifă și datele din ceas.
