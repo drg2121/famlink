@@ -18,6 +18,9 @@ function famlinkKind(d) {
   var t = String(d.title || ''), b = String(d.body || '');
   /* v4: serverul nu transmite tipul — titlurile notificărilor îl spun singure */
   if (/^Memento:/i.test(t) && /Începe/i.test(b)) return 'event';
+  /* v4.2: pornirea și închiderea automată a fastingului au butoanele lor */
+  if (/^Fastingul a pornit/i.test(t)) return 'faststart';
+  if (/^Fasting încheiat/i.test(t)) return 'fastdone';
   if (/fasting/i.test(t)) return 'fast';
   if (/(^|[^\p{L}])ap[ăa]([^\p{L}]|$)|water/iu.test(t)) return 'water';
   if (/c[âa]nt[ăa]r/i.test(t)) return 'weigh';
@@ -32,6 +35,7 @@ function famlinkKind(d) {
 function famlinkActions(kind) {
   if (kind === 'water') return [{ action: 'water:250', title: '+250 ml' }, { action: 'qs:water', title: 'Altă cantitate…' }];
   if (kind === 'fast') return [{ action: 'fast:stop', title: 'Finalizează' }, { action: 'fast:ext30', title: '+30 min' }];
+  if (kind === 'faststart') return [{ action: 'fast:skip', title: 'Nu azi' }, { action: 'open', title: 'Deschide' }];
   if (kind === 'event') return [{ action: 'ev:done', title: 'Finalizat ✓' }, { action: 'ev:snooze', title: 'Amână 15 min' }];
   if (kind === 'weigh') return [{ action: 'open', title: 'Notez greutatea' }];
   if (kind === 'meal') return [{ action: 'open', title: 'Spun ce am mâncat' }];
@@ -134,11 +138,13 @@ self.addEventListener('notificationclick', function (event) {
   else if (a === 'qs:water')  job = famlinkDeliver('qs:water', {}, true);
   else if (a === 'fast:stop') job = famlinkDeliver('fast:stop', {}, false);
   else if (a === 'fast:ext30')job = famlinkDeliver('fast:ext30', {}, false);
+  else if (a === 'fast:skip') job = famlinkDeliver('fast:skip', {}, false);
   else if (a === 'ev:done')   job = famlinkDeliver('ev:done', extra, false);
   else if (a === 'ev:snooze') job = famlinkDeliver('ev:snooze', extra, false);
   else { // atingerea notificării: te duce în secțiunea potrivită (+ foaia rapidă unde ajută)
     if (kind === 'water')      job = famlinkDeliver('qs:water', { kind: 'water' }, true);
     else if (kind === 'fast')  job = famlinkDeliver('qs:fast', { kind: 'fast' }, true);
+    else if (kind === 'faststart' || kind === 'fastdone') job = famlinkDeliver('open', { kind: 'fast', title: d.title || '' }, true);
     else if (kind === 'event') job = famlinkDeliver('qs:ev', Object.assign({ kind: 'event' }, extra), true);
     else job = famlinkDeliver('open', { kind: kind || 'rem', title: d.title || '' }, true); // memento general → deschide Mementouri
   }
@@ -150,7 +156,7 @@ self.addEventListener('notificationclick', function (event) {
    CDN-urile cunoscute, ca FamLink să pornească și fără internet.
    Strategie: network-first pentru pagină (update-urile ajung imediat, cache doar
    ca fallback offline); cache-first pentru CDN-uri (librării versionate). */
-var CACHE = 'famlink-v62';
+var CACHE = 'famlink-v63';
 var ASSETS = ['./', 'index.html', 'manifest.json', 'firebase-config.js',
               'apple-touch-icon.png', 'icon-512.png'];
 var CDN_HOSTS = ['cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'www.gstatic.com'];

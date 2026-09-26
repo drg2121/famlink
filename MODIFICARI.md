@@ -548,3 +548,52 @@ Cererea: fastingul să se închidă și să se reia singur, mesaje de susținere
 - **FamLink scoate dublura** (`fitDedupSteps`): pe fiecare oră ia sursa cu cei mai mulți pași, ca aplicația Sănătate care alege o singură sursă pe interval. Când ceasul e la încărcat, contează telefonul. Pentru un membru fără ceas, suma rămâne neschimbată. Km se scalează în aceeași proporție (pași dedublați / pași bruți). Ora se citește din formatele en-GB, en-US (AM/PM) și ro. Fără liste, sau cu variabile nesubstituite, se folosește `steps` ca înainte.
 - Cardul de import arată „Azi: dublura telefon + ceas scoasă, X → Y pași”. Descrierea, pasul „Verifică setările” și ghidul manual sunt refăcute. Descrierea are acum 13 pași.
 - Testat: simulare telefon + ceas cu ceasul la încărcat o oră: 13.271 bruți → 7.117 (exact cât ar da Sănătate), km 10,70 → 5,74; doar telefon → neschimbat; placeholdere → rezerva `steps`; mobil 375 px, fără erori JS. Cache PWA: `famlink-v62`.
+
+## v4.2.0 — asistentul fără blocaje, chat aerisit, „Bine ai venit, Alisa", notificări la fastingul automat (2026-09-26)
+
+Cererea: verificarea aplicației, îmbunătățiri grafice și practice, iar asistentul „uneori se blochează și pare prea aglomerat". Pe parcurs: să recunoască bine utilizatorul (Cosmin sau Alisa) și să-l salute, și să vină notificare când fastingul automat pornește și când se oprește.
+
+### De ce „se bloca" asistentul (cauzele găsite)
+
+- **Fără termen-limită la AI.** `gemini()` aștepta oricât un răspuns; pe o rețea care „atârna", bula „scrie…" rămânea pe ecran minute întregi, fără nicio cale de ieșire.
+- **Calendarul din chat putea rămâne agățat.** `addEventsFromText` ieșea fără să răspundă dacă o cerere anterioară era încă în lucru (`_aiBusy`), iar asistentul aștepta la nesfârșit. În plus, bula „scrie…" rămânea deschisă cât timp fereastra „Confirmi adăugarea?" stătea peste chat.
+- **Atingeri pierdute.** `LI()` (`lucide.createIcons()`) redesena la fiecare apel TOATE iconițele din pagină, și pe cele deja desenate — cu fastingul pornit, o dată pe secundă, plus la fiecare mesaj. O atingere care cădea pe o iconiță înlocuită între apăsare și ridicarea degetului nu mai ajungea la buton.
+- **Dictarea putea rămâne deschisă** la o eroare definitivă (fără permisiune la microfon), repornind la nesfârșit.
+- Un model de rezervă care răspundea gol (modelele care „gândesc" rămân fără tokeni) oprea tot lanțul cu eroare.
+
+### Ce s-a schimbat
+
+- `gemini()`: timeout pe încercare (25 s text, 60 s cu poză) și termen-limită pe toată cererea (45 s / 100 s), anulare prin `AbortSignal`, verificare „fără internet", răspuns gol → modelul următor. Erorile au cod (`aiFail`: timeout, offline, quota, key, abort…).
+- Asistentul: `askSend` are stare „lucrez…" (butonul negru „Oprește"), coadă pentru mesajele scrise între timp, eroare omenească cu „Reîncearcă" (`askFail`, `askRetry`), iar bula de așteptare își schimbă textul după 7 și 16 secunde. Calendarul, mementourile, obiectivele și motto-ul se confirmă într-un card în conversație (`askConfirmCard`: Da · Modifică · Nu; „Modifică" deschide formularul complet). Cântărirea și sportul spuse în chat se notează imediat, cu „Anulează" (`askQuickReceipt`). `aiParseEvents` întoarce rezultatul în loc de callback.
+- Panoul: foaie mare pe telefon cu fundal estompat, antet cu „Conversație nouă" și X, se închide trăgând în jos, atingând fundalul sau cu Esc; urmărește tastatura (`visualViewport`) ca antetul și câmpul de scris să rămână la vedere. Salut scurt cu numele, sugestii pe un rând care se potrivesc momentului zilei. Bulele fără mini-avatar, cardurile pe toată lățimea. Butonul de trimis apare în locul microfonului când scrii. Discuția rămâne 15 minute după închidere. Mesajele scurte (toast) apar sus cât panoul e deschis.
+- Cardul mesei din chat e compact: numele, kcal, porția pe − / + (½ · ¾ · 1 · 1¼ · 1½ · 2), „Anulează" sus; kcal exacte și tipul mesei stau sub „Kcal exacte sau altă masă a zilei". Cardul din meniu se restrânge după ce e notat (poza farfuriei nu mai afișează două carduri pentru aceeași masă), iar corectura în cuvinte apare la cerere.
+- **Bug reparat:** cardul din meniu scădea de două ori caloriile deja notate („îți rămân" ieșea prea mic după „Notează").
+- **Bug reparat:** cu alt membru selectat în Mese / Sănătate, „am mâncat…" spus asistentului ajungea în jurnalul acelui membru. La deschiderea asistentului, selecția revine la cine folosește telefonul.
+- `LI()` desenează doar iconițele noi (numele trece din `data-lucide` în `data-li`). Ecranul Azi scrie în pagină doar ce s-a schimbat (`tdSet`), la fel linia de ore din Fasting.
+
+### Cine folosește aplicația
+
+- **Cauza:** pe un telefon nou aplicația pornea cu un singur membru („Eu" = `m1`), îl alegea automat, iar după prima sincronizare `m1` devenea Cosmin — așa că telefonul Alisei se credea al lui Cosmin, fără să mai întrebe.
+- Acum identitatea stă pe dispozitiv (`famlink_me`, nesincronizată) și e stabilită înainte de prima randare (`meBoot`). Cu 2+ membri și fără o alegere pe acest telefon, apare o dată „Cine ești?" (avatare mari). Cine avea deja ales alt membru decât primul nu mai e întrebat.
+- „Bine ai venit, Alisa!" la pornire și la revenirea după mai mult de o oră, cu „Schimbă". Avatarul din antet deschide schimbarea. `pickUser` re-înregistrează notificările sub membrul ales.
+- „Trimite acces altui dispozitiv" întreabă pentru cine e linkul; telefonul care îl deschide știe direct cine e (`m` în link, `meAfterSync`).
+
+### Notificări la fastingul automat
+
+- Pe server (push, pe slotul emailului): pe lângă „Fasting încheiat" la țintă, și „Fastingul a pornit" la ora automată, pentru următoarele două seri (dacă un post în curs nu ține până atunci). Se reprogramează la fiecare schimbare.
+- Cu aplicația deschisă și fără push: notificare locală la pornirea automată și la închiderea la țintă. `notify()` trece acum prin service worker (`new Notification()` nu merge pe Android și în aplicația de pe ecranul principal al iPhone-ului).
+- Tot ce face fastingul singur apare și în clopoțel (`addNotifQuiet`).
+- Service worker: tipurile `faststart` (butoane „Nu azi" / „Deschide", nu rămâne fixată pe ecran) și `fastdone`. „Nu azi" (`fastSkipTonight`) anulează postul automat de azi fără să-l treacă în istoric.
+
+### Grafică
+
+- Buton de asistent rotund pe telefon (cu text pe desktop), ascuns cât panoul e deschis. Ferestrele (bottom-sheet) și ecranele apar lin. Motto-ul gol nu mai ocupă loc în antet pe telefon; antetul se strânge pe ecrane înguste (fără scroll lateral la 320 px).
+- Mese: apa pe un rând cu bară de progres și pahare rămase; cifrele cu separator de mii. Azi: cifrele din ceas pe un rând. Temă întunecată pentru sportul bifat, butoanele de ștergere și avertismente.
+- Cardul „ce e nou" pentru 4.2 (o singură dată).
+
+### Testat
+
+- Asistent cu Gemini simulat: masă notată + porție − / +, calendar confirmat în chat (evenimentul creat o dată), memento, cântărire + sport cu anulare, poza farfuriei (3 feluri notate, un singur card), rețea care nu răspunde (oprire manuală; timeout 25 s → model de rezervă; fără niciun răspuns → eroare cu „Reîncearcă" la ~45 s, apoi reîncercare reușită), mesaj scris cât aștepta (a plecat singur după), model care răspunde gol → modelul următor.
+- Identitate: date cu Cosmin + Alisa fără alegere salvată → „Cine ești?"; alegerea Alisei → salut, antet și „Azi" pe Alisa; la repornire „Bine ai venit, Alisa!" cu „Schimbă".
+- Fasting: pornire automată (notificare + clopoțel + push pentru încheiere și următoarele două porniri), închidere la țintă („Fasting încheiat"), „Nu azi" pe un post pornit acum 5 minute (oprit, nimic în istoric).
+- Toate ecranele și ferestrele fără erori JS; mobil 375 și 320 px (fără scroll lateral), desktop 1280 px, temă luminoasă și întunecată. Cache PWA: `famlink-v63`.

@@ -4,6 +4,14 @@ Aplicație într-un singur fișier (`index.html`), pe modelul ArhiLink: fără s
 
 **Module:** Azi (ecranul zilei), Calendar (Lună / An / Zi / Obiective, recurențe, notificări, motto-ul lunii, print A3/A4 landscape, export .ics pentru iPhone) și Sănătate (profil + IMC/BMR/TDEE, jurnal greutate cu grafic, fasting cu contor și notificări, mese + calorii, analiză foto și meniuri cu Gemini AI).
 
+## Noutăți v4.2
+
+- **Asistentul nu se mai blochează.** Fiecare cerere către AI are un termen-limită; dacă durează, asistentul spune „Încă puțin…", butonul de trimis devine „Oprește", iar la o eroare apare „Reîncearcă" (mesajul rămâne în conversație). Poți scrie următorul mesaj cât aștepți — pleacă singur după răspuns. Un model care răspunde gol nu mai oprește tot: se încearcă următorul.
+- **Chat aerisit.** Panoul e o foaie mare pe telefon, cu un salut scurt și sugestii pe un singur rând. Calendarul, mementourile, obiectivele și motto-ul se confirmă direct în conversație („Da · Modifică · Nu"), fără ferestre peste chat. Masa notată are un card compact, cu porția pe − / +; cântărirea și sportul spuse în chat se notează pe loc, cu „Anulează". O închidere din greșeală nu pierde discuția (15 minute), iar butonul din antet pornește o conversație nouă.
+- **FamLink știe cine ești.** Fiecare telefon ține minte cine îl folosește (Cosmin sau Alisa) și te salută: „Bine ai venit, Alisa!". Avatarul din antet schimbă utilizatorul. Linkul „Trimite acces" poate spune pentru cine e.
+- **Fastingul automat te anunță** când pornește și când se oprește (cu push activ, chiar și cu aplicația închisă); din notificarea de pornire poți spune „Nu azi".
+- Mai fluid: iconițele nu se mai redesenează toate, o dată pe secundă (atingerile nu se mai pierd), ecranul Azi se reîmprospătează doar când se schimbă ceva, ferestrele apar lin, iar tema întunecată e completă și în Mese.
+
 ## Noutăți v4.1
 
 - **Poza farfuriei se notează singură** (Mese, „Poză la masă” sau în chat): caloriile se calculează și masa intră direct în jurnal, cu porție ajustabilă și „Anulează”.
