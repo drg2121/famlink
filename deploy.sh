@@ -1,11 +1,14 @@
 #!/bin/sh
-# FamLink — deploy pe GitHub Pages. Ruleaza: sh deploy.sh
+# FamLink — publică versiunea curentă (deja salvată cu git commit). Rulează: sh deploy.sh
+#  1) Firebase Hosting → https://famlink-push.web.app/  (adresa principală din v4.3.0)
+#  2) GitHub Pages     → https://drg2121.github.io/famlink/ (adresa veche: arată anunțul de mutare)
+# Publică DOAR site-ul (--only hosting). Backend-ul Firebase (functions, reguli) nu se atinge de aici.
 cd "$(dirname "$0")" || exit 1
-rm -f .git/index.lock                       # curata lock-ul ramas
-git add index.html README.md MODIFICARI.md PUSH-SETUP.md NOTIFICARI-PUSH-CE-AM-FACUT.md \
-        firebase-config.js firebase-messaging-sw.js manifest.json
-git commit -m "feat: logo=acasa, obiective AI pe membru/familie, purjare emailuri vechi (v3.6)"
-git pull --no-rebase --no-edit -X ours origin main   # reconciliaza cu ce e pe GitHub (local castiga la conflicte)
-git push
+if [ -n "$(git status --porcelain)" ]; then
+  echo "Ai modificări nesalvate în git. Fă întâi commit, apoi rulează din nou."; exit 1
+fi
+firebase deploy --only hosting --project famlink-push || exit 1
+git push origin main || exit 1
+VER=$(grep -oE "APP_VER='[^']+'" index.html | cut -d"'" -f2)
 echo ""
-echo "Gata. Verifica in ~1 min pe https://drg2121.github.io/famlink/?v=36 ca scrie v3.6 jos in Setari."
+echo "Gata. Verifică pe https://famlink-push.web.app/ că scrie v$VER jos în Setări → Date & backup."

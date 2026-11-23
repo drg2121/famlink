@@ -597,3 +597,20 @@ Cererea: verificarea aplicației, îmbunătățiri grafice și practice, iar asi
 - Identitate: date cu Cosmin + Alisa fără alegere salvată → „Cine ești?"; alegerea Alisei → salut, antet și „Azi" pe Alisa; la repornire „Bine ai venit, Alisa!" cu „Schimbă".
 - Fasting: pornire automată (notificare + clopoțel + push pentru încheiere și următoarele două porniri), închidere la țintă („Fasting încheiat"), „Nu azi" pe un post pornit acum 5 minute (oprit, nimic în istoric).
 - Toate ecranele și ferestrele fără erori JS; mobil 375 și 320 px (fără scroll lateral), desktop 1280 px, temă luminoasă și întunecată. Cache PWA: `famlink-v63`.
+
+## v4.3.0 — FamLink se mută pe Google (Firebase Hosting) (2026-11-23)
+
+Cererea: să mutăm FamLink de pe GitHub pe Google, ca prim pas spre sincronizare în timp real (Firestore) și legătura cu Sona.
+
+### Ce s-a schimbat
+
+- **Adresa principală e acum `https://famlink-push.web.app/`** — Firebase Hosting, în același proiect cu notificările (`famlink-push`). `firebase.json` are secțiunea `hosting` (fără fișierele .md, scripturi, config); toate fișierele vin cu `Cache-Control: no-cache`, deci o versiune nouă ajunge imediat.
+- **Adresa veche (GitHub Pages) merge în continuare** și arată o dată pe zi anunțul „FamLink s-a mutat”, cu butonul „Deschide FamLink nou”. Butonul duce accesul de sincronizare (`#sync=…` cu `mv:1`): pe adresa nouă se conectează fără întrebare și trage datele din gist. Ambele adrese folosesc același gist, deci nimic nu se pierde. Fără sincronizare pornită: buton „Descarcă o copie a datelor” + Restaurează în aplicația nouă.
+- **iPhone:** aplicația de pe ecranul principal are memoria ei, separată de Safari. De aceea butonul copiază și linkul, iar în aplicația nouă, pe un dispozitiv gol, apare „Vii de pe FamLink vechi?”, cu câmp pentru link („Nu, încep de la zero” îl ascunde definitiv).
+- **Setări → Sincronizare:** câmp nou „…sau lipește linkul de acces primit” (`syncFromLink`). `importSyncFromHash(src)` primește acum și un link lipit.
+- `APP_URL` de rezervă (fișier local) → adresa nouă. `deploy.sh` refăcut: publică doar site-ul (`firebase deploy --only hosting`) și face `git push`; nu mai face commit singur. Backend-ul (functions, reguli) nu se publică de aici.
+
+### De știut
+
+- Pe fiecare telefon: aplicația se adaugă din nou pe ecranul principal și notificările se pornesc din nou (permisiunea și tokenul push țin de adresă). Până se șterge iconița veche, pot veni notificări pe ambele.
+- Testat: local + canal de test Firebase (`test-v43`): anunțul vechi (mobil 375 px luminos/întunecat, desktop), „Vii de pe FamLink vechi?”, link greșit / link valid / același link, „Nu, încep de la zero” rămâne ascuns după repornire, service worker activ pe adresa nouă, fără erori JS. Cheia web Firebase merge și de pe adresa nouă. Cache PWA: `famlink-v64`.

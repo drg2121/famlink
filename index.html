@@ -1686,6 +1686,8 @@ html[data-theme="dark"] .askgrab{background:#3a4a42}
       <div id="syncStatus" class="muted" style="margin:8px 0;font-size:13px"></div>
       <label>Token GitHub (doar scope „gist")</label><input id="syncToken" type="password" placeholder="ghp_…">
       <label>Parolă de criptare (o alegi tu — ține-o minte!)</label><input id="syncPass" type="password" placeholder="parola ta secretă">
+      <label>…sau lipește linkul de acces primit (îl ai din „Trimite acces” sau de la mutare)</label>
+      <div class="row" style="flex-wrap:wrap"><input id="syncLinkIn" class="grow" placeholder="https://…#sync=…" autocomplete="off"><button class="btn sec" onclick="syncFromLink('syncLinkIn')"><i data-lucide="clipboard-paste"></i>Conectează din link</button></div>
       <div class="row" style="margin-top:10px;flex-wrap:wrap">
         <button class="btn" onclick="syncConnect()"><i data-lucide="link"></i>Conectează</button>
         <button class="btn sec" onclick="syncPush()"><i data-lucide="cloud-upload"></i>Salvează în cloud</button>
@@ -2030,12 +2032,22 @@ html[data-theme="dark"] .askgrab{background:#3a4a42}
   </div>
 </div>
 
+<!-- Mutarea pe Firebase Hosting (v4.3.0): anunț pe adresa veche + „vii de pe FamLink vechi?" pe cea nouă -->
+<div class="mback" id="mvBack" onclick="if(event.target===this)mvLater()">
+  <div class="modal" style="max-width:440px">
+    <div class="mhead"><h2 style="margin:0;font-size:17px" id="mvTitle">FamLink s-a mutat</h2><button class="x" onclick="mvLater()" aria-label="Închide"><i data-lucide="x"></i></button></div>
+    <div id="mvBody"></div>
+  </div>
+</div>
+
 <div id="toast"></div>
 <div id="printArea"></div>
 <script>
 /* ============ FamLink v1.0 — arhitectură ArhiLink (single-file, localStorage) ============ */
 const KEY='famlink_v1';
-const APP_VER='4.2.0';
+const APP_VER='4.3.0';
+/* v4.3.0: dispozitiv nou pe această adresă (nimic salvat încă) — citit înainte de primul save() */
+const _wasFresh=(function(){try{return !localStorage.getItem(KEY);}catch(e){return false;}})();
 /* prima literă mare (titluri de obiective, etichete de mementouri, titluri AI) */
 const capFirst=s=>{s=String(s||'').trim();return s?s.charAt(0).toLocaleUpperCase('ro-RO')+s.slice(1):s;};
 /* curăță titlul unui obiectiv: scoate din față formulările de COMANDĂ
@@ -3563,7 +3575,7 @@ function myEmail(){return memEmail(S.settings.activeUser||S.members[0].id);}
 function evEmails(ev){const ms=(ev.members||[]).filter(id=>memById(id));const ids=ms.length?ms:S.members.map(m=>m.id);return [...new Set(ids.map(memEmail).filter(Boolean))];}
 function nfMin(n){n=Number(n)||0;return n===0?'chiar acum':(n>=60?(n%60===0?(n/60)+' h':Math.floor(n/60)+' h '+(n%60)+' min'):n+' min');}
 /* --- emailuri frumoase (HTML) cu link rapid către aplicație --- */
-const APP_URL=(location.protocol==='http:'||location.protocol==='https:')?(location.origin+location.pathname):'https://drg2121.github.io/famlink/';
+const APP_URL=(location.protocol==='http:'||location.protocol==='https:')?(location.origin+location.pathname):'https://famlink-push.web.app/';
 /* linkul din emailuri include accesul de sincronizare (ca „Trimite acces altui dispozitiv") —
    deschis pe un dispozitiv neconectat se conectează automat, nu mai apare pagina goală */
 function appLink(){
@@ -6672,21 +6684,96 @@ function shareSyncAccess(mid){
   if(navigator.share){navigator.share({title:'FamLink — acces familie',text:(who?who+', d':'D')+'eschide linkul ca să vezi calendarul familiei pe dispozitivul tău:',url:link}).catch(()=>{});}
   else{(navigator.clipboard?navigator.clipboard.writeText(link):Promise.reject()).then(()=>toast('Link copiat — trimite-l familiei prin mesaj privat')).catch(()=>prompt('Copiază linkul și trimite-l familiei:',link));}
 }
-function importSyncFromHash(){
-  const h=location.hash||'';
-  if(h.indexOf('#sync=')!==0)return false;
+function importSyncFromHash(src){
+  /* src = un link lipit de mână (Setări → Sincronizare / „Vii de pe FamLink vechi?"); fără src → hash-ul paginii */
+  let h=src!=null?String(src).trim():(location.hash||'');
+  const at=h.indexOf('#sync=');
+  if(at<0)return false;
+  h=h.slice(at);
   let data=null;try{data=JSON.parse(atob(h.slice(6)));}catch(e){}
-  history.replaceState(null,'',location.pathname);
+  if(src==null)history.replaceState(null,'',location.pathname);
   if(data&&data.t&&data.g&&data.p){
     if(SYNC.token===data.t&&SYNC.gistId===data.g&&SYNC.pass===data.p)return false; /* deja conectat cu aceleași date — nu întreba nimic */
-    if(confirm('Te conectezi la calendarul familiei partajat? Datele tale de pe acest dispozitiv se vor combina cu cele partajate (nimic nu se șterge).')){
+    const mv=data.mv===1; /* vine de la butonul de mutare de pe adresa veche — mutarea e confirmată acolo, nu mai întrebăm */
+    if(mv||confirm('Te conectezi la calendarul familiei partajat? Datele tale de pe acest dispozitiv se vor combina cu cele partajate (nimic nu se șterge).')){
       SYNC.token=data.t;SYNC.gistId=data.g;SYNC.pass=data.p;SYNC.auto=true;if(!SYNC.intervalMin)SYNC.intervalMin=5;saveSync();
       if(data.m&&typeof data.m==='string'&&!meGet())meSet(data.m); // linkul spune pentru cine e
-      syncPull(false).then(()=>{setupSyncTimer();rSyncUI();toast('Conectat la calendarul familiei ✓');});
+      syncPull(false).then(()=>{setupSyncTimer();rSyncUI();toast(mv?'Gata, ești în noul FamLink ✓ Datele au venit prin sincronizare.':'Conectat la calendarul familiei ✓');});
       return true;
     }
   }
   return false;
+}
+/* ============ Mutarea pe Firebase Hosting (v4.3.0) ============
+   Adresa nouă: famlink-push.web.app (Google, același proiect Firebase ca notificările).
+   - Pe adresa veche (GitHub Pages) apare o dată pe zi un anunț cu butonul „Deschide FamLink nou”,
+     care duce cu el accesul de sincronizare (#sync=… cu mv:1 → pe adresa nouă se conectează fără
+     întrebare și trage datele din gist). Aplicația veche merge în continuare: ambele adrese folosesc
+     același gist, deci nimic nu se pierde și nimic nu se dublează.
+   - Pe iPhone, aplicația de pe ecranul principal are memoria ei, separată de Safari, așa că linkul
+     se și copiază; în aplicația nouă, „Vii de pe FamLink vechi?” îl cere o singură dată. */
+const NEW_URL='https://famlink-push.web.app/';
+const MVKEY='famlink_move_later';
+function onOldHost(){return /(^|\.)github\.io$/i.test(location.hostname);}
+function isStandalone(){try{return (window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;}catch(e){return false;}}
+function isIOS(){return /iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);}
+function syncOn(){return !!(SYNC.token&&SYNC.pass&&SYNC.gistId);}
+function mvLink(){
+  if(!syncOn())return NEW_URL;
+  const o={t:SYNC.token,g:SYNC.gistId,p:SYNC.pass,mv:1};const me=meGet();if(me)o.m=me;
+  return NEW_URL+'#sync='+btoa(JSON.stringify(o));
+}
+function mvCopy(){
+  const link=mvLink();
+  (navigator.clipboard?navigator.clipboard.writeText(link):Promise.reject()).then(()=>toast('Link copiat ✓ Îl lipești în FamLink nou')).catch(()=>prompt('Copiază linkul și lipește-l în FamLink nou:',link));
+}
+function mvShow(){
+  const on=syncOn(),ios=isIOS();
+  document.getElementById('mvTitle').textContent='FamLink s-a mutat';
+  const install=ios
+    ?'<li>Se deschide în Safari. Apasă <b>Partajează → Adaugă pe ecranul principal</b>.</li><li>Deschide iconița nouă. Te întreabă „Vii de pe FamLink vechi?” — lipește linkul (e deja copiat).</li>'
+    :'<li>În browser, alege <b>Instalează aplicația</b> (sau <b>Adaugă pe ecranul principal</b>).</li>';
+  document.getElementById('mvBody').innerHTML=
+    '<p style="margin:0 0 10px">De acum FamLink stă pe serverele Google, la <b>famlink-push.web.app</b>, în același loc cu notificările.</p>'+
+    (on
+      ?'<p class="muted" style="margin:0 0 12px">Datele tale vin cu tine prin sincronizare — nu se pierde nimic.</p>'
+      :'<p class="muted" style="margin:0 0 12px">Pe acest dispozitiv sincronizarea nu e pornită, deci datele stau doar aici. <b>Descarcă întâi o copie</b>, apoi în FamLink nou o încarci din <b>Setări → Date &amp; backup → Restaurează</b>.</p>'+
+       '<button class="btn sec" style="width:100%;margin-bottom:8px" onclick="backup()"><i data-lucide="download"></i>Descarcă o copie a datelor</button>')+
+    '<a class="btn" id="mvGo" style="display:flex;justify-content:center;width:100%;box-sizing:border-box;text-decoration:none" href="'+esc(mvLink())+'" target="_blank" rel="noopener" onclick="mvOpened()"><i data-lucide="external-link"></i>Deschide FamLink nou</a>'+
+    '<ol class="muted" style="margin:12px 0 0;padding-left:20px;font-size:13px;line-height:1.5">'+install+
+      '<li>În aplicația nouă pornește din nou notificările (Setări → Notificări push).</li>'+
+      '<li>După ce merge, iconița veche o poți șterge.</li></ol>'+
+    '<button class="btn ghost sm" style="margin-top:12px" onclick="mvLater()">Mai târziu</button>';
+  document.getElementById('mvBack').classList.add('show');LI();
+}
+/* pe adresa nouă, fără sincronizare: „Vii de pe FamLink vechi?” — lipești linkul o singură dată */
+function mvShowNew(){
+  document.getElementById('mvTitle').textContent='Vii de pe FamLink vechi?';
+  document.getElementById('mvBody').innerHTML=
+    '<p style="margin:0 0 10px">Lipește linkul de acces și îți aduc calendarul familiei. Îl găsești în FamLink vechi, la butonul <b>Deschide FamLink nou</b> (se copiază singur), sau îl primești de la cineva din familie.</p>'+
+    '<input id="mvLinkIn" placeholder="https://…#sync=…" autocomplete="off" style="width:100%;box-sizing:border-box">'+
+    '<button class="btn" style="width:100%;margin-top:10px" onclick="syncFromLink(\'mvLinkIn\')"><i data-lucide="link"></i>Conectează</button>'+
+    '<p class="muted" style="margin:12px 0 0;font-size:13px">Ai doar o copie descărcată? Închide fereastra și mergi la <b>Setări → Date &amp; backup → Restaurează</b>.</p>'+
+    '<button class="btn ghost sm" style="margin-top:12px" onclick="mvNever()">Nu, încep de la zero</button>';
+  document.getElementById('mvBack').classList.add('show');LI();
+}
+function mvClose(){document.getElementById('mvBack').classList.remove('show');}
+function mvLater(){if(onOldHost()){try{localStorage.setItem(MVKEY,dstr(new Date()));}catch(e){}}mvClose();}
+function mvNever(){try{localStorage.setItem(MVKEY,'never');}catch(e){}mvClose();}
+function mvOpened(){if(isIOS())mvCopy();setTimeout(mvLater,400);}
+function syncFromLink(inputId){
+  const el=document.getElementById(inputId);const v=(el&&el.value||'').trim();
+  if(v.indexOf('#sync=')<0)return toast('Linkul nu pare bun — trebuie să conțină „#sync=”');
+  if(syncOn()&&mvLinkSame(v))return toast('Ești deja conectat cu acest link ✓');
+  if(importSyncFromHash(v)){if(el)el.value='';mvClose();}
+}
+function mvLinkSame(v){try{const d=JSON.parse(atob(v.slice(v.indexOf('#sync=')+6)));return d.t===SYNC.token&&d.g===SYNC.gistId&&d.p===SYNC.pass;}catch(e){return false;}}
+function mvBoot(){
+  let last='';try{last=localStorage.getItem(MVKEY)||'';}catch(e){}
+  if(onOldHost()){if(last!==dstr(new Date()))setTimeout(mvShow,1200);return;}
+  if(location.protocol!=='https:')return; // doar pe adresa publică nouă (nu în fișier local)
+  const empty=_wasFresh||!((S.events||[]).length||(S.goals||[]).length||(S.members||[]).length>1);
+  if(!syncOn()&&last!=='never'&&empty)setTimeout(mvShowNew,1200);
 }
 function syncNow(){
   const b=document.getElementById('hSync');
@@ -7573,6 +7660,7 @@ handleActHash(); // acțiune venită dintr-o notificare (aplicația pornită de 
 const _imported=importSyncFromHash();
 if(!_imported&&SYNC.token&&SYNC.pass&&SYNC.gistId&&SYNC.auto!==false)syncPull(true);
 setupSyncTimer();
+mvBoot(); // v4.3.0: anunțul de mutare (adresa veche) / „Vii de pe FamLink vechi?” (adresa nouă)
 if(typeof pushSanitize==='function')pushSanitize(); // scoate definitiv vechiul link de emailuri, dacă a rămas de la v2.x
 pushInit();
 if(typeof nudgeSchedule==='function')nudgeSchedule();

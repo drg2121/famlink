@@ -51,7 +51,9 @@ Aplicație într-un singur fișier (`index.html`), pe modelul ArhiLink: fără s
 
 ## Sincronizare privată între dispozitive (v1.3)
 
-Datele NU se publică pe GitHub Pages — stau doar în browserul tău. Dacă vrei să le ai pe mai multe dispozitive, activează sincronizarea din **Setări → Sincronizare privată**:
+**Adresa aplicației (din v4.3.0): https://famlink-push.web.app/** — Firebase Hosting. Vechea adresă de pe GitHub Pages arată un anunț de mutare. Publicare: `sh deploy.sh` (după commit).
+
+Datele NU se publică pe server — stau doar în browserul tău. Dacă vrei să le ai pe mai multe dispozitive, activează sincronizarea din **Setări → Sincronizare privată**:
 
 1. Creează un token GitHub: **Settings → Developer settings → Personal access tokens (classic) → Generate**, bifând **doar** scope-ul `gist`.
 2. Lipește tokenul + o **parolă de criptare** aleasă de tine (ține-o minte — fără ea datele nu pot fi citite).
