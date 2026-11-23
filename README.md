@@ -53,6 +53,8 @@ Aplicație într-un singur fișier (`index.html`), pe modelul ArhiLink: fără s
 
 **Adresa aplicației (din v4.3.0): https://famlink-push.web.app/** — Firebase Hosting. Vechea adresă de pe GitHub Pages arată un anunț de mutare. Publicare: `sh deploy.sh` (după commit).
 
+**Sincronizare prin cont Google (din v4.4.0):** Setări → Sincronizare între dispozitive → „Trec pe sincronizarea Google”. În timp real, fără token GitHub, cu datele criptate cu parola familiei; acces doar pentru emailurile de pe lista familiei. Regulile: `firestore.rules` (se publică cu `firebase deploy --only firestore:rules`). Detalii în MODIFICARI.md, v4.4.0.
+
 Datele NU se publică pe server — stau doar în browserul tău. Dacă vrei să le ai pe mai multe dispozitive, activează sincronizarea din **Setări → Sincronizare privată**:
 
 1. Creează un token GitHub: **Settings → Developer settings → Personal access tokens (classic) → Generate**, bifând **doar** scope-ul `gist`.

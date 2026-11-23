@@ -1,0 +1,59 @@
+rules_version = '2';
+
+// FamLink — reguli Firestore pentru sincronizarea prin cont Google (v4.4.0).
+//
+// ATENȚIE la publicare: `firebase deploy --only firestore:rules` ÎNLOCUIEȘTE regulile actuale ale
+// proiectului famlink-push. Backend-ul de notificări (Cloud Functions, Admin SDK) NU trece prin
+// aceste reguli, deci nu-l afectează. Dacă ai și în folderul backend-ului un firestore.rules cu alte
+// blocuri `match`, copiază acolo blocul `famlinkSync` de mai jos (altfel următoarea publicare de
+// acolo îl șterge și sincronizarea Google se oprește).
+//
+// Date: famlinkSync/{fid} = { emails, owner, ver, n, fmt, at, by, created }
+//       famlinkSync/{fid}/chunks/{i} = { d }  — starea familiei, comprimată și CRIPTATĂ pe telefon
+//       (AES-GCM cu parola familiei); Google vede doar text criptat.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null
+        && request.auth.token.email is string
+        && request.auth.token.email_verified == true;
+    }
+    function mail() { return request.auth.token.email.lower(); }
+    function famPath(fid) { return /databases/$(database)/documents/famlinkSync/$(fid); }
+    function okEmails(list) { return list is list && list.size() >= 1 && list.size() <= 20; }
+
+    match /famlinkSync/{fid} {
+      // doar membrii familiei (după emailul contului Google) văd documentul; nimeni nu poate lista familiile
+      allow get: if signedIn() && mail() in resource.data.emails;
+      allow list: if false;
+
+      // familia o creează cine e conectat: devine owner, e pe listă, pornește de la versiunea 1
+      allow create: if signedIn()
+        && request.resource.data.owner == request.auth.uid
+        && okEmails(request.resource.data.emails)
+        && mail() in request.resource.data.emails
+        && request.resource.data.ver == 1;
+
+      // orice membru salvează, dar doar peste ultima versiune (ver + 1) → nimic nu se suprascrie pe ascuns
+      allow update: if signedIn()
+        && mail() in resource.data.emails
+        && request.resource.data.owner == resource.data.owner
+        && okEmails(request.resource.data.emails)
+        && request.resource.data.ver == resource.data.ver + 1;
+
+      allow delete: if false;
+
+      match /chunks/{cid} {
+        allow read: if signedIn()
+          && exists(famPath(fid))
+          && mail() in get(famPath(fid)).data.emails;
+        // bucățile se scriu DOAR în aceeași tranzacție cu urcarea versiunii documentului principal
+        allow write: if signedIn()
+          && mail() in getAfter(famPath(fid)).data.emails
+          && getAfter(famPath(fid)).data.ver
+             == (exists(famPath(fid)) ? get(famPath(fid)).data.ver : 0) + 1;
+      }
+    }
+  }
+}

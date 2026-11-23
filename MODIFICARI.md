@@ -614,3 +614,38 @@ Cererea: să mutăm FamLink de pe GitHub pe Google, ca prim pas spre sincronizar
 
 - Pe fiecare telefon: aplicația se adaugă din nou pe ecranul principal și notificările se pornesc din nou (permisiunea și tokenul push țin de adresă). Până se șterge iconița veche, pot veni notificări pe ambele.
 - Testat: local + canal de test Firebase (`test-v43`): anunțul vechi (mobil 375 px luminos/întunecat, desktop), „Vii de pe FamLink vechi?”, link greșit / link valid / același link, „Nu, încep de la zero” rămâne ascuns după repornire, service worker activ pe adresa nouă, fără erori JS. Cheia web Firebase merge și de pe adresa nouă. Cache PWA: `famlink-v64`.
+
+## v4.4.0 — sincronizare prin contul Google (Firestore), în timp real (2026-11-23)
+
+Cererea: pasul 2 al mutării pe Google — sincronizarea să nu mai treacă prin gist-ul GitHub, ci prin Firestore, cu login Google.
+
+### De ce
+
+- Gist-ul primea **tot fișierul deodată, fără verificare**: două dispozitive care salvau aproape simultan își puteau ascunde una alteia modificările până la următoarea salvare.
+- Fiecare telefon ținea un **token GitHub** (cu acces la toate gist-urile contului).
+- Schimbările ajungeau pe celelalte dispozitive doar la câteva minute (cronometru).
+
+### Cum merge acum (opțional, din Setări → Sincronizare între dispozitive)
+
+- **„Trec pe sincronizarea Google”**: login cu Google, apoi familia se creează în Firestore (`famlinkSync/{fid}`), cu lista de emailuri din fișele membrilor (+ al tău). Doar conturile Google de pe listă au acces (verificat de `firestore.rules`, cu email verificat).
+- **Datele rămân criptate** cu aceeași parolă a familiei (AES-GCM) și comprimate (gzip) — Google vede doar text criptat. Peste 700 KB, starea se împarte în bucăți (`chunks/0..n-1`), scrise în aceeași tranzacție.
+- **Fără suprascrieri**: fiecare salvare urcă doar peste ultima versiune (`ver + 1`, verificat și de reguli). Dacă altcineva a salvat între timp, întâi combinăm (`mergeState`, ca până acum), apoi urcăm.
+- **În timp real**: dispozitivele ascultă documentul familiei; o schimbare apare pe celelalte în 2–3 secunde. Un dispozitiv care doar primește nu mai urcă nimic înapoi (amprenta ultimei stări sincronizate, `SYNC.fsHash`, ține și peste reporniri).
+- **Linkul de acces** („Trimite acces altui dispozitiv”, emailuri, anunțul de mutare) conține acum familia + parola, **fără token GitHub**. Când trimiți linkul pentru un membru cu email în fișă, emailul se adaugă singur pe listă.
+- **Punte în perioada de trecere**: un dispozitiv conectat și la gist sincronizează în ambele locuri; gist-ul primește `famlink-firestore.json`, iar dispozitivele rămase pe gist văd „Familia a trecut pe Google” → login → intră cu aceeași parolă. După ce toți au trecut: „Oprește sincronizarea GitHub aici”. Importul automat din Sănătate (scurtătura iPhone) scrie încă în gist — pe telefonul care îl folosește, gist-ul rămâne pornit.
+- Lista „Cine are acces”: adaugi / scoți emailuri. Fiecare modificare a listei urcă și ea versiunea.
+- SDK-urile Firebase Auth + Firestore se încarcă **doar** pe dispozitivele care folosesc sincronizarea Google.
+
+### De făcut de proprietarul proiectului (o singură dată)
+
+1. **Publică regulile**: `firebase deploy --only firestore:rules` (din acest folder). Înlocuiesc regulile actuale; backend-ul de notificări (Admin SDK) nu trece prin reguli. Dacă folderul backend-ului are propriul `firestore.rules`, copiază acolo blocul `famlinkSync`.
+2. **Pentru login din aplicația instalată pe iPhone**: Google Cloud Console → APIs & Services → Credentials → „Web client (auto created by Google Service)” → Authorized redirect URIs → adaugă `https://famlink-push.web.app/__/auth/handler`. Apoi `FS_SAME_HOST_AUTH = true` (login prin redirect pe aceeași adresă). Până atunci, login-ul merge prin fereastră pop-up (desktop, Android, Safari).
+
+### Testat (emulatorul Firebase, local: auth + Firestore cu regulile de mai sus)
+
+- Creare familie (date criptate + comprimate în cloud, fără text lizibil), al doilea dispozitiv intră prin link + login, schimbare pe un dispozitiv → apare pe celălalt în ~2,5 s, fără salvări în buclă.
+- Salvare pe versiune veche → combină și urcă, nimic pierdut; două salvări în aceeași clipă → ambele ajung (a doua e respinsă de reguli și reîncercată după combinare).
+- Reporniri repetate → versiunea nu mai crește. Stare de 1,5 MB → 2 bucăți; ștergere → 1 bucată, bucata în plus dispare; ștergerile ajung și pe celălalt dispozitiv.
+- Securitate: fără login, cont străin, email neverificat → acces refuzat; un membru nu poate schimba proprietarul, sări versiuni, scrie bucăți fără versiune nouă, goli lista, șterge familia sau lista familiile. Scos de pe listă → acces refuzat imediat, readăugat → merge din nou. Parolă greșită → „Parolă de criptare greșită”.
+- Punte gist → Google: semnul din gist → „Familia a trecut pe Google” → login → intră cu aceeași parolă; linkurile noi nu mai au token.
+- Setări pe mobil 375 px (luminos/întunecat), fără erori JS; un dispozitiv fără sincronizare Google nu încarcă nimic în plus. Cache PWA: `famlink-v65`.

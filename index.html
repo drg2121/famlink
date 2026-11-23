@@ -1682,7 +1682,8 @@ html[data-theme="dark"] .askgrab{background:#3a4a42}
     <details class="card setfold">
       <summary><i data-lucide="refresh-cw"></i>Sincronizare între dispozitive<span class="chev"><i data-lucide="chevron-down"></i></span></summary>
       <div class="foldbody">
-      <p class="muted">Datele tale se salvează <b>criptate</b> într-un gist privat GitHub. Le poți încărca pe orice dispozitiv cu același token și aceeași parolă. Nimeni — nici GitHub — nu le poate citi fără parola ta.</p>
+      <div id="fsBox" style="margin-bottom:14px"></div>
+      <p class="muted"><b>Vechea sincronizare (GitHub).</b> Datele tale se salvează <b>criptate</b> într-un gist privat GitHub. Le poți încărca pe orice dispozitiv cu același token și aceeași parolă. Nimeni — nici GitHub — nu le poate citi fără parola ta.</p>
       <div id="syncStatus" class="muted" style="margin:8px 0;font-size:13px"></div>
       <label>Token GitHub (doar scope „gist")</label><input id="syncToken" type="password" placeholder="ghp_…">
       <label>Parolă de criptare (o alegi tu — ține-o minte!)</label><input id="syncPass" type="password" placeholder="parola ta secretă">
@@ -2045,9 +2046,11 @@ html[data-theme="dark"] .askgrab{background:#3a4a42}
 <script>
 /* ============ FamLink v1.0 — arhitectură ArhiLink (single-file, localStorage) ============ */
 const KEY='famlink_v1';
-const APP_VER='4.3.0';
+const APP_VER='4.4.0';
 /* v4.3.0: dispozitiv nou pe această adresă (nimic salvat încă) — citit înainte de primul save() */
 const _wasFresh=(function(){try{return !localStorage.getItem(KEY);}catch(e){return false;}})();
+/* v4.4.0: teste locale cu emulatorul Firebase (?emu=1), citit înainte ca linkul de acces să curețe adresa */
+const _fsEmu=/^(localhost|127\.0\.0\.1)$/.test(location.hostname)&&/[?&]emu=1/.test(location.search);
 /* prima literă mare (titluri de obiective, etichete de mementouri, titluri AI) */
 const capFirst=s=>{s=String(s||'').trim();return s?s.charAt(0).toLocaleUpperCase('ro-RO')+s.slice(1):s;};
 /* curăță titlul unui obiectiv: scoate din față formulările de COMANDĂ
@@ -3580,9 +3583,8 @@ const APP_URL=(location.protocol==='http:'||location.protocol==='https:')?(locat
    deschis pe un dispozitiv neconectat se conectează automat, nu mai apare pagina goală */
 function appLink(){
   try{
-    if(typeof SYNC!=='undefined'&&SYNC.token&&SYNC.pass&&SYNC.gistId){
-      return APP_URL+'#sync='+btoa(JSON.stringify({t:SYNC.token,g:SYNC.gistId,p:SYNC.pass}));
-    }
+    const o=(typeof SYNC!=='undefined')?syncPayload():null;
+    if(o)return APP_URL+'#sync='+btoa(JSON.stringify(o));
   }catch(e){}
   return APP_URL;
 }
@@ -6549,7 +6551,8 @@ async function _key(pass,salt){const enc=new TextEncoder();const km=await crypto
 async function encJSON(obj,pass){const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));const key=await _key(pass,salt);const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(obj))));const buf=new Uint8Array(28+ct.length);buf.set(salt,0);buf.set(iv,16);buf.set(ct,28);return b64enc(buf);}
 async function decJSON(b64,pass){const raw=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));const salt=raw.slice(0,16),iv=raw.slice(16,28),ct=raw.slice(28);const key=await _key(pass,salt);const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ct);return JSON.parse(new TextDecoder().decode(pt));}
 let _pushT=null;
-function schedulePush(){if(!(SYNC.token&&SYNC.pass&&SYNC.gistId&&SYNC.auto!==false))return;clearTimeout(_pushT);_pushT=setTimeout(()=>syncPush(true),700);}
+function schedulePush(){if(typeof fsOn==='function'&&fsOn()){clearTimeout(_fsPushT);_fsPushT=setTimeout(()=>fsSync('push',true),900);}
+  if(!(SYNC.token&&SYNC.pass&&SYNC.gistId&&SYNC.auto!==false))return;clearTimeout(_pushT);_pushT=setTimeout(()=>syncPush(true),700);}
 async function syncPush(silent){
   if(!(SYNC.token&&SYNC.pass&&SYNC.gistId))return silent?0:toast('Conectează-te mai întâi');
   const hb=document.getElementById('hSync');if(hb)hb.classList.add('spin');
@@ -6650,6 +6653,7 @@ async function syncPull(silent){
     const r=await fetch('https://api.github.com/gists/'+SYNC.gistId,{headers:ghHeaders()});
     if(!r.ok)throw new Error('HTTP '+r.status);
     const d=await r.json(),f=d.files&&d.files['famlink-sync.json'];
+    if(typeof fsGistHint==='function')fsGistHint(d.files);
     if(!f||!f.content)throw new Error('gist gol');
     const obj=await decJSON(f.content,SYNC.pass);
     if(obj&&obj.members){
@@ -6658,6 +6662,7 @@ async function syncPull(silent){
       S=mergeState(S,obj);localStorage.setItem(KEY,JSON.stringify(S));
       if(!firstTime)notifyNewEvents(beforeIds);
       SYNC.seeded=true;SYNC.last=new Date().toISOString();saveSync();rSyncUI();
+      if(typeof fsOn==='function'&&fsOn())setTimeout(()=>fsSync('push',true),300); // punte: ce a venit din gist urcă și în Google
       if(typeof fitInboxFromGist==='function')try{await fitInboxFromGist(d.files||{});}catch(e){console.warn('fit inbox',e);}
       render();if(!silent)toast('Sincronizat ✓ (date combinate)');
       if(typeof meAfterSync==='function')meAfterSync();
@@ -6670,20 +6675,330 @@ let _syncTimer=null;
 function setupSyncTimer(){clearInterval(_syncTimer);const mn=Number(SYNC.intervalMin);if(mn&&SYNC.token&&SYNC.pass&&SYNC.gistId)_syncTimer=setInterval(()=>syncPull(true),mn*60000);}
 /* v4.2: linkul poate spune și PENTRU CINE e — telefonul care îl deschide știe direct cine e, fără întrebări */
 function shareSyncAccess(mid){
-  if(!(SYNC.token&&SYNC.pass&&SYNC.gistId))return toast('Conectează întâi sincronizarea, apoi trimite accesul');
+  if(!(gistOn()||fsOn()))return toast('Conectează întâi sincronizarea, apoi trimite accesul');
   if(mid===undefined&&S.members.length>1){
     document.getElementById('qsTitle').innerHTML='<i data-lucide="send"></i> Pentru cine e linkul?';
     document.getElementById('qsSub').textContent='Telefonul care deschide linkul se conectează și știe direct cine e.';
     document.getElementById('qsBody').innerHTML='<div class="whopick">'+S.members.map(m=>'<button type="button" style="--mc:'+esc(m.color||'#2c7a5f')+'" onclick="qsClose();shareSyncAccess(\''+m.id+'\')">'+avatarBig(m)+'<b>'+esc(m.name)+'</b></button>').join('')+'</div><button class="btn ghost" style="width:100%;margin-top:10px" onclick="qsClose();shareSyncAccess(\'\')">Fără nume — întreabă la deschidere</button>';
     document.getElementById('qsBack').classList.add('show');LI();return;
   }
-  const o={t:SYNC.token,g:SYNC.gistId,p:SYNC.pass};if(mid&&memById(mid))o.m=mid;
+  const o=syncPayload();if(mid&&memById(mid))o.m=mid;
+  if(fsOn()&&o.m){ /* Google: persoana intră doar cu emailul ei pe lista familiei — îl adăugăm din fișa membrului */
+    const em=String((memById(o.m)||{}).email||'').trim().toLowerCase();
+    if(em&&!(SYNC.fsEmails||[]).includes(em))fsEditEmails(em,null);
+    else if(!em)setTimeout(()=>toast('Adaugă și emailul Google al lui '+firstName(o.m)+' în Setări → Sincronizare'),1200);
+  }
   const payload=btoa(JSON.stringify(o));
   const link=location.origin+location.pathname+'#sync='+payload;
   const who=o.m?firstName(o.m):'';
   if(navigator.share){navigator.share({title:'FamLink — acces familie',text:(who?who+', d':'D')+'eschide linkul ca să vezi calendarul familiei pe dispozitivul tău:',url:link}).catch(()=>{});}
   else{(navigator.clipboard?navigator.clipboard.writeText(link):Promise.reject()).then(()=>toast('Link copiat — trimite-l familiei prin mesaj privat')).catch(()=>prompt('Copiază linkul și trimite-l familiei:',link));}
 }
+/* ============ SINCRONIZARE GOOGLE (Firestore + cont Google) — v4.4.0 ============
+   De ce: gist-ul primea tot fișierul o dată, fără să verifice dacă între timp a salvat altcineva,
+   cerea un token GitHub pe fiecare telefon și se actualiza doar la câteva minute. Acum:
+   - te conectezi cu contul Google; intră doar emailurile de pe lista familiei (regulile Firestore verifică)
+   - datele rămân CRIPTATE cu aceeași parolă (AES-GCM, ca la gist) și comprimate — Google vede doar text criptat
+   - o salvare urcă doar peste ultima versiune (tranzacție cu număr de versiune); dacă altcineva a salvat
+     între timp, întâi combinăm (mergeState), apoi urcăm → nimic nu se pierde
+   - schimbările apar pe celelalte dispozitive în câteva secunde (ascultare în timp real, fără cronometru)
+   - în perioada de trecere, un dispozitiv conectat și la gist sincronizează în ambele locuri (punte), iar
+     gist-ul primește fișierul-semn famlink-firestore.json ca dispozitivele rămase pe gist să afle de mutare
+   Date: famlinkSync/{fid} = {emails, owner, ver, n, fmt, at, by}; famlinkSync/{fid}/chunks/{0..n-1} = {d}.
+   Regulile: firestore.rules (le publică proprietarul proiectului). */
+const FS_COL='famlinkSync',FS_CHUNK=700000,FB_SDK='https://www.gstatic.com/firebasejs/10.14.1/';
+/* login Google prin redirect pe aceeași adresă (merge și în aplicația de pe ecranul iPhone-ului): pornit doar
+   după ce https://famlink-push.web.app/__/auth/handler e adăugat la „Authorized redirect URIs" în Google Cloud */
+const FS_SAME_HOST_AUTH=false;
+var _fsSdk=null,_fsUnsub=null,_fsLock=Promise.resolve(),_fsPushT=null,_fsState='';
+/* ce intră în linkul de acces: familia Google (fără token) sau, înainte de mutare, gist-ul */
+function syncPayload(){return fsOn()?{f:SYNC.fsId,p:SYNC.pass}:(gistOn()?{t:SYNC.token,g:SYNC.gistId,p:SYNC.pass}:null);}
+function gistOn(){return !!(SYNC.token&&SYNC.pass&&SYNC.gistId);}
+function fsOn(){return !!(SYNC.fsId&&SYNC.pass);}
+function fsErr(code){const e=new Error(code);e.code=code;return e;}
+function loadJS(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(fsErr('sdk'));document.head.appendChild(s);});}
+function fsSdk(){
+  if(_fsSdk)return _fsSdk;
+  _fsSdk=(async()=>{
+    if(typeof firebase==='undefined')await loadJS(FB_SDK+'firebase-app-compat.js');
+    if(!firebase.auth)await loadJS(FB_SDK+'firebase-auth-compat.js');
+    if(!firebase.firestore)await loadJS(FB_SDK+'firebase-firestore-compat.js');
+    /* aplicație Firebase separată de cea a notificărilor, ca să putem alege domeniul de login */
+    let app=firebase.apps.find(a=>a.name==='famlink-fs');
+    if(!app){
+      const cfg=Object.assign({},FB_CONFIG);
+      if(FS_SAME_HOST_AUTH&&location.hostname==='famlink-push.web.app')cfg.authDomain=location.hostname;
+      app=firebase.initializeApp(cfg,'famlink-fs');
+    }
+    const auth=app.auth(),db=app.firestore();
+    if(_fsEmu){ // doar teste locale cu emulatorul Firebase
+      auth.useEmulator('http://127.0.0.1:9099');db.useEmulator('127.0.0.1',8080);
+    }
+    return {auth,db};
+  })();
+  _fsSdk.catch(()=>{_fsSdk=null;});
+  return _fsSdk;
+}
+async function fsUser(){
+  const {auth}=await fsSdk();
+  if(auth.currentUser)return auth.currentUser;
+  return new Promise(res=>{const off=auth.onAuthStateChanged(u=>{off();res(u);});});
+}
+function fsEmail(){try{const a=firebase.apps.find(x=>x.name==='famlink-fs');const u=a&&a.auth().currentUser;return u&&u.email?u.email.toLowerCase():'';}catch(e){return '';}}
+async function fsSignIn(){
+  const {auth}=await fsSdk();
+  const p=new firebase.auth.GoogleAuthProvider();p.setCustomParameters({prompt:'select_account'});
+  const redirect=()=>{SYNC.fsRedirect=1;saveSync();return auth.signInWithRedirect(p).then(()=>null);};
+  if(FS_SAME_HOST_AUTH&&isStandalone())return redirect(); // în aplicația instalată, ferestrele pop-up nu se întorc mereu
+  try{return (await auth.signInWithPopup(p)).user;}
+  catch(e){if(/popup-blocked|operation-not-supported/.test(e.code||''))return redirect();throw e;}
+}
+/* împachetare: JSON → gzip (dacă browserul știe) → AES-GCM cu parola familiei → base64 → bucăți de 700 KB */
+async function gzBytes(u8,decompress){
+  if(typeof CompressionStream==='undefined')return null;
+  const st=new Blob([u8]).stream().pipeThrough(decompress?new DecompressionStream('gzip'):new CompressionStream('gzip'));
+  return new Uint8Array(await new Response(st).arrayBuffer());
+}
+async function encPack(str,pass){
+  let bytes=new TextEncoder().encode(str),fmt='raw1';
+  const z=await gzBytes(bytes,false);if(z){bytes=z;fmt='gz1';}
+  const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},await _key(pass,salt),bytes));
+  const buf=new Uint8Array(28+ct.length);buf.set(salt,0);buf.set(iv,16);buf.set(ct,28);
+  const b=b64enc(buf),chunks=[];for(let i=0;i<b.length;i+=FS_CHUNK)chunks.push(b.slice(i,i+FS_CHUNK));
+  return {fmt,chunks};
+}
+async function decPack(fmt,b64,pass){
+  const raw=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+  let pt=new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:raw.slice(16,28)},await _key(pass,raw.slice(0,16)),raw.slice(28)));
+  if(fmt==='gz1'){const z=await gzBytes(pt,true);if(!z)throw fsErr('gzip');pt=z;}
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+function fsRef(db,fid){return db.collection(FS_COL).doc(fid||SYNC.fsId);}
+/* amprenta ultimei stări sincronizate (ține și peste reporniri) → deschiderea aplicației nu urcă degeaba */
+function fnv(str){let h=0x811c9dc5;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,0x01000193);}return (h>>>0).toString(36)+'.'+str.length;}
+function fsMarkSynced(str){SYNC.fsHash=fnv(str);saveSync();}
+function fsDirty(){return !SYNC.fsHash||fnv(JSON.stringify(S))!==SYNC.fsHash;}
+function fsSerial(fn){const p=_fsLock.then(fn,fn);_fsLock=p.catch(()=>{});return p;}
+function fsMeta(m,user){SYNC.fsVer=m.ver||0;SYNC.fsEmails=m.emails||[];SYNC.fsOwner=!!(user&&m.owner===user.uid);SYNC.fsLast=new Date().toISOString();saveSync();}
+/* aplică starea venită din cloud (aceeași logică ca la gist: combină, anunță activitățile noi, redesenează) */
+function fsApplyRemote(obj){
+  const beforeIds=new Set(S.events.map(e=>e.id));const firstTime=!SYNC.seeded;
+  S=mergeState(S,obj);localStorage.setItem(KEY,JSON.stringify(S));
+  if(!firstTime)notifyNewEvents(beforeIds);
+  SYNC.seeded=true;SYNC.last=new Date().toISOString();saveSync();
+  if(gistOn()&&SYNC.auto!==false){clearTimeout(_pushT);_pushT=setTimeout(()=>syncPush(true),1500);} // punte: dispozitivele rămase pe gist văd și ele
+  render();
+  if(typeof meAfterSync==='function')meAfterSync();
+  if(typeof pushCronSync==='function')pushCronSync();
+  if(!syncPull._cu&&typeof pushCatchUp==='function'){syncPull._cu=1;pushCatchUp(true);}
+}
+async function fsPullNow(){
+  const {db}=await fsSdk();const user=await fsUser();if(!user)throw fsErr('login');
+  const ref=fsRef(db);
+  /* citim documentul și bucățile în aceeași tranzacție → nu amestecăm două versiuni */
+  const got=await db.runTransaction(async tx=>{
+    const s=await tx.get(ref);if(!s.exists)throw fsErr('missing');
+    const m=s.data(),parts=[];
+    for(let i=0;i<(m.n||0);i++){const c=await tx.get(ref.collection('chunks').doc(String(i)));parts.push(c.exists?c.data().d:null);}
+    return {m,parts};
+  });
+  if(got.parts.some(x=>typeof x!=='string'))throw fsErr('partial');
+  const obj=await decPack(got.m.fmt,got.parts.join(''),SYNC.pass);
+  const wasDirty=fsDirty();
+  if(obj&&obj.members)fsApplyRemote(obj);
+  fsMeta(got.m,user);
+  return wasDirty;
+}
+async function fsPushNow(){
+  const {db}=await fsSdk();const user=await fsUser();if(!user)throw fsErr('login');
+  const ref=fsRef(db);
+  for(let k=0;k<4;k++){
+    const str=JSON.stringify(S);const {fmt,chunks}=await encPack(str,SYNC.pass);
+    let res;
+    try{
+      res=await db.runTransaction(async tx=>{
+        const s=await tx.get(ref);if(!s.exists)throw fsErr('missing');
+        const m=s.data();
+        if((m.ver||0)!==(SYNC.fsVer||0))return {stale:true};
+        chunks.forEach((d,i)=>tx.set(ref.collection('chunks').doc(String(i)),{d}));
+        for(let i=chunks.length;i<(m.n||0);i++)tx.delete(ref.collection('chunks').doc(String(i)));
+        const nx={ver:(m.ver||0)+1,n:chunks.length,fmt,at:firebase.firestore.FieldValue.serverTimestamp(),by:(user.email||'').toLowerCase()};
+        tx.update(ref,nx);
+        return {m:Object.assign({},m,nx)};
+      });
+    }catch(e){
+      /* două salvări în aceeași clipă: regulile o resping pe a doua (versiunea nu mai e ver+1) →
+         o tratăm ca „versiune veche”. Dacă emailul chiar nu e pe listă, citirea de mai jos o spune. */
+      if(e&&e.code==='permission-denied'&&k<3)res={stale:true};else throw e;
+    }
+    if(!res.stale){fsMarkSynced(str);fsMeta(res.m,user);return true;}
+    await fsPullNow(); // altcineva a salvat între timp: combinăm întâi, apoi urcăm din nou
+  }
+  throw fsErr('busy');
+}
+function fsMsg(e){
+  const c=String((e&&(e.code||e.name||e.message))||'');
+  if(/permission-denied|insufficient permissions/i.test(c))return 'Contul Google '+(fsEmail()||'tău')+' nu e pe lista familiei. Cineva din familie îl adaugă din Setări → Sincronizare.';
+  if(/OperationError|decrypt|operation-specific/i.test(c))return 'Parolă de criptare greșită';
+  if(/unavailable|network|offline|failed-precondition/i.test(c))return 'Fără internet — reîncerc singur mai târziu';
+  if(/popup-closed|cancelled-popup|user-cancelled/i.test(c))return 'Conectarea cu Google a fost anulată';
+  if(/unauthorized-domain|redirect_uri/i.test(c))return 'Adresa asta nu e încă autorizată pentru login Google';
+  if(c==='missing')return 'Nu găsesc calendarul familiei în cloud';
+  if(c==='login')return 'Conectează-te întâi cu Google';
+  if(c==='sdk')return 'Nu am putut încărca Google (verifică internetul)';
+  return 'Sincronizarea Google a eșuat ('+c+')';
+}
+/* singurul punct de intrare: 'pull' (aduce + combină + urcă doar dacă aveam modificări) sau 'push' */
+function fsSync(kind,silent){
+  return fsSerial(async()=>{
+    if(!fsOn())return false;
+    const hb=document.getElementById('hSync');if(hb&&!silent)hb.classList.add('spin');
+    try{
+      if(kind==='pull'){const wasDirty=await fsPullNow();if(wasDirty)await fsPushNow();else fsMarkSynced(JSON.stringify(S));}
+      else if(fsDirty())await fsPushNow();
+      _fsState='ok';if(!silent)toast('Sincronizat cu Google ✓');
+      if(!_fsUnsub)fsListen(); // ascultarea s-a oprit (ex. scos și readăugat pe listă) → o repornim
+      return true;
+    }catch(e){_fsState=fsMsg(e);console.warn('famlink fs',e);if(!silent||/permission|Parolă/.test(_fsState))toast(_fsState);return false;}
+    finally{rFsUI();if(hb)setTimeout(()=>hb.classList.remove('spin'),400);}
+  });
+}
+async function fsListen(){
+  if(_fsUnsub||!fsOn())return;
+  const {db}=await fsSdk();
+  _fsUnsub=fsRef(db).onSnapshot(s=>{
+    if(!s.exists||s.metadata.hasPendingWrites)return;
+    const m=s.data();SYNC.fsEmails=m.emails||[];
+    if((m.ver||0)>(SYNC.fsVer||0))fsSync('pull',true);
+  },e=>{console.warn('famlink fs listen',e);_fsUnsub=null;_fsState=fsMsg(e);rFsUI();});
+}
+function fsStopListen(){if(_fsUnsub){try{_fsUnsub();}catch(e){}_fsUnsub=null;}}
+function rid(n){const a=crypto.getRandomValues(new Uint8Array(n));return Array.from(a,x=>'abcdefghijkmnpqrstuvwxyz23456789'[x%32]).join('');}
+function fsFamilyEmails(user){
+  return [...new Set([user&&user.email].concat((S.members||[]).map(m=>m.email)).map(x=>String(x||'').trim().toLowerCase()).filter(x=>/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(x)))].slice(0,20);
+}
+async function fsCreate(user){
+  const {db}=await fsSdk();
+  const fid=rid(20),ref=fsRef(db,fid),str=JSON.stringify(S);
+  const {fmt,chunks}=await encPack(str,SYNC.pass);
+  const emails=fsFamilyEmails(user),ts=firebase.firestore.FieldValue.serverTimestamp();
+  const b=db.batch();
+  chunks.forEach((d,i)=>b.set(ref.collection('chunks').doc(String(i)),{d}));
+  b.set(ref,{emails,owner:user.uid,ver:1,n:chunks.length,fmt,at:ts,created:ts,by:user.email.toLowerCase()});
+  await b.commit();
+  SYNC.fsId=fid;fsMarkSynced(str);fsMeta({ver:1,emails,owner:user.uid},user);
+  if(gistOn())gistMarkMoved(fid);
+}
+/* semn în gist: dispozitivele rămase pe gist află că familia s-a mutat pe Google (fid nu e secret; fără parolă și fără email pe listă nu deschide nimic) */
+async function gistMarkMoved(fid){try{await fetch('https://api.github.com/gists/'+SYNC.gistId,{method:'PATCH',headers:ghHeaders(),body:JSON.stringify({files:{'famlink-firestore.json':{content:JSON.stringify({fid,at:new Date().toISOString()})}}})});}catch(e){}}
+function fsGistHint(files){
+  try{const f=files&&files['famlink-firestore.json'];if(!f||!f.content||fsOn())return;
+    const d=JSON.parse(f.content);if(d&&d.fid&&SYNC.fsHint!==d.fid){SYNC.fsHint=d.fid;saveSync();rFsUI();setTimeout(fsOfferMove,800);}}catch(e){}
+}
+/* după login: intru în familia cunoscută (link / semn din gist) sau creez una nouă din datele de pe acest dispozitiv */
+async function fsAfterLogin(user){
+  if(!user)return;
+  if(!SYNC.fsId&&SYNC.fsHint)SYNC.fsId=SYNC.fsHint;
+  delete SYNC.fsIntent;saveSync();
+  if(SYNC.fsId){const ok=await fsSync('pull',false);if(ok){delete SYNC.fsHint;saveSync();fsListen();}else if(/lista familiei/.test(_fsState)){/* păstrăm fsId: după ce e adăugat emailul, merge din nou */}}
+  else{try{await fsCreate(user);_fsState='ok';toast('Gata — FamLink se sincronizează acum prin Google ✓');fsListen();}
+    catch(e){_fsState=e&&e.code==='permission-denied'?'Serverul nu acceptă încă sincronizarea Google: regulile Firestore nu sunt publicate (firebase deploy --only firestore:rules).':fsMsg(e);toast(_fsState);SYNC.fsId='';saveSync();}}
+  rFsUI();rSyncUI();
+}
+/* butonul „Trec pe sincronizarea Google" / „Conectează-te cu Google" */
+async function fsStart(){
+  if(!SYNC.pass)return fsAskPass(fsStart);
+  SYNC.fsIntent=1;saveSync();
+  try{
+    let u=await fsUser();
+    if(!u)u=await fsSignIn();
+    if(u)await fsAfterLogin(u); // la redirect continuăm după reîncărcare (fsBoot)
+  }catch(e){toast(fsMsg(e));}
+}
+function fsAskPass(next){
+  const has=!!SYNC.fsId||!!SYNC.fsHint;
+  document.getElementById('qsTitle').innerHTML='<i data-lucide="key-round"></i> Parola familiei';
+  document.getElementById('qsSub').textContent=has?'Parola de criptare a calendarului familiei (aceeași ca la vechea sincronizare).':'Alege o parolă de criptare. O vor folosi toți din familie — ține-o minte!';
+  document.getElementById('qsBody').innerHTML='<input id="fsPassIn" type="password" placeholder="parola familiei" style="width:100%;box-sizing:border-box"><button class="btn" style="width:100%;margin-top:10px" onclick="fsPassOk()"><i data-lucide="check"></i>Continuă</button>';
+  fsAskPass._next=next;document.getElementById('qsBack').classList.add('show');LI();
+  setTimeout(()=>{const i=document.getElementById('fsPassIn');if(i)i.focus();},100);
+}
+function fsPassOk(){const v=(document.getElementById('fsPassIn').value||'');if(v.length<6)return toast('Parola trebuie să aibă cel puțin 6 caractere');SYNC.pass=v;saveSync();qsClose();const n=fsAskPass._next;fsAskPass._next=null;if(n)n();}
+function fsOfferMove(){
+  if(fsOn()||!SYNC.fsHint)return;
+  document.getElementById('qsTitle').innerHTML='<i data-lucide="cloud"></i> Familia a trecut pe Google';
+  document.getElementById('qsSub').textContent='Calendarul familiei se sincronizează acum prin contul Google: mai sigur și în timp real.';
+  document.getElementById('qsBody').innerHTML='<button class="btn" style="width:100%" onclick="qsClose();fsStart()"><i data-lucide="log-in"></i>Conectează-te cu Google</button><button class="btn ghost sm" style="margin-top:10px" onclick="qsClose()">Mai târziu</button>';
+  document.getElementById('qsBack').classList.add('show');LI();
+}
+async function fsEditEmails(add,remove){
+  const {db}=await fsSdk();const user=await fsUser();if(!user)return toast('Conectează-te întâi cu Google');
+  const ref=fsRef(db);
+  try{
+    const res=await db.runTransaction(async tx=>{
+      const s=await tx.get(ref);const m=s.data();
+      let em=(m.emails||[]).slice();
+      if(add){add=String(add).trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(add))throw fsErr('email');if(!em.includes(add))em.push(add);}
+      if(remove)em=em.filter(x=>x!==remove);
+      if(!em.length)throw fsErr('gol');
+      tx.update(ref,{emails:em.slice(0,20),ver:(m.ver||0)+1});
+      return {was:m.ver||0,em};
+    });
+    if((SYNC.fsVer||0)===res.was)SYNC.fsVer=res.was+1; // aveam ultima versiune → rămânem la zi
+    SYNC.fsEmails=res.em;saveSync();rFsUI();toast(add?'Adăugat pe lista familiei ✓':'Scos de pe listă');
+  }catch(e){toast(e.code==='email'?'Emailul nu pare bun':e.code==='gol'?'Lista familiei nu poate rămâne goală':fsMsg(e));}
+}
+function fsAddEmailUI(){const i=document.getElementById('fsMailIn');if(!i||!i.value.trim())return;fsEditEmails(i.value,null).then(()=>{i.value='';});}
+async function fsSignOut(){
+  if(!confirm('Deconectezi contul Google de pe acest dispozitiv? Datele rămân aici, dar nu se mai sincronizează prin Google.'))return;
+  fsStopListen();try{const {auth}=await fsSdk();await auth.signOut();}catch(e){}
+  _fsState='';rFsUI();toast('Cont Google deconectat');
+}
+function gistStop(){
+  if(!confirm('Oprești vechea sincronizare prin GitHub pe acest dispozitiv? Sincronizarea Google rămâne. (Dacă pe acest telefon folosești importul automat din Sănătate, lasă-o pornită — scurtătura scrie încă în gist.)'))return;
+  delete SYNC.token;delete SYNC.gistId;saveSync();setupSyncTimer();
+  const t=document.getElementById('syncToken');if(t)t.value='';rSyncUI();toast('Sincronizarea GitHub e oprită aici');
+}
+function rFsUI(){
+  const box=document.getElementById('fsBox');if(!box)return;
+  const me=fsEmail(),on=fsOn();
+  let h='';
+  if(on&&me){
+    const em=(SYNC.fsEmails||[]);
+    h+='<div class="muted" style="font-size:13px"><b style="color:var(--pri2)">Sincronizare Google ✓</b> · '+esc(me)+(SYNC.fsLast?' · '+new Date(SYNC.fsLast).toLocaleString('ro-RO'):'')+'</div>';
+    if(_fsState&&_fsState!=='ok')h+='<div class="muted" style="font-size:13px;color:#c0392b;margin-top:4px">'+esc(_fsState)+'</div>';
+    h+='<label style="margin-top:10px">Cine are acces (emailul contului Google)</label><div>'+em.map(x=>'<div class="row" style="justify-content:space-between;align-items:center;margin:4px 0"><span style="font-size:14px">'+esc(x)+(x===me?' <span class="muted">(tu)</span>':'')+'</span>'+(x!==me?'<button class="btn ghost sm" onclick="if(confirm(\'Scoți '+esc(x)+' de pe listă?\'))fsEditEmails(null,\''+esc(x)+'\')">Scoate</button>':'')+'</div>').join('')+'</div>';
+    h+='<div class="row" style="flex-wrap:wrap;margin-top:6px"><input id="fsMailIn" class="grow" type="email" placeholder="email@gmail.com" autocomplete="off"><button class="btn sec" onclick="fsAddEmailUI()"><i data-lucide="user-plus"></i>Adaugă</button></div>';
+    h+='<div class="row" style="flex-wrap:wrap;margin-top:10px"><button class="btn sec" onclick="fsSync(\'pull\',false)"><i data-lucide="refresh-cw"></i>Sincronizează acum</button><button class="btn ghost" onclick="fsSignOut()"><i data-lucide="log-out"></i>Deconectează Google</button></div>';
+    if(gistOn())h+='<p class="muted" style="font-size:13px;margin:10px 0 4px">Vechea sincronizare prin GitHub merge în paralel (punte), ca dispozitivele care n-au trecut încă să vadă tot. După ce toți folosesc Google, o poți opri:</p><button class="btn ghost sm" onclick="gistStop()"><i data-lucide="unlink"></i>Oprește sincronizarea GitHub aici</button>';
+  }else if(on||SYNC.fsHint){
+    h+='<div class="muted" style="font-size:13px;margin-bottom:8px">'+(_fsState&&_fsState!=='ok'?'<span style="color:#c0392b">'+esc(_fsState)+'</span>':'Calendarul familiei se sincronizează prin Google. Conectează-te ca să-l vezi aici.')+'</div><button class="btn" style="width:100%" onclick="fsStart()"><i data-lucide="log-in"></i>Conectează-te cu Google</button>';
+  }else{
+    h+='<p class="muted" style="margin:0 0 8px"><b>Nou: sincronizare prin contul Google.</b> În timp real, fără token GitHub, iar datele rămân criptate cu parola familiei.</p><button class="btn" style="width:100%" onclick="fsStart()"><i data-lucide="cloud"></i>Trec pe sincronizarea Google</button>';
+  }
+  box.innerHTML=h;LI();
+}
+async function fsBoot(){
+  if(!fsOn()&&!SYNC.fsRedirect&&!SYNC.fsHint)return;
+  try{
+    const {auth}=await fsSdk();
+    if(SYNC.fsRedirect){delete SYNC.fsRedirect;saveSync();try{await auth.getRedirectResult();}catch(e){toast(fsMsg(e));}}
+    const u=await fsUser();
+    if(u&&(SYNC.fsIntent||(!fsOn()&&SYNC.fsHint&&SYNC.pass)))return fsAfterLogin(u);
+    if(!fsOn()){if(SYNC.fsHint)setTimeout(fsOfferMove,1500);return;}
+    if(u){await fsSync('pull',true);fsListen();}
+    else{_fsState='';rFsUI();setTimeout(fsAskLogin,1200);}
+  }catch(e){_fsState=fsMsg(e);rFsUI();}
+}
+function fsAskLogin(){
+  if(!fsOn()||fsEmail())return;
+  document.getElementById('qsTitle').innerHTML='<i data-lucide="log-in"></i> Conectează-te cu Google';
+  document.getElementById('qsSub').textContent='Calendarul familiei se sincronizează prin contul Google. Folosește contul al cărui email e pe lista familiei.';
+  document.getElementById('qsBody').innerHTML='<button class="btn" style="width:100%" onclick="qsClose();fsStart()"><i data-lucide="log-in"></i>Conectează-te cu Google</button><button class="btn ghost sm" style="margin-top:10px" onclick="qsClose()">Mai târziu</button>';
+  document.getElementById('qsBack').classList.add('show');LI();
+}
+window.addEventListener('online',()=>{if(fsOn()&&fsEmail())fsSync('pull',true);});
 function importSyncFromHash(src){
   /* src = un link lipit de mână (Setări → Sincronizare / „Vii de pe FamLink vechi?"); fără src → hash-ul paginii */
   let h=src!=null?String(src).trim():(location.hash||'');
@@ -6692,6 +7007,16 @@ function importSyncFromHash(src){
   h=h.slice(at);
   let data=null;try{data=JSON.parse(atob(h.slice(6)));}catch(e){}
   if(src==null)history.replaceState(null,'',location.pathname);
+  if(data&&data.f&&data.p){ /* v4.4: link spre familia din Google (fără token) — login-ul îl cere fsBoot */
+    if(SYNC.fsId===data.f&&SYNC.pass===data.p)return false;
+    const mvf=data.mv===1;
+    if(mvf||_wasFresh||confirm('Te conectezi la calendarul familiei? Datele de pe acest dispozitiv se combină cu ale familiei (nimic nu se șterge).')){
+      SYNC.fsId=data.f;SYNC.pass=data.p;SYNC.fsVer=0;delete SYNC.fsHash;fsStopListen();saveSync();
+      if(data.m&&typeof data.m==='string'&&!meGet())meSet(data.m);
+      return true;
+    }
+    return false;
+  }
   if(data&&data.t&&data.g&&data.p){
     if(SYNC.token===data.t&&SYNC.gistId===data.g&&SYNC.pass===data.p)return false; /* deja conectat cu aceleași date — nu întreba nimic */
     const mv=data.mv===1; /* vine de la butonul de mutare de pe adresa veche — mutarea e confirmată acolo, nu mai întrebăm */
@@ -6717,10 +7042,10 @@ const MVKEY='famlink_move_later';
 function onOldHost(){return /(^|\.)github\.io$/i.test(location.hostname);}
 function isStandalone(){try{return (window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;}catch(e){return false;}}
 function isIOS(){return /iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);}
-function syncOn(){return !!(SYNC.token&&SYNC.pass&&SYNC.gistId);}
+function syncOn(){return gistOn()||fsOn();}
 function mvLink(){
-  if(!syncOn())return NEW_URL;
-  const o={t:SYNC.token,g:SYNC.gistId,p:SYNC.pass,mv:1};const me=meGet();if(me)o.m=me;
+  const o=syncPayload();if(!o)return NEW_URL;
+  o.mv=1;const me=meGet();if(me)o.m=me;
   return NEW_URL+'#sync='+btoa(JSON.stringify(o));
 }
 function mvCopy(){
@@ -6765,9 +7090,9 @@ function syncFromLink(inputId){
   const el=document.getElementById(inputId);const v=(el&&el.value||'').trim();
   if(v.indexOf('#sync=')<0)return toast('Linkul nu pare bun — trebuie să conțină „#sync=”');
   if(syncOn()&&mvLinkSame(v))return toast('Ești deja conectat cu acest link ✓');
-  if(importSyncFromHash(v)){if(el)el.value='';mvClose();}
+  if(importSyncFromHash(v)){if(el)el.value='';mvClose();if(fsOn())fsBoot();}
 }
-function mvLinkSame(v){try{const d=JSON.parse(atob(v.slice(v.indexOf('#sync=')+6)));return d.t===SYNC.token&&d.g===SYNC.gistId&&d.p===SYNC.pass;}catch(e){return false;}}
+function mvLinkSame(v){try{const d=JSON.parse(atob(v.slice(v.indexOf('#sync=')+6)));return d.f?(d.f===SYNC.fsId&&d.p===SYNC.pass):(d.t===SYNC.token&&d.g===SYNC.gistId&&d.p===SYNC.pass);}catch(e){return false;}}
 function mvBoot(){
   let last='';try{last=localStorage.getItem(MVKEY)||'';}catch(e){}
   if(onOldHost()){if(last!==dstr(new Date()))setTimeout(mvShow,1200);return;}
@@ -6777,9 +7102,12 @@ function mvBoot(){
 }
 function syncNow(){
   const b=document.getElementById('hSync');
-  if(!(SYNC.token&&SYNC.pass&&SYNC.gistId)){toast('Activează sincronizarea în Setări');go('set');return;}
+  if(!(gistOn()||fsOn())){toast('Activează sincronizarea în Setări');go('set');return;}
   if(b)b.classList.add('spin');
-  syncPull().then(()=>syncPush(true)).finally(()=>{setTimeout(()=>{if(b)b.classList.remove('spin');},600);});
+  const jobs=[];
+  if(fsOn())jobs.push(fsEmail()?fsSync('pull',false):Promise.resolve(fsAskLogin()));
+  if(gistOn())jobs.push(syncPull(fsOn()).then(()=>syncPush(true)));
+  Promise.all(jobs).finally(()=>{setTimeout(()=>{if(b)b.classList.remove('spin');},600);});
 }
 async function syncConnect(){
   const token=(document.getElementById('syncToken').value||'').trim();
@@ -6802,14 +7130,16 @@ async function syncConnect(){
     SYNC.last=new Date().toISOString();saveSync();rSyncUI();setupSyncTimer();
   }catch(e){toast('Eroare: '+e.message);}
 }
-function syncDisconnect(){if(!confirm('Te deconectezi? Datele rămân pe acest dispozitiv, dar nu se mai sincronizează.'))return;SYNC={};saveSync();const t=document.getElementById('syncToken'),p=document.getElementById('syncPass');if(t)t.value='';if(p)p.value='';rSyncUI();setupSyncTimer();toast('Deconectat');}
+function syncDisconnect(){if(typeof fsOn==='function'&&fsOn())return gistStop(); /* cu Google pornit, „Deconectează” oprește doar GitHub */
+  if(!confirm('Te deconectezi? Datele rămân pe acest dispozitiv, dar nu se mai sincronizează.'))return;SYNC={};saveSync();const t=document.getElementById('syncToken'),p=document.getElementById('syncPass');if(t)t.value='';if(p)p.value='';rSyncUI();setupSyncTimer();toast('Deconectat');}
 function rSyncUI(){
   const st=document.getElementById('syncStatus');if(!st)return;
   const tI=document.getElementById('syncToken'),pI=document.getElementById('syncPass');
   if(tI&&SYNC.token&&!tI.value)tI.value=SYNC.token;
   if(pI&&SYNC.pass&&!pI.value)pI.value=SYNC.pass;
   const eI=document.getElementById('syncEvery');if(eI)eI.value=String(SYNC.intervalMin||0);
-  st.innerHTML=(SYNC.token&&SYNC.gistId)?('<b style="color:var(--pri2)">Conectat ✓</b>'+(SYNC.last?(' · ultima sincronizare: '+new Date(SYNC.last).toLocaleString('ro-RO')):'')):'Neconectat — datele stau doar pe acest dispozitiv.';
+  st.innerHTML=(SYNC.token&&SYNC.gistId)?('<b style="color:var(--pri2)">Conectat ✓</b>'+(SYNC.last?(' · ultima sincronizare: '+new Date(SYNC.last).toLocaleString('ro-RO')):'')):(fsOn()?'Vechea sincronizare GitHub nu e pornită aici — nu e nevoie, merge prin Google.':'Neconectat — datele stau doar pe acest dispozitiv.');
+  rFsUI();
 }
 
 /* ============ ASISTENT FLOTANT ============ */
@@ -7661,6 +7991,7 @@ const _imported=importSyncFromHash();
 if(!_imported&&SYNC.token&&SYNC.pass&&SYNC.gistId&&SYNC.auto!==false)syncPull(true);
 setupSyncTimer();
 mvBoot(); // v4.3.0: anunțul de mutare (adresa veche) / „Vii de pe FamLink vechi?” (adresa nouă)
+fsBoot(); // v4.4.0: sincronizarea Google (login + ascultare în timp real)
 if(typeof pushSanitize==='function')pushSanitize(); // scoate definitiv vechiul link de emailuri, dacă a rămas de la v2.x
 pushInit();
 if(typeof nudgeSchedule==='function')nudgeSchedule();

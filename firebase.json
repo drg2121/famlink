@@ -16,12 +16,19 @@
       "*.md",
       "deploy.sh",
       "functions/**",
-      "firestore.rules"
+      "firestore.rules",
+      "*.log",
+      "firebase.emu.json"
     ],
     "headers": [
       {
         "source": "**",
-        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
       }
     ]
   }
